@@ -1,5 +1,3 @@
 # webserv
 
-The development of a basic HTTP server in C++98
-
-A 42 group project
+42 Paris group project | C++98 implementation of a HTTP server
