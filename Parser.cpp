@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/02 17:45:39 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/03 17:43:56 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ const std::string WHITESPACE = "\f\t\n\r\v ";
 /**************************************/
 
 Parser::Parser():
+	_serverNb(0);
 	_ip("127.0.0.1")
 	_port(80);
 	_serverName("localhost");
@@ -36,6 +37,7 @@ Parser::Parser(const Parser &x) {
 
 Parser&	operator=(const Parser &x) {
 	if (this != &x) {
+		_serverNb = x._serverNb;
 		_ip = x._ip;
 		_port = x._port;
 		_serverName = x._serverName;
@@ -51,25 +53,95 @@ Parser&	operator=(const Parser &x) {
 //				GETTERS				  //
 /**************************************/
 
-std::string 				Parser::getIP() { return _ip; }
-size_t						Parser::getPort() { return _port; }
-std::vector<std::string>	Parser::getServerName() { return _serverName; }
-std::string					Parser::getRoot() { return _root; }
-std::vector<std::string>	Parser::getErrorPage() { return _errorPage; }
-size_t						Parser::getMaxBodySize() { return _maxBodySize; }
+std::string 				Parser::getServerNb() const { return _serverNb; }
+std::string 				Parser::getIP() const { return _ip; }
+std::vector<size_t>			Parser::getPort() const { return _port; }
+vec_str						Parser::getServerName() const { return _serverName; }
+std::string					Parser::getRoot() const { return _root; }
+vec_str						Parser::getErrorPage() const { return _errorPage; }
+size_t						Parser::getMaxBodySize() const { return _maxBodySize; }
 
 /**************************************/
 //				SETTERS				  //
 /**************************************/
 
 void	Parser::setIP(std::string ip) { _ip = ip; }
-void	Parser::setPort(size_t port) { _port = port; }
-void	Parser::setServerName(std::vector<std::string> serverName) { _serverName = serverName }
+void	Parser::setPort(std::vector<size_t> port) { _port = port; }
+void	Parser::setServerName(vec_str serverName) { _serverName = serverName }
 void	Parser::setRoot(std::string root) { _root = root; }
-void	Parser::setErrorPage(std::vector<std::string> errorPage) { _errorPage = errorPage; }
+void	Parser::setErrorPage(vec_str errorPage) { _errorPage = errorPage; }
 void	Parser::setMaxBodySize(size_t maxBodySize) { _maxBodySize = maxBodySize; }
+void	Parser::setMaxBodySize(std::string maxBodySize) {
+	size_t pos;
+
+	_maxBodySize = static_cast<size_t>std::atoi(maxBodySize.c_str);
+	if ((pos = maxBodySize.find_first_not_of("0123456789")) != std::string::npos) {
+		if (maxBodySize.at(pos) == 'K')
+			_maxBodySize *= 1000;
+		else if (maxBodySize.at(pos) == 'M')
+			_maxBodySize *= 1000000;
+		else if (maxBodySize.at(pos) == 'G')
+			_maxBodySize *= 1000000000;
+	}
+}
 void	Parser::setLocation(t_location location) {
 	_location.root = location.root;
+}
+
+/**************************************/
+//			SETTERS HELPER			  //
+/**************************************/
+
+/**
+ * addPort(): add a new port to the vector containing ports.
+ * Called by drListen (see below)
+ **/
+void	Parser::addPort(std::string port) { _port.push_back(static_cast<size_t>std::atoi(port.c_str)); }
+
+/**
+ * dirListen(): handles setIP() and setPort(): 2 types of directive.
+ * 1. listen IP:port;
+ * 2. listen port;
+ * returns the number of elements iterated over
+ **/
+size_t	Parser::dirListen(vec_str::iterator it, vec_str::iterator vend) {
+	size_t ret = 0;
+
+	for (; it != vend; it++) {
+		size_t	pos = it->find(":");
+		size_t	end = it->find(";");
+
+		//listen IP:port
+		if (pos != std::string::npos) {
+			setIP(it->substr(0, pos - 1));
+			addPort(it->substr(pos + 1, end));
+		}
+		//listen port
+		else
+			addPort(it->substr(0, end));
+
+		ret++;
+		// met a ';' == end of the directive
+		if (end != std::string::npos)
+			break ;
+	}
+	return ret;
+}
+
+size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
+	setRoot(*it);
+	(void)vend;
+	return (1);
+}
+
+size_t Parser::dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend) {
+	setMaxBodySize(*it);
+	(void)vend;
+	return 1;
+}
+
+size_t	Parser::dirServerName(vec_str::iterator it, vec_str::iterator vend) {
+	
 }
 
 /**************************************/
@@ -78,19 +150,42 @@ void	Parser::setLocation(t_location location) {
 
 /**
  * interpret(): goes through the 'tok' vector and sets 'Server' class accordingly
-**/
-void	Parser::interpret(std::vector<std::string> tok) {
-		
+ **/
+void	Parser::interpret(vec_str tok) {
+
+	std::vector<std::pair<std::string, methodPointer> > dir;
+	methodPointer mp;
+
+	dir.push_back(std::make_pair("listen", &dirListen));
+	dir.push_back(std::make_pair("root", &dirRoot));
+	dir.push_back(std::make_pair("client_max_body_size", &dirMaxBodySize));
+	dir.push_back(std::make_pair("server_name", &dirServerName));
+	dir.push_back(std::make_pair("error_page", &dirErrorPage));
+	dir.push_back(std::make_pair("location", &dirLocation));
+	dir.push_back(std::make_pair("server", &dirServer));
+
+	vec_str::iterator itok = tok.begin();
+	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
+	for (; itok != tok.end(); itok++) {
+
+		idir = dir.begin();
+		for (; idir < dir.end(); idir++) {
+			if (*itok == idir->first) {
+				mp = idir->second;
+				itok += mp(itok + 1, tok.end());
+			}
+		}
+	}
 }
 
 /**
  * tokenizer(): splits the file content by WHITESPACE and stores results into the 'tok' vector
-**/
+ **/
 void	Parser::tokenize(char **av) {
 	std::ifstream	file;
 	std::string fileName(av[1]);
 	std::string	line;
-	std::vector<std::string> tok;
+	vec_str tok;
 	size_t	pos;
 	size_t	posend;
 
@@ -108,7 +203,7 @@ void	Parser::tokenize(char **av) {
 			line.erase(0, posend);
 		}
 	}
-//	ft_putvec(tok);
+	//	ft_putvec(tok);
 	interpret(tok);
 }
 
