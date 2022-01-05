@@ -6,27 +6,20 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 14:46:17 by user42           ###   ########.fr       */
+/*   Updated: 2022/01/05 20:15:01 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
+Meta	meta_g;
 
 /**************************************/
 //           COPLIAN CLASS            //
 /**************************************/
 
-Parser::Parser():
-	_serverNb(0);
-	_ip("127.0.0.1")
-	_port(80);
-	_serverName("localhost");
-	_root("/")
-	_errorPage("");
-	_maxBodySize(1000000); //nginx default value
-	_location(NULL);
+Parser::Parser(): Server()
 {}
 
 Parser::~Parser() {}
@@ -35,68 +28,29 @@ Parser::Parser(const Parser &x) {
 	*this = x;
 }
 
-Parser&	operator=(const Parser &x) {
-	if (*this != x) {
-		_serverNb = x._serverNb;
-		_ip = x._ip;
-		_port = x._port;
-		_serverName = x._serverName;
-		_root = x._root;
-		_errorPage = x._errorPage;
-		_maxBodySize = x._maxBodySize;
-		_location = x._location;
+Parser&	Parser::operator=(const Parser &x) {
+	if (this != &x) {
+		_serverNb = x.getServerNb();
+		_ip = x.getIP();
+		_port = x.getPort();
+		_serverName = x.getServerName();
+		_root = x.getRoot();
+		_errorPage = x.getErrorPage();
+		_maxBodySize = x.getMaxBodySize();
+		_location = x.getLocation();
 	}
 	return *this;
 }
 
 /**************************************/
-//				GETTERS				  //
-/**************************************/
-
-std::string 				Parser::getServerNb() const { return _serverNb; }
-std::string 				Parser::getIP() const { return _ip; }
-std::vector<size_t>			Parser::getPort() const { return _port; }
-vec_str						Parser::getServerName() const { return _serverName; }
-std::string					Parser::getRoot() const { return _root; }
-vec_str						Parser::getErrorPage() const { return _errorPage; }
-size_t						Parser::getMaxBodySize() const { return _maxBodySize; }
-
-/**************************************/
-//				SETTERS				  //
-/**************************************/
-
-void	Parser::setIP(std::string ip) { _ip = ip; }
-void	Parser::setPort(std::vector<size_t> port) { _port = port; }
-void	Parser::setServerName(vec_str serverName) { _serverName = serverName }
-void	Parser::setRoot(std::string root) { _root = root; }
-void	Parser::setErrorPage(vec_str errorPage) { _errorPage = errorPage; }
-void	Parser::setMaxBodySize(size_t maxBodySize) { _maxBodySize = maxBodySize; }
-void	Parser::setMaxBodySize(std::string maxBodySize) {
-	size_t pos;
-
-	_maxBodySize = static_cast<size_t>std::atoi(maxBodySize.c_str);
-	if ((pos = maxBodySize.find_first_not_of("0123456789")) != std::string::npos) {
-		if (maxBodySize.at(pos) == 'K')
-			_maxBodySize *= 1000;
-		else if (maxBodySize.at(pos) == 'M')
-			_maxBodySize *= 1000000;
-		else if (maxBodySize.at(pos) == 'G')
-			_maxBodySize *= 1000000000;
-	}
-}
-void	Parser::setLocation(t_location location) {
-	_location.root = location.root;
-}
-
-/**************************************/
-//			SETTERS HELPER			  //
+//			PARSING HELPERS			  //
 /**************************************/
 
 /**
  * addPort(): add a new port to the vector containing ports.
  * Called by drListen (see below)
  **/
-void	Parser::addPort(std::string port) { _port.push_back(static_cast<size_t>std::atoi(port.c_str)); }
+void	Parser::addPort(std::string port) { _port.push_back(static_cast<size_t>(std::atoi(port.c_str()))); }
 
 /**
  * dirListen(): handles setIP() and setPort() (called by interpret())
@@ -191,7 +145,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	std::vector<std::pair<std::string, methodPointer> > dir;
 	methodPointer mp;
 
-	dir.push_back(std::make_pair("root", &dirRoot));
+	dir.push_back(std::make_pair("root", &Parser::dirRoot));
 	
 	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
 	for (; it != vend; it++) {
@@ -200,7 +154,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 		for (; idir < dir.end(); idir++) {
 			if (*it == idir->first) {
 				mp = idir->second;
-				iter = mp(it + 1, tok.end());
+				iter = mp(it + 1, vend);
 				ret += iter;
 				it += iter;
 
@@ -214,38 +168,40 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 }
 
 /**
- * dirServer(): generates a new server (called by interpret())
+ * dirServer(): add the new server to 'meta_g' class (called by interpret())
 **/
-size_t	Parser::server(vec_str::iterator it, vec_str::iterator vend) {
+size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 
 	_serverNb++;
 	// if there is more than one server, copy the server we just parsed into a new Server instance
 	if (_serverNb > 1) {
-		Server server(this);
-		server.addServer(Meta);
+		Server& server = dynamic_cast<Server&>(*this);	
+		server.addServer(meta_g);
 	}
+	(void)it;
+	(void)vend;
 	return 1;
 }
 
 /**************************************/
-//				PARSERS				  //
+//			PARSING MAIN			  //
 /**************************************/
 
 /**
- * interpret(): goes through the 'tok' vector and sets 'Server' class accordingly
+ * interpreter(): goes through the 'tok' vector and sets 'Server' class accordingly
  **/
-void	Parser::interpret(vec_str tok) {
+void	Parser::interpreter(vec_str tok) {
 
 	std::vector<std::pair<std::string, methodPointer> > dir;
 	methodPointer mp;
 
-	dir.push_back(std::make_pair("listen", &dirListen));
-	dir.push_back(std::make_pair("root", &dirRoot));
-	dir.push_back(std::make_pair("client_max_body_size", &dirMaxBodySize));
-	dir.push_back(std::make_pair("server_name", &dirServerName));
-	dir.push_back(std::make_pair("error_page", &dirErrorPage));
-	dir.push_back(std::make_pair("location", &dirLocation));
-	dir.push_back(std::make_pair("server", &dirServer));
+	dir.push_back(std::make_pair("listen", &Parser::dirListen));
+	dir.push_back(std::make_pair("root", &Parser::dirRoot));
+	dir.push_back(std::make_pair("client_max_body_size", &Parser::dirMaxBodySize));
+	dir.push_back(std::make_pair("server_name", &Parser::dirServerName));
+	dir.push_back(std::make_pair("error_page", &Parser::dirErrorPage));
+	dir.push_back(std::make_pair("location", &Parser::dirLocation));
+	dir.push_back(std::make_pair("server", &Parser::dirServer));
 
 	vec_str::iterator itok = tok.begin();
 	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
@@ -259,12 +215,14 @@ void	Parser::interpret(vec_str tok) {
 			}
 		}
 	}
+	//add the last server to the 'meta_g' class (note: the params don't matter here)
+	dirServer(itok, itok);
 }
 
 /**
  * tokenizer(): splits the file content by WHITESPACE and stores results into the 'tok' vector
  **/
-void	Parser::tokenize(char **av) {
+void	Parser::tokenizer(char **av) {
 	std::ifstream	file;
 	std::string fileName(av[1]);
 	std::string	line;
@@ -287,7 +245,7 @@ void	Parser::tokenize(char **av) {
 		}
 	}
 	//	ft_putvec(tok);
-	interpret(tok);
+	interpreter(tok);
 }
 
 /**
@@ -300,6 +258,6 @@ int		main(int ac, char **av) {
 	if (ac != 2)
 		std::cout << "Error: Need one and only one argument\n";
 	else {
-		parser.tokenize(av);
+		parser.tokenizer(av);
 	}
 }

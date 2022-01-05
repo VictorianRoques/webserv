@@ -1,32 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Meta.cpp                                           :+:      :+:    :+:   */
+/*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/05 12:25:32 by user42            #+#    #+#             */
-/*   Updated: 2022/01/05 18:12:53 by pnielly          ###   ########.fr       */
+/*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
+/*   Updated: 2022/01/05 19:16:27 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Meta.hpp"
+#include "Location.hpp"
+//#include "Server.hpp"
 
 /**************************************/
 //           COPLIAN CLASS            //
 /**************************************/
 
-Meta::Meta() {}
+Location::Location():
+	_root("/")
+{}
 
-Meta::~Meta() {}
+Location::~Location() {}
 
-Meta::Meta(const Meta &x) {
-	*this = x;
-}
+Location::Location(const Location &x) { *this = x; }
 
-Meta&	Meta::operator=(const Meta &x) {
-	if (this != &x)
-		_servers = x.getServers();
+Location&	Location::operator=(const Location &x) {
+	if (this != &x) {
+		_root = x.getRoot();
+	}
 	return *this;
 }
 
@@ -34,18 +36,10 @@ Meta&	Meta::operator=(const Meta &x) {
 //				GETTERS				  //
 /**************************************/
 
-std::vector<Server>	Meta::getServers() const { return _servers; }
+std::string	Location::getRoot() const { return _root; }
 
 /**************************************/
-//				SETTERS				  //
+//				GETTERS				  //
 /**************************************/
 
-void	Meta::setServers(std::vector<Server> servers) { _servers = servers; }
-
-/**************************************/
-//			SERVER PARSED			  //
-/**************************************/
-
-void	Meta::addServer(Server server) {
-	_servers.push_back(server);
-}
+void	Location::setRoot(std::string root) { _root = root; }

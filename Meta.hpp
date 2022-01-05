@@ -6,14 +6,16 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 12:17:19 by user42            #+#    #+#             */
-/*   Updated: 2022/01/05 12:22:51 by user42           ###   ########.fr       */
+/*   Updated: 2022/01/05 19:32:15 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef META_HPP
 # define META_HPP
 
-# include "Parser.hpp"
+# include "Server.hpp"
+
+class Server;
 
 class Meta {
 	//Coplian Class
@@ -25,6 +27,19 @@ class Meta {
 
 	private:
 		std::vector<Server>	_servers;
+
+		// getters
+	public:
+		std::vector<Server>	getServers() const;
+
+		//setters
+	private:
+		void setServers(std::vector<Server> servers);
+
+		// adding a server that has just been parsed
+	public:
+		void	addServer(Server server);
 };
+
 
 #endif
