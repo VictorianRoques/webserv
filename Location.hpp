@@ -6,14 +6,14 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 19:20:54 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 20:53:24 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LOCATION_HPP
 # define LOCATION_HPP
 
-# include <string>
+# include "utils.hpp"
 
 class Location {
 	// Coplian Class
@@ -34,6 +34,10 @@ class Location {
 		//setters
 	public:
 		void	setRoot(std::string root);
+
+		// utils
+	public:
+		void	print_loc();
 };
 
 #endif

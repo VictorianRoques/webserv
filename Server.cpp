@@ -6,18 +6,18 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 19:14:57 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 21:13:32 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "utils.hpp"
 
 /**************************************/
 //           COPLIAN CLASS            //
 /**************************************/
 
 Server::Server():
-	_serverNb(0),
 	_ip("127.0.0.1"),
 	_root("/"),
 	_maxBodySize(1000000), //nginx default value
@@ -41,7 +41,6 @@ Server::Server(const Server &x) {
 
 Server&	Server::operator=(const Server &x) {
 	if (this != &x) {
-		_serverNb = x.getServerNb();
 		_ip = x.getIP();
 		_port = x.getPort();
 		_serverName = x.getServerName();
@@ -57,7 +56,6 @@ Server&	Server::operator=(const Server &x) {
 //				GETTERS				  //
 /**************************************/
 
-size_t		 				Server::getServerNb() const { return _serverNb; }
 std::string 				Server::getIP() const { return _ip; }
 std::vector<size_t>			Server::getPort() const { return _port; }
 vec_str						Server::getServerName() const { return _serverName; }
@@ -98,4 +96,18 @@ void	Server::setLocation(Location* location) {
 
 void	Server::addServer(Meta meta) {
 	meta.addServer(*this);
+}
+
+/**************************************/
+//				UTILS				  //
+/**************************************/
+
+void	Server::print_serv() {
+	std::cout << "Server Name: "; ft_putvec(_serverName, " ");
+	std::cout << "IP: " << _ip << std::endl;
+	std::cout << "Port: "; ft_putvec(_port, " ");
+	std::cout << "Root: " << _root << std::endl;
+	std::cout << "Error Page: "; ft_putvec(_errorPage, " ");
+	std::cout << "Client_Max_Body_Size: " << _maxBodySize << std::endl;
+	std::cout << "Location: "; _location->print_loc();
 }

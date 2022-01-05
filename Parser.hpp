@@ -6,15 +6,15 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 20:15:03 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 21:12:30 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PARSER_HPP
 # define PARSER_HPP
 
-#include "Server.hpp"
-#include "Meta.hpp"
+# include "utils.hpp"
+# include "Server.hpp"
 
 class Server;
 
@@ -40,6 +40,14 @@ class Parser: public Server {
 		~Parser();
 		Parser(const Parser &);
 		Parser&	operator=(const Parser &);
+
+		// variables
+	private:
+		size_t						_serverNb;
+	
+		// getters
+	public:
+		size_t						getServerNb() const;
 
 		// parsing
 	public:

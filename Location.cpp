@@ -6,12 +6,12 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 19:16:27 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 21:13:23 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "utils.hpp"
 #include "Location.hpp"
-//#include "Server.hpp"
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -43,3 +43,12 @@ std::string	Location::getRoot() const { return _root; }
 /**************************************/
 
 void	Location::setRoot(std::string root) { _root = root; }
+
+/**************************************/
+//			PRINT_LOC				  //
+/**************************************/
+
+void	Location::print_loc() {
+	std::cout << "Root: " << _root << std::endl;
+	std::cout << std::endl;
+}

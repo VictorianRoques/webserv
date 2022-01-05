@@ -6,10 +6,11 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 20:15:01 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 21:12:43 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "utils.hpp"
 #include "Parser.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
@@ -19,7 +20,7 @@ Meta	meta_g;
 //           COPLIAN CLASS            //
 /**************************************/
 
-Parser::Parser(): Server()
+Parser::Parser(): Server(), _serverNb(0)
 {}
 
 Parser::~Parser() {}
@@ -41,6 +42,12 @@ Parser&	Parser::operator=(const Parser &x) {
 	}
 	return *this;
 }
+
+/**************************************/
+//				GETTERS				  //
+/**************************************/
+
+size_t		 				Server::getServerNb() const { return _serverNb; }
 
 /**************************************/
 //			PARSING HELPERS			  //
@@ -244,7 +251,7 @@ void	Parser::tokenizer(char **av) {
 			line.erase(0, posend);
 		}
 	}
-	//	ft_putvec(tok);
+	//	ft_putvec(tok, "\n");
 	interpreter(tok);
 }
 

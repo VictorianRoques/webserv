@@ -6,37 +6,16 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 19:35:03 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 21:08:15 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <iostream>
-# include <cstdlib> // std::atoi()
-# include <utility> // std::make_pair
-# include <string>
-# include <fstream>
-# include <vector>
-# include "Meta.hpp"
+# include "utils.hpp"
 # include "Location.hpp" //--> alternative: 'Location' is a nested class of 'Server'
-
-/**
- * type simplification (makes the code 'lighter')
-**/
-typedef std::vector<std::string>	vec_str;
-
-/**
- * ft_putvec(): prints out the vector v
-**/
-template < class T >
-void	ft_putvec(std::vector<T> v) {
-	typename std::vector<T>::iterator it = v.begin();
-		
-	for (; it != v.end(); it++)
-		std::cout << "<" << *it << ">" << std::endl;
-}
+# include "Meta.hpp"
 
 class Meta;
 class Location;
@@ -80,7 +59,6 @@ class Server {
 
 		// variables
 	protected:
-		size_t						_serverNb;
 		std::string					_ip;
 		std::vector<size_t>			_port;
 		std::vector<std::string>	 _serverName;
@@ -91,7 +69,6 @@ class Server {
 
 		// getters
 	public:
-		size_t						getServerNb() const;
 		std::string					getIP() const;
 		std::vector<size_t>			getPort() const;
 		std::vector<std::string>	getServerName() const;
@@ -114,6 +91,10 @@ class Server {
 		// adding parsed server
 	public:
 		void	addServer(Meta meta);
+
+		// utils
+	public:
+		void	print_serv();
 };
 
 # endif

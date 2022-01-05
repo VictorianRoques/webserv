@@ -6,11 +6,12 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 12:25:32 by user42            #+#    #+#             */
-/*   Updated: 2022/01/05 18:12:53 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 21:12:25 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Meta.hpp"
+#include "utils.hpp"
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -48,4 +49,19 @@ void	Meta::setServers(std::vector<Server> servers) { _servers = servers; }
 
 void	Meta::addServer(Server server) {
 	_servers.push_back(server);
+}
+
+/**************************************/
+//				UTILS				  //
+/**************************************/
+
+/**
+ * print_servers(): prints every Server variables' value from vector '_server'
+**/
+void	Meta::print_servers() {
+	std::vector<Server>::iterator	it;
+
+	for (it = _servers.begin(); it != _servers.end(); it++) {
+		it->print_serv();
+	}
 }

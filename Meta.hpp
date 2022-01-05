@@ -6,14 +6,14 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 12:17:19 by user42            #+#    #+#             */
-/*   Updated: 2022/01/05 19:32:15 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 20:53:29 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef META_HPP
 # define META_HPP
 
-# include "Server.hpp"
+# include "utils.hpp"
 
 class Server;
 
@@ -39,6 +39,10 @@ class Meta {
 		// adding a server that has just been parsed
 	public:
 		void	addServer(Server server);
+
+		// utils
+	public:
+		void	print_servers();
 };
 
 
