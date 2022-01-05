@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/03 17:43:56 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 14:46:17 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ Parser::Parser(const Parser &x) {
 }
 
 Parser&	operator=(const Parser &x) {
-	if (this != &x) {
+	if (*this != x) {
 		_serverNb = x._serverNb;
 		_ip = x._ip;
 		_port = x._port;
@@ -99,7 +99,8 @@ void	Parser::setLocation(t_location location) {
 void	Parser::addPort(std::string port) { _port.push_back(static_cast<size_t>std::atoi(port.c_str)); }
 
 /**
- * dirListen(): handles setIP() and setPort(): 2 types of directive.
+ * dirListen(): handles setIP() and setPort() (called by interpret())
+ * 2 types of directive:
  * 1. listen IP:port;
  * 2. listen port;
  * returns the number of elements iterated over
@@ -128,20 +129,102 @@ size_t	Parser::dirListen(vec_str::iterator it, vec_str::iterator vend) {
 	return ret;
 }
 
+/**
+ * dirRoot(): sets root from parsing (called by interpret())
+**/
 size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	setRoot(*it);
 	(void)vend;
 	return (1);
 }
 
+/**
+ * dirMaxBodySize(): sets client_max_body_size from parsing (called by interpret())
+**/
 size_t Parser::dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend) {
 	setMaxBodySize(*it);
 	(void)vend;
 	return 1;
 }
 
+/**
+ * dirServerName(): sets server_name(s) from parsing (called by interpret())
+**/
 size_t	Parser::dirServerName(vec_str::iterator it, vec_str::iterator vend) {
+	size_t	ret = 0;
+
+	for (; it != vend; it++) {
+		_serverName.push_back(*it);
+		ret++;
+
+		// met a ';' == end of the directive
+		if (it->find(";") != std::string::npos)
+			break ;
+	}
+	return ret;
+}
+
+/**
+ * dirErrorPage(): sets error_page(s) from parsing (called by interpret())
+**/
+size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
+	size_t	ret = 0;
+
+	for (; it != vend; it++) {
+		_errorPage.push_back(*it);
+		ret++;
+
+		// met a ';' == end of the directive
+		if (it->find(";") != std::string::npos)
+			break ;
+	}
+	return ret;
+}
+
+/**
+ * dirLocation(): sets location from parsing (called by interpret())
+**/
+size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
+	size_t ret = 0;
+	size_t iter;
+
+	std::vector<std::pair<std::string, methodPointer> > dir;
+	methodPointer mp;
+
+	dir.push_back(std::make_pair("root", &dirRoot));
 	
+	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
+	for (; it != vend; it++) {
+
+		idir = dir.begin();
+		for (; idir < dir.end(); idir++) {
+			if (*it == idir->first) {
+				mp = idir->second;
+				iter = mp(it + 1, tok.end());
+				ret += iter;
+				it += iter;
+
+			// met a '}' == end of the location directive
+			if (it->find("}") != std::string::npos)
+				break ;
+			}
+		}
+	}
+	return ret;
+}
+
+/**
+ * dirServer(): generates a new server (called by interpret())
+**/
+size_t	Parser::server(vec_str::iterator it, vec_str::iterator vend) {
+
+	_serverNb++;
+	// if there is more than one server, copy the server we just parsed into a new Server instance
+	if (_serverNb > 1) {
+		Server server(this);
+		server.addServer(Meta);
+	}
+	return 1;
 }
 
 /**************************************/
