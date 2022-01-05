@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 12:17:19 by user42            #+#    #+#             */
-/*   Updated: 2022/01/05 20:53:29 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 21:18:44 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define META_HPP
 
 # include "utils.hpp"
+# include "Server.hpp"
 
 class Server;
 

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 21:12:43 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/05 21:18:22 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ Parser&	Parser::operator=(const Parser &x) {
 //				GETTERS				  //
 /**************************************/
 
-size_t		 				Server::getServerNb() const { return _serverNb; }
+size_t		 				Parser::getServerNb() const { return _serverNb; }
 
 /**************************************/
 //			PARSING HELPERS			  //
