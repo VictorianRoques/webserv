@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 21:17:43 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/06 15:12:15 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class Parser: public Server {
 		 *  -vend = vector.end()
 		**/
 	public:
-		typedef size_t (*methodPointer)(vec_str::iterator it, vec_str::iterator vend);
+		typedef size_t	(Parser::*methodPointer)(vec_str::iterator it, vec_str::iterator vend);
 
 		// Coplien Class
 	public:

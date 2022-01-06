@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 21:18:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/06 15:12:13 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 
 	dir.push_back(std::make_pair("root", &Parser::dirRoot));
 	
-	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
+	std::vector<std::pair<std::string, Parser::methodPointer> >::iterator idir;
 	for (; it != vend; it++) {
 
 		idir = dir.begin();
@@ -217,8 +217,9 @@ void	Parser::interpreter(vec_str tok) {
 		idir = dir.begin();
 		for (; idir < dir.end(); idir++) {
 			if (*itok == idir->first) {
-				mp = idir->second;
-				itok += mp(itok + 1, tok.end());
+				(idir->second)(itok + 1, tok.end());
+			//	mp = idir->second;
+			//	itok += (*mp)(itok + 1, tok.end());
 			}
 		}
 	}
