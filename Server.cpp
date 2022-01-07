@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 19:16:34 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 20:12:19 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,7 @@ Server::Server():
 	_ip("127.0.0.1"),
 	_root("/"),
 	_maxBodySize(1000000) //nginx default value
-{
-	std::vector<size_t> port(1, 80);
-	_port = port;
-	
-	vec_str	serverName(1, "localhost");
-	_serverName = serverName;
-
-	vec_str errorPage(1, "");
-	_errorPage = errorPage;
-
-//	_location = new std::vector<Location *>;
-}
+{}
 
 Server::~Server() {
 //	delete _location; ??? compilation error: why?
@@ -104,17 +93,18 @@ void	Server::addServer(Meta meta) {
 /**************************************/
 
 void	Server::print_serv() {
-	std::cout << "Server Name: "; ft_putvec(_serverName, " ");
-	std::cout << "IP: " << _ip << std::endl;
-	std::cout << "Port: "; ft_putvec(_port, " ");
-	std::cout << "Root: " << _root << std::endl;
-	std::cout << "Error Page: "; ft_putvec(_errorPage, " ");
-	std::cout << "Client_Max_Body_Size: " << _maxBodySize << std::endl;
+	std::string COLOR = PURPLE;
+	std::cout << COLOR << "Server Name: " << NC; ft_putvec(_serverName, " ");
+	std::cout << COLOR << "IP: " << NC << _ip << std::endl;
+	std::cout << COLOR << "Port: " << NC; ft_putvec(_port, " ");
+	std::cout << COLOR << "Root: " << NC << _root << std::endl;
+	std::cout << COLOR << "Error Page: " << NC; ft_putvec(_errorPage, " ");
+	std::cout << COLOR << "Client_Max_Body_Size: " << NC << _maxBodySize << std::endl;
 
 	std::cout << std::endl;
 	std::vector<Location *>::iterator	it = _location.begin();
 	for (; it != _location.end(); it++) {
-		std::cout << "Location: "; 
+		std::cout << COLOR << "Location: " << NC; 
 		(*it)->print_loc();
 	}
 }

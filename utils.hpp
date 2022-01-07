@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 16:50:45 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 19:57:27 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,19 @@
 # include <string>
 # include <fstream>
 # include <vector>
+
+/**
+ * COLORS
+**/
+# define BLACK "\e[1;30m"
+# define RED "\e[1;31m"
+# define GREEN "\e[1;32m"
+# define YELLOW "\e[1;33m"
+# define PURPLE "\e[1;34m"
+# define MAGENTA "\e[1;35m"
+# define CYAN "\e[1;36m"
+# define WHITE "\e[1;37m"
+# define NC "\e[0m" // NC = NO COLOR (reset)
 
 /**
  * type simplification (makes the code 'lighter')

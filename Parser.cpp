@@ -6,12 +6,11 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 19:16:55 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 20:12:25 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
-#include "Meta.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
 
@@ -93,7 +92,17 @@ size_t	Parser::dirListen(vec_str::iterator it, vec_str::iterator vend) {
  * dirRoot(): sets root from parsing (called by interpret())
 **/
 size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
-	setRoot(*it);
+	std::string	root;
+	size_t		pos;
+	size_t		posend;
+
+	//remove the trailing ';'
+	pos = (*it).find_first_not_of(";");
+	posend = std::min((*it).find_first_of(";", pos), (*it).length());
+	std::cout << *it << " = " << posend << std::endl;
+	root = (*it).substr(pos, posend - pos);
+
+	setRoot(root);
 	(void)vend;
 	return (1);
 }
@@ -136,7 +145,7 @@ size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 
 		// met a ';' == end of the directive
 		if (it->find(";") != std::string::npos)
-			break ;
+			return ret;
 	}
 	return ret;
 }
@@ -199,19 +208,20 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 
 /**
  * interpreter(): goes through the 'tok' vector and sets 'Server' class accordingly
+ * using the corresponding "dir" (for 'directive') functions (see above)
  **/
 void	Parser::interpreter(vec_str tok) {
 
 	std::vector<std::pair<std::string, methodPointer> > dir;
 	methodPointer mp;
 
+	dir.push_back(std::make_pair("location", &Parser::dirLocation));
+	dir.push_back(std::make_pair("server", &Parser::dirServer));
 	dir.push_back(std::make_pair("listen", &Parser::dirListen));
 	dir.push_back(std::make_pair("root", &Parser::dirRoot));
 	dir.push_back(std::make_pair("client_max_body_size", &Parser::dirMaxBodySize));
 	dir.push_back(std::make_pair("server_name", &Parser::dirServerName));
 	dir.push_back(std::make_pair("error_page", &Parser::dirErrorPage));
-	dir.push_back(std::make_pair("location", &Parser::dirLocation));
-	dir.push_back(std::make_pair("server", &Parser::dirServer));
 
 	vec_str::iterator itok = tok.begin();
 	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
@@ -219,9 +229,11 @@ void	Parser::interpreter(vec_str tok) {
 
 		idir = dir.begin();
 		for (; idir < dir.end(); idir++) {
+			std::cout << RED << *itok << " = " << idir->first << "?" << NC << std::endl;
 			if (*itok == idir->first) {
 				mp = idir->second;
 				itok += (this->*mp)(itok + 1, tok.end());
+				break ;
 			}
 		}
 	}

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 18:38:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 19:37:32 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class Parser: public Server {
 	public:
 		size_t						getServerNb() const;
 
-		// parsing
+		// PARSING
 	public:
 		// parsing main functions
 		void tokenizer(char **av);
