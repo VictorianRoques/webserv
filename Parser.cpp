@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 20:12:25 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 20:55:42 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,12 +99,11 @@ size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	//remove the trailing ';'
 	pos = (*it).find_first_not_of(";");
 	posend = std::min((*it).find_first_of(";", pos), (*it).length());
-	std::cout << *it << " = " << posend << std::endl;
 	root = (*it).substr(pos, posend - pos);
 
 	setRoot(root);
 	(void)vend;
-	return (1);
+	return 1;
 }
 
 /**
@@ -121,9 +120,19 @@ size_t Parser::dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend) {
 **/
 size_t	Parser::dirServerName(vec_str::iterator it, vec_str::iterator vend) {
 	size_t	ret = 0;
+	std::string	name;
+	size_t		pos;
+	size_t		posend;
+
 
 	for (; it != vend; it++) {
-		_serverName.push_back(*it);
+		//remove the trailing ';'
+		pos = (*it).find_first_not_of(";");
+		posend = std::min((*it).find_first_of(";", pos), (*it).length());
+		name = (*it).substr(pos, posend - pos);
+	
+		// set serverName
+		_serverName.push_back(name);
 		ret++;
 
 		// met a ';' == end of the directive
@@ -138,9 +147,18 @@ size_t	Parser::dirServerName(vec_str::iterator it, vec_str::iterator vend) {
 **/
 size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 	size_t	ret = 0;
+	std::string	errorPage;
+	size_t		pos;
+	size_t		posend;
 
 	for (; it != vend; it++) {
-		_errorPage.push_back(*it);
+		//remove the trailing ';'
+		pos = (*it).find_first_not_of(";");
+		posend = std::min((*it).find_first_of(";", pos), (*it).length());
+		errorPage = (*it).substr(pos, posend - pos);
+
+		// set ErrorPage
+		_errorPage.push_back(errorPage);
 		ret++;
 
 		// met a ';' == end of the directive
@@ -154,7 +172,7 @@ size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
  * dirLocation(): sets location from parsing (called by interpret())
 **/
 size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
-	size_t ret = 0;
+	size_t ret = 1;
 	size_t iter;
 	Location *location = new Location();
 
@@ -214,6 +232,7 @@ void	Parser::interpreter(vec_str tok) {
 
 	std::vector<std::pair<std::string, methodPointer> > dir;
 	methodPointer mp;
+//	bool location_on = false;
 
 	dir.push_back(std::make_pair("location", &Parser::dirLocation));
 	dir.push_back(std::make_pair("server", &Parser::dirServer));
@@ -225,17 +244,17 @@ void	Parser::interpreter(vec_str tok) {
 
 	vec_str::iterator itok = tok.begin();
 	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
-	for (; itok != tok.end(); itok++) {
+	while (itok != tok.end()) {
 
 		idir = dir.begin();
 		for (; idir < dir.end(); idir++) {
-			std::cout << RED << *itok << " = " << idir->first << "?" << NC << std::endl;
 			if (*itok == idir->first) {
 				mp = idir->second;
 				itok += (this->*mp)(itok + 1, tok.end());
 				break ;
 			}
 		}
+		itok++;
 	}
 	dirServer(itok, itok);
 }

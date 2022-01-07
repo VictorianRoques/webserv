@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 19:15:36 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 20:56:12 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,18 @@ void	Location::setRoot(std::string root) { _root = root; }
 /**************************************/
 
 size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
-	setRoot(*it);
+	std::string	root;
+	size_t		pos;
+	size_t		posend;
+
+	//remove the trailing ';'
+	pos = (*it).find_first_not_of(";");
+	posend = std::min((*it).find_first_of(";", pos), (*it).length());
+	root = (*it).substr(pos, posend - pos);
+
+	setRoot(root);
 	(void)vend;
-	return (1);
+	return 2;
 }
 
 /**************************************/
