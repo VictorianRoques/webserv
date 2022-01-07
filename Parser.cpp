@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 17:21:14 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 19:16:55 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,28 +147,29 @@ size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	size_t ret = 0;
 	size_t iter;
+	Location *location = new Location();
 
-	std::vector<std::pair<std::string, methodPointer> > dir;
-	methodPointer mp;
+	std::vector<std::pair<std::string, Location::methodPointer> > dir;
+	Location::methodPointer mp;
 
-	dir.push_back(std::make_pair("root", &Parser::dirRoot));
+	dir.push_back(std::make_pair("root", &Location::dirRoot));
 	
-	std::vector<std::pair<std::string, Parser::methodPointer> >::iterator idir;
+	std::vector<std::pair<std::string, Location::methodPointer> >::iterator idir;
 	for (; it != vend; it++) {
 
 		idir = dir.begin();
 		for (; idir < dir.end(); idir++) {
 			if (*it == idir->first) {
 				mp = idir->second;
-				iter = (this->*mp)(it + 1, vend);
+				iter = (location->*mp)(it + 1, vend);
 				ret += iter;
-				it += iter;
-
 			}
 
-		// met a '}' == end of the location directive
-		if (it->find("}") != std::string::npos)
-			break ;
+			// meets a '}' == end of the location directive
+			if (it->find("}") != std::string::npos) {
+				this->_location.push_back(location);
+				return ret;
+			}
 		}
 	}
 	return ret;
@@ -180,9 +181,11 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 
 	_serverNb++;
-	// if there is more than one server, copy the server we just parsed into a new Server instance
+	// need _serverNb > 1 because the "server {}" directive comes up first
+	// so we need to end the first parsing before sending the first server to cgi.
 	if (_serverNb > 1) {
 		Server& server = dynamic_cast<Server&>(*this);
+		// testing
 		server.print_serv();
 	}
 	(void)it;
@@ -217,13 +220,11 @@ void	Parser::interpreter(vec_str tok) {
 		idir = dir.begin();
 		for (; idir < dir.end(); idir++) {
 			if (*itok == idir->first) {
-//				(*(idir->second))(itok + 1, tok.end());
 				mp = idir->second;
 				itok += (this->*mp)(itok + 1, tok.end());
 			}
 		}
 	}
-	//add the last server to the 'meta_g' class (note: the params don't matter here)
 	dirServer(itok, itok);
 }
 
@@ -253,7 +254,7 @@ void	Parser::tokenizer(char **av) {
 		}
 	}
 	// DELETE FOLLOWING LINE WHEN DONE (used for testing)
-	//	ft_putvec(tok, "\n");
+//	ft_putvec(tok, "\n");
 	interpreter(tok);
 }
 

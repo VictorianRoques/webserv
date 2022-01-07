@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 17:21:45 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 19:16:57 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ class Server {
 		std::string					_root;
 		std::vector<std::string>	_errorPage;
 		size_t						_maxBodySize;
-		Location*					_location;
+		std::vector<Location *>		_location;
 
 		// getters
 	public:
@@ -75,7 +75,7 @@ class Server {
 		std::string					getRoot() const;
 		std::vector<std::string>	getErrorPage() const;
 		size_t						getMaxBodySize() const;
-		Location*					getLocation() const;
+		std::vector<Location *>		getLocation() const;
 
 		//setters
 	protected:
@@ -86,7 +86,7 @@ class Server {
 		void	setErrorPage(vec_str errorPage);
 		void	setMaxBodySize(size_t maxBodySize);
 		void	setMaxBodySize(std::string maxBodySize);
-		void	setLocation(Location* location);
+		void	setLocation(std::vector<Location *> location);
 
 		// adding parsed server
 	public:

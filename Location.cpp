@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 15:31:02 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 19:15:36 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,21 @@ std::string	Location::getRoot() const { return _root; }
 void	Location::setRoot(std::string root) { _root = root; }
 
 /**************************************/
+//			PARSING HELPERS			  //
+/**************************************/
+
+size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
+	setRoot(*it);
+	(void)vend;
+	return (1);
+}
+
+/**************************************/
 //			PRINT_LOC				  //
 /**************************************/
 
 void	Location::print_loc() {
+
 	std::cout << std::endl;
 	std::cout << "Root: " << _root << std::endl;
 	std::cout << std::endl;

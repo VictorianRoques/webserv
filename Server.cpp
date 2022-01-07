@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 17:21:03 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 19:16:34 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ Server::Server():
 	vec_str errorPage(1, "");
 	_errorPage = errorPage;
 
-	_location = new Location();
+//	_location = new std::vector<Location *>;
 }
 
 Server::~Server() {
@@ -64,7 +64,7 @@ vec_str						Server::getServerName() const { return _serverName; }
 std::string					Server::getRoot() const { return _root; }
 vec_str						Server::getErrorPage() const { return _errorPage; }
 size_t						Server::getMaxBodySize() const { return _maxBodySize; }
-Location					*Server::getLocation() const { return _location; }
+std::vector<Location *>		Server::getLocation() const { return _location; }
 
 /**************************************/
 //				SETTERS				  //
@@ -89,9 +89,7 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 			_maxBodySize *= 1000000000;
 	}
 }
-void	Server::setLocation(Location* location) {
-	_location->setRoot(location->getRoot());
-}
+void	Server::setLocation(std::vector<Location *> location) { _location = location; }
 
 /**************************************/
 //			SERVER PARSED			  //
@@ -112,5 +110,11 @@ void	Server::print_serv() {
 	std::cout << "Root: " << _root << std::endl;
 	std::cout << "Error Page: "; ft_putvec(_errorPage, " ");
 	std::cout << "Client_Max_Body_Size: " << _maxBodySize << std::endl;
-	std::cout << "Location: "; _location->print_loc();
+
+	std::cout << std::endl;
+	std::vector<Location *>::iterator	it = _location.begin();
+	for (; it != _location.end(); it++) {
+		std::cout << "Location: "; 
+		(*it)->print_loc();
+	}
 }
