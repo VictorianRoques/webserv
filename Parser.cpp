@@ -6,15 +6,14 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/06 15:12:13 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 17:21:14 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "utils.hpp"
 #include "Parser.hpp"
+#include "Meta.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
-Meta	meta_g;
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -161,14 +160,15 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 		for (; idir < dir.end(); idir++) {
 			if (*it == idir->first) {
 				mp = idir->second;
-				iter = mp(it + 1, vend);
+				iter = (this->*mp)(it + 1, vend);
 				ret += iter;
 				it += iter;
 
-			// met a '}' == end of the location directive
-			if (it->find("}") != std::string::npos)
-				break ;
 			}
+
+		// met a '}' == end of the location directive
+		if (it->find("}") != std::string::npos)
+			break ;
 		}
 	}
 	return ret;
@@ -182,8 +182,8 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 	_serverNb++;
 	// if there is more than one server, copy the server we just parsed into a new Server instance
 	if (_serverNb > 1) {
-		Server& server = dynamic_cast<Server&>(*this);	
-		server.addServer(meta_g);
+		Server& server = dynamic_cast<Server&>(*this);
+		server.print_serv();
 	}
 	(void)it;
 	(void)vend;
@@ -217,9 +217,9 @@ void	Parser::interpreter(vec_str tok) {
 		idir = dir.begin();
 		for (; idir < dir.end(); idir++) {
 			if (*itok == idir->first) {
-				(idir->second)(itok + 1, tok.end());
-			//	mp = idir->second;
-			//	itok += (*mp)(itok + 1, tok.end());
+//				(*(idir->second))(itok + 1, tok.end());
+				mp = idir->second;
+				itok += (this->*mp)(itok + 1, tok.end());
 			}
 		}
 	}
@@ -247,11 +247,12 @@ void	Parser::tokenizer(char **av) {
 
 		while (line.find_first_not_of(WHITESPACE) != std::string::npos) {
 			pos = line.find_first_not_of(WHITESPACE);
-			posend = std::min(line.find_first_of(WHITESPACE, pos), std::string::npos);
-			tok.push_back(line.substr(pos, posend));
+			posend = std::min(line.find_first_of(WHITESPACE, pos), line.length());
+			tok.push_back(line.substr(pos, posend - pos));
 			line.erase(0, posend);
 		}
 	}
+	// DELETE FOLLOWING LINE WHEN DONE (used for testing)
 	//	ft_putvec(tok, "\n");
 	interpreter(tok);
 }

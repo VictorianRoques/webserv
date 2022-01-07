@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 21:13:23 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 15:31:02 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ void	Location::setRoot(std::string root) { _root = root; }
 /**************************************/
 
 void	Location::print_loc() {
+	std::cout << std::endl;
 	std::cout << "Root: " << _root << std::endl;
 	std::cout << std::endl;
 }

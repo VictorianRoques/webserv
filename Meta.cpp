@@ -6,12 +6,11 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 12:25:32 by user42            #+#    #+#             */
-/*   Updated: 2022/01/05 21:12:25 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 17:20:34 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Meta.hpp"
-#include "utils.hpp"
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -35,20 +34,24 @@ Meta&	Meta::operator=(const Meta &x) {
 //				GETTERS				  //
 /**************************************/
 
-std::vector<Server>	Meta::getServers() const { return _servers; }
+std::vector<Server *>	Meta::getServers() const { return _servers; }
 
 /**************************************/
 //				SETTERS				  //
 /**************************************/
 
-void	Meta::setServers(std::vector<Server> servers) { _servers = servers; }
+void	Meta::setServers(std::vector<Server *> servers) { _servers = servers; }
 
 /**************************************/
 //			SERVER PARSED			  //
 /**************************************/
 
 void	Meta::addServer(Server server) {
-	_servers.push_back(server);
+	//DELETE FOLLOWING LINE WHEN DONE (used for testing)
+	server.print_serv();
+	Server *tmp = new Server(server);
+	_servers.push_back(tmp);
+	std::cout << _servers.size() << std::endl;
 }
 
 /**************************************/
@@ -59,9 +62,11 @@ void	Meta::addServer(Server server) {
  * print_servers(): prints every Server variables' value from vector '_server'
 **/
 void	Meta::print_servers() {
-	std::vector<Server>::iterator	it;
+	std::vector<Server *>::iterator	it;
 
+	std::cout << "PRINT SERVERS" << std::endl;
+	std::cout << _servers.size() << std::endl;
 	for (it = _servers.begin(); it != _servers.end(); it++) {
-		it->print_serv();
+		(*it)->print_serv();
 	}
 }

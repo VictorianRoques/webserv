@@ -6,12 +6,11 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/05 21:13:32 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 17:21:03 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "utils.hpp"
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -20,8 +19,7 @@
 Server::Server():
 	_ip("127.0.0.1"),
 	_root("/"),
-	_maxBodySize(1000000), //nginx default value
-	_location(NULL)
+	_maxBodySize(1000000) //nginx default value
 {
 	std::vector<size_t> port(1, 80);
 	_port = port;
@@ -31,9 +29,13 @@ Server::Server():
 
 	vec_str errorPage(1, "");
 	_errorPage = errorPage;
+
+	_location = new Location();
 }
 
-Server::~Server() {}
+Server::~Server() {
+//	delete _location; ??? compilation error: why?
+}
 
 Server::Server(const Server &x) {
 	*this = x;
@@ -62,6 +64,7 @@ vec_str						Server::getServerName() const { return _serverName; }
 std::string					Server::getRoot() const { return _root; }
 vec_str						Server::getErrorPage() const { return _errorPage; }
 size_t						Server::getMaxBodySize() const { return _maxBodySize; }
+Location					*Server::getLocation() const { return _location; }
 
 /**************************************/
 //				SETTERS				  //
@@ -78,11 +81,11 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 
 	_maxBodySize = static_cast<size_t>(std::atoi(maxBodySize.c_str()));
 	if ((pos = maxBodySize.find_first_not_of("0123456789")) != std::string::npos) {
-		if (maxBodySize.at(pos) == 'K')
+		if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k')
 			_maxBodySize *= 1000;
-		else if (maxBodySize.at(pos) == 'M')
+		else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm')
 			_maxBodySize *= 1000000;
-		else if (maxBodySize.at(pos) == 'G')
+		else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
 			_maxBodySize *= 1000000000;
 	}
 }

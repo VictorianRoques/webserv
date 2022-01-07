@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 12:17:19 by user42            #+#    #+#             */
-/*   Updated: 2022/01/05 21:18:44 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/07 17:19:35 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,15 +27,15 @@ class Meta {
 		Meta	&operator=(const Meta &);
 
 	private:
-		std::vector<Server>	_servers;
+		std::vector<Server *>	_servers;
 
 		// getters
 	public:
-		std::vector<Server>	getServers() const;
+		std::vector<Server *>	getServers() const;
 
 		//setters
 	private:
-		void setServers(std::vector<Server> servers);
+		void setServers(std::vector<Server *> servers);
 
 		// adding a server that has just been parsed
 	public:
@@ -45,6 +45,5 @@ class Meta {
 	public:
 		void	print_servers();
 };
-
 
 #endif
