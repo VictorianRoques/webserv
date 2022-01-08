@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 20:12:19 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/08 13:01:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,11 @@
 Server::Server():
 	_ip("127.0.0.1"),
 	_root("/"),
+	_errorPage(1, "defaultErrorPage.html"),
 	_maxBodySize(1000000) //nginx default value
 {}
 
-Server::~Server() {
-//	delete _location; ??? compilation error: why?
-}
+Server::~Server() {}
 
 Server::Server(const Server &x) {
 	*this = x;

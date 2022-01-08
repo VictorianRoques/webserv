@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 20:56:55 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/08 13:05:13 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,17 +203,30 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 }
 
 /**
+ * clear(): clears up variables from Parser (to make it available to next server parsing)
+**/
+void	Parser::clear() {
+	_port.clear();
+	_serverName.clear();
+	// just keep the first file (defaultErrorPage.html)
+	_errorPage.erase(_errorPage.begin() + 1, _errorPage.end());
+	_location.clear();
+}
+
+/**
  * dirServer(): add the new server to 'meta_g' class (called by interpret())
 **/
 size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 
 	_serverNb++;
-	// need _serverNb > 1 because the "server {}" directive comes up first
-	// so we need to end the first parsing before sending the first server to cgi.
+	// need _serverNb > 1 because the "server {}" directive comes up first (when _serverNb == 0)
+	// so we need to end the parsing of the first server before sending the first server to cgi.
 	if (_serverNb > 1) {
 		Server& server = dynamic_cast<Server&>(*this);
 		// testing
 		server.print_serv();
+		// clearing Parser class
+		this->clear();
 	}
 	(void)it;
 	(void)vend;
@@ -225,14 +238,13 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 /**************************************/
 
 /**
- * interpreter(): goes through the 'tok' vector and sets 'Server' class accordingly
+ * interpreter(): goes through the 'tok' vector and sets 'Parser' class variables accordingly
  * using the corresponding "dir" (for 'directive') functions (see above)
  **/
 void	Parser::interpreter(vec_str tok) {
 
 	std::vector<std::pair<std::string, methodPointer> > dir;
 	methodPointer mp;
-//	bool location_on = false;
 
 	dir.push_back(std::make_pair("location", &Parser::dirLocation));
 	dir.push_back(std::make_pair("server", &Parser::dirServer));
@@ -278,6 +290,14 @@ void	Parser::tokenizer(char **av) {
 		getline(file, line);
 
 		while (line.find_first_not_of(WHITESPACE) != std::string::npos) {
+			// remove comments before parsing
+			pos = line.find_first_of("#");
+			if (pos == 0)
+				break ;
+			else if (pos != std::string::npos)
+				line.erase(pos);
+
+			// trim out WHITESPACES
 			pos = line.find_first_not_of(WHITESPACE);
 			posend = std::min(line.find_first_of(WHITESPACE, pos), line.length());
 			tok.push_back(line.substr(pos, posend - pos));
@@ -285,7 +305,7 @@ void	Parser::tokenizer(char **av) {
 		}
 	}
 	// DELETE FOLLOWING LINE WHEN DONE (used for testing)
-//	ft_putvec(tok, "\n");
+	//ft_putvec(tok, "\n");
 	interpreter(tok);
 }
 
