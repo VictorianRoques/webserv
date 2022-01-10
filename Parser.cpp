@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/08 13:05:13 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/10 17:59:26 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,24 @@
 const std::string WHITESPACE = "\f\t\n\r\v ";
 
 /**************************************/
+//           EXCEPTIONS               //
+/**************************************/
+
+char const *Parser::MissingBracketException::what() const throw() { return ("Missing a bracket after 'server' or 'location' directive."); }
+char const *Parser::OutsideServerException::what() const throw() { return ("Some directive is outside a server definition."); }
+char const *Parser::LonelyBracketException::what() const throw() { return ("Lonely opening bracket(s)."); }
+char const *Parser::EmbeddedServersException::what() const throw() { return ("Found a server in another server."); }
+char const *Parser::NoSuchDirectiveException::what() const throw() { return ("Non valid directive in the file."); }
+char const *Parser::FailedToOpenException::what() const throw() { return ("Failed to open <config_file>."); }
+
+/**************************************/
 //           COPLIAN CLASS            //
 /**************************************/
 
-Parser::Parser(): Server(), _serverNb(0)
+Parser::Parser(): Server(), 
+	_serverNb(0),
+	_in_server(false),
+	_in_location(false)
 {}
 
 Parser::~Parser() {}
@@ -30,6 +44,8 @@ Parser::Parser(const Parser &x) {
 Parser&	Parser::operator=(const Parser &x) {
 	if (this != &x) {
 		_serverNb = x.getServerNb();
+		_in_server = x.getInServer();
+		_in_location = x.getInLocation();
 		_ip = x.getIP();
 		_port = x.getPort();
 		_serverName = x.getServerName();
@@ -46,6 +62,8 @@ Parser&	Parser::operator=(const Parser &x) {
 /**************************************/
 
 size_t		 				Parser::getServerNb() const { return _serverNb; }
+bool		 				Parser::getInServer() const { return _in_server; }
+bool		 				Parser::getInLocation() const { return _in_location; }
 
 /**************************************/
 //			PARSING HELPERS			  //
@@ -124,7 +142,6 @@ size_t	Parser::dirServerName(vec_str::iterator it, vec_str::iterator vend) {
 	size_t		pos;
 	size_t		posend;
 
-
 	for (; it != vend; it++) {
 		//remove the trailing ';'
 		pos = (*it).find_first_not_of(";");
@@ -169,13 +186,57 @@ size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 }
 
 /**
+ * dirOpen(): Necessarily lonely '{' (server and location take care of their own '{')
+**/
+size_t	Parser::dirOpen(vec_str::iterator it, vec_str::iterator vend) {
+	throw LonelyBracketException();
+	(void)it;
+	(void)vend;
+	return 0;
+}
+
+/**
+ * dirClose(): records closing server/location
+**/
+size_t	Parser::dirClose(vec_str::iterator it, vec_str::iterator vend) {
+
+	if (_in_server == false)
+		throw OutsideServerException();
+	else if (_in_location == true)
+		_in_location = false;
+	else 
+		_in_server = false;
+	(void)it;
+	(void)vend;
+	return 0;
+}
+
+/**
  * dirLocation(): sets location from parsing (called by interpret())
 **/
 size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	size_t ret = 1;
 	size_t iter;
+	
 	Location *location = new Location();
+	_in_location = true;
 
+	// set location context
+	location->setMatchModifier(*it);
+	location->setLocationMatch(*it);
+	it++;
+	if (*it != "{" && *(it + 1) != "{")
+		throw MissingBracketException();
+	else if (*it == "{") {
+		location->setMatchModifier("");
+		ret += 1;
+	}
+	else {
+		location->setLocationMatch(*it);
+		ret += 2;
+	}
+
+	// set directives
 	std::vector<std::pair<std::string, Location::methodPointer> > dir;
 	Location::methodPointer mp;
 
@@ -218,7 +279,12 @@ void	Parser::clear() {
 **/
 size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 
+	if (_in_server == true)
+		throw EmbeddedServersException();
+
 	_serverNb++;
+	_in_server = true;
+
 	// need _serverNb > 1 because the "server {}" directive comes up first (when _serverNb == 0)
 	// so we need to end the parsing of the first server before sending the first server to cgi.
 	if (_serverNb > 1) {
@@ -228,6 +294,10 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 		// clearing Parser class
 		this->clear();
 	}
+
+	if (*it != "{" && it != vend)
+		throw MissingBracketException();
+
 	(void)it;
 	(void)vend;
 	return 1;
@@ -253,10 +323,17 @@ void	Parser::interpreter(vec_str tok) {
 	dir.push_back(std::make_pair("client_max_body_size", &Parser::dirMaxBodySize));
 	dir.push_back(std::make_pair("server_name", &Parser::dirServerName));
 	dir.push_back(std::make_pair("error_page", &Parser::dirErrorPage));
+	dir.push_back(std::make_pair("{", &Parser::dirOpen));
+	dir.push_back(std::make_pair("}", &Parser::dirClose));
 
 	vec_str::iterator itok = tok.begin();
 	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
 	while (itok != tok.end()) {
+
+		//TESTING ******************
+//		std::cout << *itok << std::endl;
+		if (*itok != "server" && _in_server == false)
+			throw OutsideServerException();
 
 		idir = dir.begin();
 		for (; idir < dir.end(); idir++) {
@@ -266,6 +343,8 @@ void	Parser::interpreter(vec_str tok) {
 				break ;
 			}
 		}
+		if (idir == dir.end())
+			throw NoSuchDirectiveException();
 		itok++;
 	}
 	dirServer(itok, itok);
@@ -284,7 +363,7 @@ void	Parser::tokenizer(char **av) {
 
 	file.open(fileName);
 	if (!file.is_open())
-		std::cout << "Error: Failed to open file\n";
+		throw FailedToOpenException();
 
 	while (!file.eof()) {
 		getline(file, line);
@@ -319,6 +398,11 @@ int		main(int ac, char **av) {
 	if (ac != 2)
 		std::cout << "Error: Need one and only one argument\n";
 	else {
-		parser.tokenizer(av);
+		try {
+			parser.tokenizer(av);
+		}
+		catch (std::exception &e) {
+			std::cout << RED << "Error: " << NC << e.what() << std::endl;
+		}
 	}
 }

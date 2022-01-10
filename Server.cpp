@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/08 13:01:58 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/10 18:01:34 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ void	Server::addServer(Meta meta) {
 
 void	Server::print_serv() {
 	std::string COLOR = PURPLE;
+	std::cout << "____________________________________________________" << std::endl << std::endl;
 	std::cout << COLOR << "Server Name: " << NC; ft_putvec(_serverName, " ");
 	std::cout << COLOR << "IP: " << NC << _ip << std::endl;
 	std::cout << COLOR << "Port: " << NC; ft_putvec(_port, " ");

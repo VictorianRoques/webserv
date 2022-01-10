@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 18:38:43 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/10 17:28:01 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,14 +37,20 @@ class Location {
 
 	// directives
 	private:
+		std::string	_matchModifier;
+		std::string	_locationMatch;
 		std::string	_root;
 
 		// getters
 	public:
+		std::string getMatchModifier() const;
+		std::string getLocationMatch() const;
 		std::string getRoot() const;
 
 		//setters
 	public:
+		void	setMatchModifier(std::string _matchModifier);
+		void	setLocationMatch(std::string _locationMatch);
 		void	setRoot(std::string root);
 
 		// parsing helpers

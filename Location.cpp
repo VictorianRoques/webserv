@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/07 20:56:12 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/10 17:53:45 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,16 @@ Location&	Location::operator=(const Location &x) {
 //				GETTERS				  //
 /**************************************/
 
+std::string	Location::getMatchModifier() const { return _matchModifier; }
+std::string	Location::getLocationMatch() const { return _locationMatch; }
 std::string	Location::getRoot() const { return _root; }
 
 /**************************************/
 //				GETTERS				  //
 /**************************************/
 
+void	Location::setMatchModifier(std::string matchModifier) { _matchModifier = matchModifier; }
+void	Location::setLocationMatch(std::string locationMatch) { _locationMatch = locationMatch; }
 void	Location::setRoot(std::string root) { _root = root; }
 
 /**************************************/
@@ -70,6 +74,8 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 void	Location::print_loc() {
 
 	std::cout << std::endl;
+	std::cout << "Match Modifier: " << _matchModifier << std::endl;
+	std::cout << "Location Match: " << _locationMatch << std::endl;
 	std::cout << "Root: " << _root << std::endl;
 	std::cout << std::endl;
 }
