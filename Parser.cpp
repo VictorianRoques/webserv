@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/13 18:53:15 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/13 19:45:33 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -308,6 +308,7 @@ void	Parser::clear() {
 	// just keep the first file (defaultErrorPage.html)
 	_errorPage.erase(_errorPage.begin() + 1, _errorPage.end());
 	_location.clear();
+	_autoIndex = true;
 }
 
 /**
@@ -427,6 +428,29 @@ void	Parser::tokenizer(char **av) {
 }
 
 /**
+ * check_file_extension(): self-explanatory
+**/
+bool	check_file_extension(char *file_name) {
+	std::string file(file_name);
+	if (file.find(".") == std::string::npos)
+		return 1;
+
+	std::string ext;
+	ext = file.substr(file.find(".") + 1, std::string::npos);
+
+	vec_str	good_ext;
+	good_ext.push_back("conf");
+	good_ext.push_back("php");
+
+	vec_str::iterator it = good_ext.begin();
+	for (; it != good_ext.end(); it++) {
+		if (*it == ext)
+			return 0;
+	}
+	return 1;
+}
+
+/**
  * main(): gets a config file in param and parses it
  **/
 int		main(int ac, char **av) {
@@ -434,7 +458,9 @@ int		main(int ac, char **av) {
 	Parser	parser;
 
 	if (ac != 2)
-		std::cout << "Error: Need one and only one argument\n";
+		std::cout << RED << "Error: " << NC << "Need one and only one argument\n";
+	else if (check_file_extension(av[1]))
+		std::cout << RED << "Error: " << NC << "Unauthorized file extension\n";
 	else {
 		try {
 			parser.tokenizer(av);
