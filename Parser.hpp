@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/10 17:35:13 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/13 16:47:48 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ class Parser: public Server {
 		size_t	dirServer(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirClose(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirOpen(vec_str::iterator it, vec_str::iterator vend);
+		size_t	dirAutoIndex(vec_str::iterator it, vec_str::iterator vend);
 
 		//EXCEPTION
 
@@ -101,6 +102,11 @@ class Parser: public Server {
 		};
 
 		class FailedToOpenException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class WrongValue_AutoIndexException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};

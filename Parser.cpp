@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/10 17:59:26 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/13 18:53:15 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ char const *Parser::LonelyBracketException::what() const throw() { return ("Lone
 char const *Parser::EmbeddedServersException::what() const throw() { return ("Found a server in another server."); }
 char const *Parser::NoSuchDirectiveException::what() const throw() { return ("Non valid directive in the file."); }
 char const *Parser::FailedToOpenException::what() const throw() { return ("Failed to open <config_file>."); }
+char const *Parser::WrongValue_AutoIndexException::what() const throw() { return ("Wrong value for autoindex."); }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -83,7 +84,7 @@ void	Parser::addPort(std::string port) { _port.push_back(static_cast<size_t>(std
  * returns the number of elements iterated over
  **/
 size_t	Parser::dirListen(vec_str::iterator it, vec_str::iterator vend) {
-	size_t ret = 0;
+	size_t ret = 1;
 
 	for (; it != vend; it++) {
 		size_t	pos = it->find(":");
@@ -121,7 +122,7 @@ size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 
 	setRoot(root);
 	(void)vend;
-	return 1;
+	return 2;
 }
 
 /**
@@ -130,14 +131,14 @@ size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 size_t Parser::dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend) {
 	setMaxBodySize(*it);
 	(void)vend;
-	return 1;
+	return 2;
 }
 
 /**
  * dirServerName(): sets server_name(s) from parsing (called by interpret())
 **/
 size_t	Parser::dirServerName(vec_str::iterator it, vec_str::iterator vend) {
-	size_t	ret = 0;
+	size_t	ret = 1;
 	std::string	name;
 	size_t		pos;
 	size_t		posend;
@@ -163,7 +164,7 @@ size_t	Parser::dirServerName(vec_str::iterator it, vec_str::iterator vend) {
  * dirErrorPage(): sets error_page(s) from parsing (called by interpret())
 **/
 size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
-	size_t	ret = 0;
+	size_t	ret = 1;
 	std::string	errorPage;
 	size_t		pos;
 	size_t		posend;
@@ -186,13 +187,27 @@ size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 }
 
 /**
+ * dirAutoIndex(): sets autoindex (called by interpret())
+**/
+size_t	Parser::dirAutoIndex(vec_str::iterator it, vec_str::iterator vend) {
+	if (*it == "on;")
+		setAutoIndex(true);
+	else if (*it == "off;")
+		setAutoIndex(false);
+	else
+		throw	WrongValue_AutoIndexException();
+	(void)vend;
+	return 2;
+}
+
+/**
  * dirOpen(): Necessarily lonely '{' (server and location take care of their own '{')
 **/
 size_t	Parser::dirOpen(vec_str::iterator it, vec_str::iterator vend) {
 	throw LonelyBracketException();
 	(void)it;
 	(void)vend;
-	return 0;
+	return 1;
 }
 
 /**
@@ -201,14 +216,37 @@ size_t	Parser::dirOpen(vec_str::iterator it, vec_str::iterator vend) {
 size_t	Parser::dirClose(vec_str::iterator it, vec_str::iterator vend) {
 
 	if (_in_server == false)
-		throw OutsideServerException();
+		throw LonelyBracketException();
 	else if (_in_location == true)
 		_in_location = false;
 	else 
 		_in_server = false;
 	(void)it;
 	(void)vend;
-	return 0;
+	return 1;
+}
+
+/**
+ * locationContext(): sets MatchModifier and LocationMatch variables (called by dirLocation())
+**/
+size_t locationContext(vec_str::iterator it, Location *location) {
+	size_t ret = 0;
+
+	location->setMatchModifier(*it);
+	location->setLocationMatch(*it);
+	it++;
+	ret++;
+	if (*it != "{" && *(it + 1) != "{")
+		throw Parser::MissingBracketException();
+	else if (*it == "{") {
+		location->setMatchModifier("");
+		ret += 1;
+	}
+	else {
+		location->setLocationMatch(*it);
+		ret += 2;
+	}
+	return ret;
 }
 
 /**
@@ -221,43 +259,41 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	Location *location = new Location();
 	_in_location = true;
 
-	// set location context
-	location->setMatchModifier(*it);
-	location->setLocationMatch(*it);
-	it++;
-	if (*it != "{" && *(it + 1) != "{")
-		throw MissingBracketException();
-	else if (*it == "{") {
-		location->setMatchModifier("");
-		ret += 1;
-	}
-	else {
-		location->setLocationMatch(*it);
-		ret += 2;
-	}
+	iter = locationContext(it, location);
+	it += iter;
+	ret += iter;
 
 	// set directives
 	std::vector<std::pair<std::string, Location::methodPointer> > dir;
 	Location::methodPointer mp;
 
 	dir.push_back(std::make_pair("root", &Location::dirRoot));
+	dir.push_back(std::make_pair("methods", &Location::dirMethods));
 	
 	std::vector<std::pair<std::string, Location::methodPointer> >::iterator idir;
-	for (; it != vend; it++) {
+	while (it != vend) {
 
 		idir = dir.begin();
+		iter = 0;
 		for (; idir < dir.end(); idir++) {
 			if (*it == idir->first) {
 				mp = idir->second;
 				iter = (location->*mp)(it + 1, vend);
 				ret += iter;
+				it += iter;
+				break ;
 			}
 
-			// meets a '}' == end of the location directive
-			if (it->find("}") != std::string::npos) {
-				this->_location.push_back(location);
-				return ret;
-			}
+
+		}
+		// meets a '}' == end of the location directive
+		if (it->find("}") != std::string::npos) {
+			this->_location.push_back(location);
+			return ret;
+		}
+
+		if (iter == 0) {
+			throw NoSuchDirectiveException();
 		}
 	}
 	return ret;
@@ -300,7 +336,7 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 
 	(void)it;
 	(void)vend;
-	return 1;
+	return 2;
 }
 
 /**************************************/
@@ -321,6 +357,7 @@ void	Parser::interpreter(vec_str tok) {
 	dir.push_back(std::make_pair("listen", &Parser::dirListen));
 	dir.push_back(std::make_pair("root", &Parser::dirRoot));
 	dir.push_back(std::make_pair("client_max_body_size", &Parser::dirMaxBodySize));
+	dir.push_back(std::make_pair("autoindex", &Parser::dirAutoIndex));
 	dir.push_back(std::make_pair("server_name", &Parser::dirServerName));
 	dir.push_back(std::make_pair("error_page", &Parser::dirErrorPage));
 	dir.push_back(std::make_pair("{", &Parser::dirOpen));
@@ -331,7 +368,7 @@ void	Parser::interpreter(vec_str tok) {
 	while (itok != tok.end()) {
 
 		//TESTING ******************
-//		std::cout << *itok << std::endl;
+//		std::cout << "ITOK ORIGIN = " << *itok << " and _in_server = " << (_in_server == true ? "true" : "false") << " and in location = " << (_in_location == true ? "true" : "false") << std::endl;
 		if (*itok != "server" && _in_server == false)
 			throw OutsideServerException();
 
@@ -343,9 +380,10 @@ void	Parser::interpreter(vec_str tok) {
 				break ;
 			}
 		}
-		if (idir == dir.end())
+		if (idir == dir.end()) {
+			std::cout << "IDIR = " << *itok << std::endl;
 			throw NoSuchDirectiveException();
-		itok++;
+		}
 	}
 	dirServer(itok, itok);
 }

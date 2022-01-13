@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/10 18:01:34 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/13 17:34:22 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,10 @@
 
 Server::Server():
 	_ip("127.0.0.1"),
-	_root("/"),
+	_root("/default"),
 	_errorPage(1, "defaultErrorPage.html"),
-	_maxBodySize(1000000) //nginx default value
+	_maxBodySize(1000000), //nginx default value
+	_autoIndex(true)
 {}
 
 Server::~Server() {}
@@ -37,6 +38,7 @@ Server&	Server::operator=(const Server &x) {
 		_root = x.getRoot();
 		_errorPage = x.getErrorPage();
 		_maxBodySize = x.getMaxBodySize();
+		_autoIndex = x.getAutoIndex();
 		_location = x.getLocation();
 	}
 	return *this;
@@ -52,6 +54,7 @@ vec_str						Server::getServerName() const { return _serverName; }
 std::string					Server::getRoot() const { return _root; }
 vec_str						Server::getErrorPage() const { return _errorPage; }
 size_t						Server::getMaxBodySize() const { return _maxBodySize; }
+bool						Server::getAutoIndex() const { return _autoIndex; }
 std::vector<Location *>		Server::getLocation() const { return _location; }
 
 /**************************************/
@@ -77,6 +80,7 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 			_maxBodySize *= 1000000000;
 	}
 }
+void	Server::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
 void	Server::setLocation(std::vector<Location *> location) { _location = location; }
 
 /**************************************/
@@ -100,6 +104,7 @@ void	Server::print_serv() {
 	std::cout << COLOR << "Root: " << NC << _root << std::endl;
 	std::cout << COLOR << "Error Page: " << NC; ft_putvec(_errorPage, " ");
 	std::cout << COLOR << "Client_Max_Body_Size: " << NC << _maxBodySize << std::endl;
+	std::cout << COLOR << "AutoIndex: " << NC << (_autoIndex ? "on" : "off") << std::endl;
 
 	std::cout << std::endl;
 	std::vector<Location *>::iterator	it = _location.begin();
