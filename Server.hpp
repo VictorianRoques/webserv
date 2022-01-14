@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/13 19:32:08 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 12:06:20 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,25 +59,29 @@ class Server {
 
 		// variables
 	protected:
-		std::string					_ip;
-		std::vector<size_t>			_port;
-		std::vector<std::string>	 _serverName;
-		std::string					_root;
-		std::vector<std::string>	_errorPage;
-		size_t						_maxBodySize;
-		bool						_autoIndex;
-		std::vector<Location *>		_location;
+		std::string						_ip;
+		std::vector<size_t>				_port;
+		std::vector<std::string>	 	_serverName;
+		std::string						_root;
+		std::vector<std::string>		_errorPage;
+		size_t							_maxBodySize;
+		bool							_autoIndex;
+		std::vector<Location *>			_location;
+		size_t							_serverNb;
+		std::pair<size_t, std::string>	_redirection;
 
 		// getters
 	public:
-		std::string					getIP() const;
-		std::vector<size_t>			getPort() const;
-		std::vector<std::string>	getServerName() const;
-		std::string					getRoot() const;
-		std::vector<std::string>	getErrorPage() const;
-		size_t						getMaxBodySize() const;
-		bool						getAutoIndex() const;
-		std::vector<Location *>		getLocation() const;
+		std::string						getIP() const;
+		std::vector<size_t>				getPort() const;
+		std::vector<std::string>		getServerName() const;
+		std::string						getRoot() const;
+		std::vector<std::string>		getErrorPage() const;
+		size_t							getMaxBodySize() const;
+		bool							getAutoIndex() const;
+		std::vector<Location *>			getLocation() const;
+		size_t							getServerNb() const;
+		std::pair<size_t, std::string>	getRedirection() const;
 
 		//setters
 	protected:
@@ -90,6 +94,8 @@ class Server {
 		void	setMaxBodySize(std::string maxBodySize);
 		void	setAutoIndex(bool autoIndex);
 		void	setLocation(std::vector<Location *> location);
+		void	setServerNb(size_t serverNb);
+		void	setRedirection(std::pair<size_t, std::string> redirection);
 
 		// adding parsed server
 	public:

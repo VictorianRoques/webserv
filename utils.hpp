@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/13 17:06:54 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 12:23:51 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@
 # define CYAN "\e[1;36m"
 # define WHITE "\e[1;37m"
 # define NC "\e[0m" // NC = NO COLOR (reset)
+
+# define COLOR_SERV CYAN
+# define COLOR_LOC 	PURPLE
 
 /**
  * type simplification (makes the code 'lighter')

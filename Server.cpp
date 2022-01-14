@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/13 19:31:59 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 12:26:44 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ Server::Server():
 	_root("/default"),
 	_errorPage(1, "defaultErrorPage.html"),
 	_maxBodySize(1000000), //nginx default value
-	_autoIndex(true)
+	_autoIndex(true),
+	_serverNb(0)
 {}
 
 Server::~Server() {}
@@ -40,6 +41,8 @@ Server&	Server::operator=(const Server &x) {
 		_maxBodySize = x.getMaxBodySize();
 		_autoIndex = x.getAutoIndex();
 		_location = x.getLocation();
+		_serverNb = x.getServerNb();
+		_redirection = x.getRedirection();
 	}
 	return *this;
 }
@@ -48,14 +51,16 @@ Server&	Server::operator=(const Server &x) {
 //				GETTERS				  //
 /**************************************/
 
-std::string 				Server::getIP() const { return _ip; }
-std::vector<size_t>			Server::getPort() const { return _port; }
-vec_str						Server::getServerName() const { return _serverName; }
-std::string					Server::getRoot() const { return _root; }
-vec_str						Server::getErrorPage() const { return _errorPage; }
-size_t						Server::getMaxBodySize() const { return _maxBodySize; }
-bool						Server::getAutoIndex() const { return _autoIndex; }
-std::vector<Location *>		Server::getLocation() const { return _location; }
+std::string 					Server::getIP() const { return _ip; }
+std::vector<size_t>				Server::getPort() const { return _port; }
+vec_str							Server::getServerName() const { return _serverName; }
+std::string						Server::getRoot() const { return _root; }
+vec_str							Server::getErrorPage() const { return _errorPage; }
+size_t							Server::getMaxBodySize() const { return _maxBodySize; }
+bool							Server::getAutoIndex() const { return _autoIndex; }
+std::vector<Location *>			Server::getLocation() const { return _location; }
+size_t							Server::getServerNb() const { return _serverNb; }
+std::pair<size_t, std::string>	Server::getRedirection() const { return _redirection; }
 
 /**************************************/
 //				SETTERS				  //
@@ -82,6 +87,8 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 }
 void	Server::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
 void	Server::setLocation(std::vector<Location *> location) { _location = location; }
+void	Server::setServerNb(size_t serverNb) { _serverNb = serverNb; }
+void	Server::setRedirection(std::pair<size_t, std::string> redirection) { _redirection = redirection; }
 
 /**************************************/
 //			SERVER PARSED			  //
@@ -96,20 +103,25 @@ void	Server::addServer(Meta meta) {
 /**************************************/
 
 void	Server::print_serv() {
-	std::string COLOR = PURPLE;
 	std::cout << "____________________________________________________" << std::endl << std::endl;
-	std::cout << COLOR << "Server Name: " << NC; ft_putvec(_serverName, " ");
-	std::cout << COLOR << "IP: " << NC << _ip << std::endl;
-	std::cout << COLOR << "Port: " << NC; ft_putvec(_port, " ");
-	std::cout << COLOR << "Root: " << NC << _root << std::endl;
-	std::cout << COLOR << "Error Page: " << NC; ft_putvec(_errorPage, " ");
-	std::cout << COLOR << "Client_Max_Body_Size: " << NC << _maxBodySize << std::endl;
-	std::cout << COLOR << "AutoIndex: " << NC << (_autoIndex ? "on" : "off") << std::endl;
+	std::cout << COLOR_SERV << "Server no. " << NC << _serverNb << std::endl;
+	std::cout << COLOR_SERV << "Server Name: " << NC; ft_putvec(_serverName, " ");
+	std::cout << COLOR_SERV << "IP: " << NC << _ip << std::endl;
+	std::cout << COLOR_SERV << "Port: " << NC; ft_putvec(_port, " ");
+	std::cout << COLOR_SERV << "Root: " << NC << _root << std::endl;
+	std::cout << COLOR_SERV << "Error Page: " << NC; ft_putvec(_errorPage, " ");
+	std::cout << COLOR_SERV << "Client_Max_Body_Size: " << NC << _maxBodySize << std::endl;
+	std::cout << COLOR_SERV << "AutoIndex: " << NC << (_autoIndex ? "on" : "off") << std::endl;
+	std::cout << COLOR_SERV << "Redirection: " << NC << (_redirection.first ? "Yes" : "No") << std::endl;
+   	if (_redirection.first) {
+		std::cout << COLOR_SERV <<  "   Status code: " << NC << _redirection.first << std::endl 
+				<< COLOR_SERV << "   URI: " << NC << _redirection.second << std::endl;
+	}
 
 	std::cout << std::endl;
 	std::vector<Location *>::iterator	it = _location.begin();
 	for (; it != _location.end(); it++) {
-		std::cout << COLOR << "Location: " << NC; 
+		std::cout << COLOR_SERV << "Location: " << NC; 
 		(*it)->print_loc();
 	}
 }

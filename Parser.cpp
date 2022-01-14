@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/13 19:45:33 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 12:45:52 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,16 +22,17 @@ char const *Parser::MissingBracketException::what() const throw() { return ("Mis
 char const *Parser::OutsideServerException::what() const throw() { return ("Some directive is outside a server definition."); }
 char const *Parser::LonelyBracketException::what() const throw() { return ("Lonely opening bracket(s)."); }
 char const *Parser::EmbeddedServersException::what() const throw() { return ("Found a server in another server."); }
-char const *Parser::NoSuchDirectiveException::what() const throw() { return ("Non valid directive in the file."); }
+char const *Parser::NoSuchDirectiveException::what() const throw() { return ("Unknown directive in the file."); }
 char const *Parser::FailedToOpenException::what() const throw() { return ("Failed to open <config_file>."); }
 char const *Parser::WrongValue_AutoIndexException::what() const throw() { return ("Wrong value for autoindex."); }
+char const *Parser::NonValidRedirectionException::what() const throw() { return ("Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;)."); }
+char const *Parser::NonValidRootException::what() const throw() { return ("Non valid root\nUsage: root <path>; (you probably forgot a \";\")."); }
 
 /**************************************/
 //           COPLIAN CLASS            //
 /**************************************/
 
 Parser::Parser(): Server(), 
-	_serverNb(0),
 	_in_server(false),
 	_in_location(false)
 {}
@@ -62,7 +63,6 @@ Parser&	Parser::operator=(const Parser &x) {
 //				GETTERS				  //
 /**************************************/
 
-size_t		 				Parser::getServerNb() const { return _serverNb; }
 bool		 				Parser::getInServer() const { return _in_server; }
 bool		 				Parser::getInLocation() const { return _in_location; }
 
@@ -72,7 +72,7 @@ bool		 				Parser::getInLocation() const { return _in_location; }
 
 /**
  * addPort(): add a new port to the vector containing ports.
- * Called by drListen (see below)
+ * Called by dirListen (see below)
  **/
 void	Parser::addPort(std::string port) { _port.push_back(static_cast<size_t>(std::atoi(port.c_str()))); }
 
@@ -115,6 +115,8 @@ size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	size_t		pos;
 	size_t		posend;
 
+	if ((*it).find(";") == std::string::npos && *(it + 1) != ";")
+		throw NonValidRootException();
 	//remove the trailing ';'
 	pos = (*it).find_first_not_of(";");
 	posend = std::min((*it).find_first_of(";", pos), (*it).length());
@@ -198,6 +200,21 @@ size_t	Parser::dirAutoIndex(vec_str::iterator it, vec_str::iterator vend) {
 		throw	WrongValue_AutoIndexException();
 	(void)vend;
 	return 2;
+}
+
+/**
+ * dirRedirection(): sets redirection (called by interpret())
+**/
+size_t	Parser::dirRedirection(vec_str::iterator it, vec_str::iterator vend) {
+	size_t code = static_cast<size_t>(std::atoi((*it).c_str()));
+	if (code < 300 || code > 308)
+		throw NonValidRedirectionException();
+	else if ((*(it + 1)).find(";") == std::string::npos && *(it + 2) != ";")
+		throw NonValidRedirectionException();
+	_redirection.first = code;
+	_redirection.second = *(it + 1);
+	(void)vend;
+	return 3;
 }
 
 /**
@@ -359,6 +376,7 @@ void	Parser::interpreter(vec_str tok) {
 	dir.push_back(std::make_pair("root", &Parser::dirRoot));
 	dir.push_back(std::make_pair("client_max_body_size", &Parser::dirMaxBodySize));
 	dir.push_back(std::make_pair("autoindex", &Parser::dirAutoIndex));
+	dir.push_back(std::make_pair("return", &Parser::dirRedirection));
 	dir.push_back(std::make_pair("server_name", &Parser::dirServerName));
 	dir.push_back(std::make_pair("error_page", &Parser::dirErrorPage));
 	dir.push_back(std::make_pair("{", &Parser::dirOpen));

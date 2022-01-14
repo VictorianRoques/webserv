@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/13 18:53:19 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 11:40:24 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,12 +111,11 @@ size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
 
 void	Location::print_loc() {
 
-	std::string	COLOR = CYAN;
 	
 	std::cout << std::endl;
-	std::cout << COLOR << "Match Modifier: " << NC << _matchModifier << std::endl;
-	std::cout << COLOR << "Location Match: " << NC << _locationMatch << std::endl;
-	std::cout << COLOR << "Root: " << NC << _root << std::endl;
-	std::cout << COLOR << "Method(s): " << NC; ft_putvec(_methods, " ");
+	std::cout << COLOR_LOC << "Match Modifier: " << NC << _matchModifier << std::endl;
+	std::cout << COLOR_LOC << "Location Match: " << NC << _locationMatch << std::endl;
+	std::cout << COLOR_LOC << "Root: " << NC << _root << std::endl;
+	std::cout << COLOR_LOC << "Method(s): " << NC; ft_putvec(_methods, " ");
 	std::cout << std::endl;
 }
