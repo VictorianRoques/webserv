@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 13:10:16 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 15:42:25 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,18 @@
 /**************************************/
 
 char const *Location::WrongMethodException::what() const throw() { return ("Wrong method."); }
+char const *Location::WrongValue_AutoIndexException::what() const throw() { return ("Wrong value for autoindex."); }
+char const *Location::NonValidRedirectionException::what() const throw() { return ("Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;)."); }
+char const *Location::NonValidRootException::what() const throw() { return ("Non valid root\nUsage: root <path>; (you probably forgot a \";\")."); }
+char const *Location::NonValidIndexException::what() const throw() { return ("Non valid index\nUsage: index <file_name>; (you probably forgot a \";\")."); }
 
 /**************************************/
 //           COPLIAN CLASS            //
 /**************************************/
 
 Location::Location():
-	_root("/")
+	_root("/"),
+	_autoIndex(true)
 {}
 
 Location::~Location() {}
@@ -36,6 +41,9 @@ Location&	Location::operator=(const Location &x) {
 		_root = x.getRoot();
 		_methods = x.getMethods();
 		_errorPage = x.getErrorPage();
+		_redirection = x.getRedirection();
+		_autoIndex = x.getAutoIndex();
+		_index = x.getIndex();
 	}
 	return *this;
 }
@@ -44,11 +52,14 @@ Location&	Location::operator=(const Location &x) {
 //				GETTERS				  //
 /**************************************/
 
-std::string	Location::getMatchModifier() const { return _matchModifier; }
-std::string	Location::getLocationMatch() const { return _locationMatch; }
-std::string	Location::getRoot() const { return _root; }
-vec_str		Location::getMethods() const { return _methods; }
-vec_str		Location::getErrorPage() const { return _errorPage; }
+std::string						Location::getMatchModifier() const { return _matchModifier; }
+std::string						Location::getLocationMatch() const { return _locationMatch; }
+std::string						Location::getRoot() const { return _root; }
+vec_str							Location::getMethods() const { return _methods; }
+vec_str							Location::getErrorPage() const { return _errorPage; }
+std::pair<size_t, std::string>	Location::getRedirection() const { return _redirection; }
+std::string						Location::getIndex() const { return _index; }
+bool							Location::getAutoIndex() const { return _autoIndex; }
 
 /**************************************/
 //				GETTERS				  //
@@ -59,11 +70,17 @@ void	Location::setLocationMatch(std::string locationMatch) { _locationMatch = lo
 void	Location::setRoot(std::string root) { _root = root; }
 void	Location::setMethods(vec_str methods) { _methods = methods; }
 void	Location::setErrorPage(vec_str errorPage) { _errorPage = errorPage; }
+void	Location::setRedirection(std::pair<size_t, std::string> redirection) { _redirection = redirection; }
+void	Location::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
+void	Location::setIndex(std::string index) { _index = index; }
 
 /**************************************/
 //			PARSING HELPERS			  //
 /**************************************/
 
+/**
+ * dirRoot(): sets root (called by dirLocation())
+**/
 size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	std::string	root;
 	size_t		pos;
@@ -79,6 +96,61 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	return 2;
 }
 
+/**
+ * dirAutoIndex(): sets autoindex (called by dirLocation())
+**/
+size_t	Location::dirAutoIndex(vec_str::iterator it, vec_str::iterator vend) {
+	if (*it == "on;")
+		setAutoIndex(true);
+	else if (*it == "off;")
+		setAutoIndex(false);
+	else
+		throw	WrongValue_AutoIndexException();
+	(void)vend;
+	return 2;
+}
+
+/**
+ * dirIndex(): sets index from parsing (called by dirLocation())
+**/
+size_t	Location::dirIndex(vec_str::iterator it, vec_str::iterator vend) {
+	std::string	index;
+	size_t		pos;
+	size_t		posend;
+
+	if ((*it).find(";") == std::string::npos && *(it + 1) != ";")
+		throw NonValidIndexException();
+	//remove the trailing ';'
+	pos = (*it).find_first_not_of(";");
+	posend = std::min((*it).find_first_of(";", pos), (*it).length());
+	index = (*it).substr(pos, posend - pos);
+
+	setIndex(index);
+	(void)vend;
+	return 2;
+}
+
+/**
+ * dirRedirection(): sets redirection (called by dirLocation())
+**/
+size_t	Location::dirRedirection(vec_str::iterator it, vec_str::iterator vend) {
+	size_t code = static_cast<size_t>(std::atoi((*it).c_str()));
+	std::string	uri = *(it + 1);
+	size_t		pos = uri.find(";");
+
+	if (code < 300 || code > 308)
+		throw NonValidRedirectionException();
+	else if ((*(it + 1)).find(";") == std::string::npos && *(it + 2) != ";")
+		throw NonValidRedirectionException();
+	_redirection.first = code;
+	_redirection.second = uri.substr(0, pos);
+	(void)vend;
+	return 3;
+}
+
+/**
+ * dirErrorPage(): sets error_page (called by dirLocation())
+**/
 size_t	Location::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 	size_t	ret = 1;
 	std::string	errorPage;
@@ -102,6 +174,9 @@ size_t	Location::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 	return ret;
 }
 
+/**
+ * dirMethods(): sets allowed methods (called by dirLocation())
+**/
 size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
 
 	vec_str methods;
@@ -141,6 +216,13 @@ void	Location::print_loc() {
 	std::cout << COLOR_LOC << "Location Match: " << NC << _locationMatch << std::endl;
 	std::cout << COLOR_LOC << "Root: " << NC << _root << std::endl;
 	std::cout << COLOR_LOC << "Error Page: " << NC; ft_putvec(_errorPage, " ");
+	std::cout << COLOR_LOC << "AutoIndex: " << NC << (_autoIndex ? "on" : "off") << std::endl;
+	std::cout << COLOR_LOC << "Index (reponse file if request is directory): " << NC << _index << std::endl;
 	std::cout << COLOR_LOC << "Method(s): " << NC; ft_putvec(_methods, " ");
+	std::cout << COLOR_LOC << "Redirection: " << NC << (_redirection.first ? "Yes" : "No") << std::endl;
+   	if (_redirection.first) {
+		std::cout << COLOR_LOC <<  "   Status code: " << NC << _redirection.first << std::endl 
+				<< COLOR_LOC << "   URI: " << NC << _redirection.second << std::endl;
+	}
 	std::cout << std::endl;
 }

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 13:28:23 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 15:34:57 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,12 @@ const std::string WHITESPACE = "\f\t\n\r\v ";
 /**************************************/
 //           EXCEPTIONS               //
 /**************************************/
-
 char const *Parser::MissingBracketException::what() const throw() { return ("Missing a bracket after 'server' or 'location' directive."); }
 char const *Parser::OutsideServerException::what() const throw() { return ("Some directive is outside a server definition."); }
 char const *Parser::LonelyBracketException::what() const throw() { return ("Lonely opening bracket(s)."); }
 char const *Parser::EmbeddedServersException::what() const throw() { return ("Found a server in another server."); }
 char const *Parser::NoSuchDirectiveException::what() const throw() { return ("Unknown directive in the file."); }
 char const *Parser::FailedToOpenException::what() const throw() { return ("Failed to open <config_file>."); }
-char const *Parser::WrongValue_AutoIndexException::what() const throw() { return ("Wrong value for autoindex."); }
-char const *Parser::NonValidRedirectionException::what() const throw() { return ("Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;)."); }
-char const *Parser::NonValidRootException::what() const throw() { return ("Non valid root\nUsage: root <path>; (you probably forgot a \";\")."); }
-char const *Parser::NonValidIndexException::what() const throw() { return ("Non valid index\nUsage: index <file_name>; (you probably forgot a \";\")."); }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -52,7 +47,6 @@ Parser&	Parser::operator=(const Parser &x) {
 		_ip = x.getIP();
 		_port = x.getPort();
 		_serverName = x.getServerName();
-		_root = x.getRoot();
 		_errorPage = x.getErrorPage();
 		_maxBodySize = x.getMaxBodySize();
 		_location = x.getLocation();
@@ -106,46 +100,6 @@ size_t	Parser::dirListen(vec_str::iterator it, vec_str::iterator vend) {
 			break ;
 	}
 	return ret;
-}
-
-/**
- * dirRoot(): sets root from parsing (called by interpret())
-**/
-size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
-	std::string	root;
-	size_t		pos;
-	size_t		posend;
-
-	if ((*it).find(";") == std::string::npos && *(it + 1) != ";")
-		throw NonValidRootException();
-	//remove the trailing ';'
-	pos = (*it).find_first_not_of(";");
-	posend = std::min((*it).find_first_of(";", pos), (*it).length());
-	root = (*it).substr(pos, posend - pos);
-
-	setRoot(root);
-	(void)vend;
-	return 2;
-}
-
-/**
- * dirIndex(): sets index from parsing (called by interpret())
-**/
-size_t	Parser::dirIndex(vec_str::iterator it, vec_str::iterator vend) {
-	std::string	index;
-	size_t		pos;
-	size_t		posend;
-
-	if ((*it).find(";") == std::string::npos && *(it + 1) != ";")
-		throw NonValidIndexException();
-	//remove the trailing ';'
-	pos = (*it).find_first_not_of(";");
-	posend = std::min((*it).find_first_of(";", pos), (*it).length());
-	index = (*it).substr(pos, posend - pos);
-
-	setIndex(index);
-	(void)vend;
-	return 2;
 }
 
 /**
@@ -207,35 +161,6 @@ size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 			return ret;
 	}
 	return ret;
-}
-
-/**
- * dirAutoIndex(): sets autoindex (called by interpret())
-**/
-size_t	Parser::dirAutoIndex(vec_str::iterator it, vec_str::iterator vend) {
-	if (*it == "on;")
-		setAutoIndex(true);
-	else if (*it == "off;")
-		setAutoIndex(false);
-	else
-		throw	WrongValue_AutoIndexException();
-	(void)vend;
-	return 2;
-}
-
-/**
- * dirRedirection(): sets redirection (called by interpret())
-**/
-size_t	Parser::dirRedirection(vec_str::iterator it, vec_str::iterator vend) {
-	size_t code = static_cast<size_t>(std::atoi((*it).c_str()));
-	if (code < 300 || code > 308)
-		throw NonValidRedirectionException();
-	else if ((*(it + 1)).find(";") == std::string::npos && *(it + 2) != ";")
-		throw NonValidRedirectionException();
-	_redirection.first = code;
-	_redirection.second = *(it + 1);
-	(void)vend;
-	return 3;
 }
 
 /**
@@ -308,6 +233,9 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	dir.push_back(std::make_pair("root", &Location::dirRoot));
 	dir.push_back(std::make_pair("methods", &Location::dirMethods));
 	dir.push_back(std::make_pair("error_page", &Location::dirErrorPage));
+	dir.push_back(std::make_pair("autoindex", &Location::dirAutoIndex));
+	dir.push_back(std::make_pair("index", &Location::dirIndex));
+	dir.push_back(std::make_pair("return", &Location::dirRedirection));
 	
 	std::vector<std::pair<std::string, Location::methodPointer> >::iterator idir;
 	while (it != vend) {
@@ -347,7 +275,6 @@ void	Parser::clear() {
 	// just keep the first file (defaultErrorPage.html)
 	_errorPage.erase(_errorPage.begin() + 1, _errorPage.end());
 	_location.clear();
-	_autoIndex = true;
 }
 
 /**
@@ -361,9 +288,8 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 	_serverNb++;
 	_in_server = true;
 
-	// need _serverNb > 1 because the "server {}" directive comes up first (when _serverNb == 0)
-	// so we need to end the parsing of the first server before sending the first server to cgi.
-	if (_serverNb > 1) {
+	// since 'server' directive comes up first, need to iterate once before saving it.
+	if (_serverNb > 0) {
 		Server& server = dynamic_cast<Server&>(*this);
 		// testing
 		server.print_serv();
@@ -395,11 +321,7 @@ void	Parser::interpreter(vec_str tok) {
 	dir.push_back(std::make_pair("location", &Parser::dirLocation));
 	dir.push_back(std::make_pair("server", &Parser::dirServer));
 	dir.push_back(std::make_pair("listen", &Parser::dirListen));
-	dir.push_back(std::make_pair("root", &Parser::dirRoot));
-	dir.push_back(std::make_pair("index", &Parser::dirIndex));
 	dir.push_back(std::make_pair("client_max_body_size", &Parser::dirMaxBodySize));
-	dir.push_back(std::make_pair("autoindex", &Parser::dirAutoIndex));
-	dir.push_back(std::make_pair("return", &Parser::dirRedirection));
 	dir.push_back(std::make_pair("server_name", &Parser::dirServerName));
 	dir.push_back(std::make_pair("error_page", &Parser::dirErrorPage));
 	dir.push_back(std::make_pair("{", &Parser::dirOpen));

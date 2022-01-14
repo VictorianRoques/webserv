@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 13:20:32 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 15:35:25 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,40 +65,29 @@ class Server {
 		std::string						_root;
 		std::vector<std::string>		_errorPage;
 		size_t							_maxBodySize;
-		bool							_autoIndex;
 		std::vector<Location *>			_location;
-		size_t							_serverNb;
-		std::pair<size_t, std::string>	_redirection;
-		std::string						_index;
+		int								_serverNb;
 
 		// getters
 	public:
 		std::string						getIP() const;
 		std::vector<size_t>				getPort() const;
 		std::vector<std::string>		getServerName() const;
-		std::string						getRoot() const;
 		std::vector<std::string>		getErrorPage() const;
 		size_t							getMaxBodySize() const;
-		bool							getAutoIndex() const;
 		std::vector<Location *>			getLocation() const;
 		size_t							getServerNb() const;
-		std::pair<size_t, std::string>	getRedirection() const;
-		std::string						getIndex() const;
 
 		//setters
 	protected:
 		void	setIP(std::string ip);
 		void	setPort(std::vector<size_t> port);
 		void	setServerName(vec_str serverName);
-		void	setRoot(std::string root);
 		void	setErrorPage(vec_str errorPage);
 		void	setMaxBodySize(size_t maxBodySize);
 		void	setMaxBodySize(std::string maxBodySize);
-		void	setAutoIndex(bool autoIndex);
 		void	setLocation(std::vector<Location *> location);
 		void	setServerNb(size_t serverNb);
-		void	setRedirection(std::pair<size_t, std::string> redirection);
-		void	setIndex(std::string index);
 
 		// adding parsed server
 	public:

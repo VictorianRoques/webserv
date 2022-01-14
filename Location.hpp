@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 13:10:14 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 15:24:31 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,19 +37,25 @@ class Location {
 
 	// directives
 	private:
-		std::string	_matchModifier;
-		std::string	_locationMatch;
-		std::string	_root;
-		vec_str		_methods;
-		vec_str		_errorPage;
+		std::string						_matchModifier;
+		std::string						_locationMatch;
+		std::string						_root;
+		vec_str							_methods;
+		vec_str							_errorPage;
+		std::pair<size_t, std::string>	_redirection;
+		std::string						_index;
+		bool							_autoIndex;
 
 		// getters
 	public:
-		std::string getMatchModifier() const;
-		std::string getLocationMatch() const;
-		std::string getRoot() const;
-		vec_str		getMethods() const;
-		vec_str		getErrorPage() const;
+		std::string 					getMatchModifier() const;
+		std::string						getLocationMatch() const;
+		std::string						getRoot() const;
+		vec_str							getMethods() const;
+		vec_str							getErrorPage() const;
+		std::pair<size_t, std::string>	getRedirection() const;
+		std::string						getIndex() const;
+		bool							getAutoIndex() const;
 
 		//setters
 	public:
@@ -58,22 +64,50 @@ class Location {
 		void	setRoot(std::string root);
 		void	setMethods(vec_str methods);
 		void	setErrorPage(vec_str errorPage);
+		void	setRedirection(std::pair<size_t, std::string> redirection);
+		void	setIndex(std::string index);
+		void	setAutoIndex(bool autoIndex);
 
 		// parsing helpers
 	public:
 		size_t	dirRoot(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirMethods(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirErrorPage(vec_str::iterator it, vec_str::iterator vend);
+		size_t	dirAutoIndex(vec_str::iterator it, vec_str::iterator vend);
+		size_t	dirRedirection(vec_str::iterator it, vec_str::iterator vend);
+		size_t	dirIndex(vec_str::iterator it, vec_str::iterator vend);
 
 		// utils
 	public:
 		void	print_loc();
 
-		// EXCEPTION
+		// EXCEPTIONS
+
 		class WrongMethodException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};
+		
+		class WrongValue_AutoIndexException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+		
+		class NonValidRedirectionException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class NonValidRootException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class NonValidIndexException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
 };
 
 #endif
