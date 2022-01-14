@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 15:34:57 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 16:33:59 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,31 +236,35 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	dir.push_back(std::make_pair("autoindex", &Location::dirAutoIndex));
 	dir.push_back(std::make_pair("index", &Location::dirIndex));
 	dir.push_back(std::make_pair("return", &Location::dirRedirection));
+	dir.push_back(std::make_pair("cgi_handler", &Location::dirCgiHandler));
 	
 	std::vector<std::pair<std::string, Location::methodPointer> >::iterator idir;
 	while (it != vend) {
 
-		idir = dir.begin();
-		iter = 0;
-		for (; idir < dir.end(); idir++) {
-			if (*it == idir->first) {
-				mp = idir->second;
-				iter = (location->*mp)(it + 1, vend);
-				ret += iter;
-				it += iter;
-				break ;
+		if (*it == ";")
+			it++;
+		else {
+			idir = dir.begin();
+//			iter = 0;
+			for (; idir < dir.end(); idir++) {
+				if (*it == idir->first) {
+					mp = idir->second;
+					iter = (location->*mp)(it + 1, vend);
+					ret += iter;
+					it += iter;
+					break ;
+				}
 			}
-
-
-		}
-		// meets a '}' == end of the location directive
-		if (it->find("}") != std::string::npos) {
-			this->_location.push_back(location);
-			return ret;
-		}
-
-		if (iter == 0) {
-			throw NoSuchDirectiveException();
+			// meets a '}' == end of the location directive
+			if (it->find("}") != std::string::npos) {
+				this->_location.push_back(location);
+				return ret;
+			}
+	
+			if (idir == dir.end()) {
+				std::cout << "dirLocation(): Unknown directive: " << *it << std::endl;
+				throw NoSuchDirectiveException();
+			}
 		}
 	}
 	return ret;
@@ -336,17 +340,21 @@ void	Parser::interpreter(vec_str tok) {
 		if (*itok != "server" && _in_server == false)
 			throw OutsideServerException();
 
-		idir = dir.begin();
-		for (; idir < dir.end(); idir++) {
-			if (*itok == idir->first) {
-				mp = idir->second;
-				itok += (this->*mp)(itok + 1, tok.end());
-				break ;
+		if (*itok == ";")
+			itok++;
+		else {
+			idir = dir.begin();
+			for (; idir < dir.end(); idir++) {
+				if (*itok == idir->first) {
+					mp = idir->second;
+					itok += (this->*mp)(itok + 1, tok.end());
+					break ;
+				}
 			}
-		}
-		if (idir == dir.end()) {
-			std::cout << "Unknown directive: " << *itok << std::endl;
-			throw NoSuchDirectiveException();
+			if (idir == dir.end()) {
+				std::cout << "Interpreter(): Unknown directive: " << *itok << std::endl;
+				throw NoSuchDirectiveException();
+			}
 		}
 	}
 	dirServer(itok, itok);

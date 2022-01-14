@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 15:42:25 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 16:36:22 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ char const *Location::WrongValue_AutoIndexException::what() const throw() { retu
 char const *Location::NonValidRedirectionException::what() const throw() { return ("Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;)."); }
 char const *Location::NonValidRootException::what() const throw() { return ("Non valid root\nUsage: root <path>; (you probably forgot a \";\")."); }
 char const *Location::NonValidIndexException::what() const throw() { return ("Non valid index\nUsage: index <file_name>; (you probably forgot a \";\")."); }
+char const *Location::NonValidCgiHandlerException::what() const throw() { return ("Non valid CGI Handler\nUsage: cgi_handler <file_extension> <CGI binary>; (you probably forgot a \";\")."); }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -44,6 +45,7 @@ Location&	Location::operator=(const Location &x) {
 		_redirection = x.getRedirection();
 		_autoIndex = x.getAutoIndex();
 		_index = x.getIndex();
+		_cgiHandler = x.getCgiHandler();
 	}
 	return *this;
 }
@@ -52,14 +54,15 @@ Location&	Location::operator=(const Location &x) {
 //				GETTERS				  //
 /**************************************/
 
-std::string						Location::getMatchModifier() const { return _matchModifier; }
-std::string						Location::getLocationMatch() const { return _locationMatch; }
-std::string						Location::getRoot() const { return _root; }
-vec_str							Location::getMethods() const { return _methods; }
-vec_str							Location::getErrorPage() const { return _errorPage; }
-std::pair<size_t, std::string>	Location::getRedirection() const { return _redirection; }
-std::string						Location::getIndex() const { return _index; }
-bool							Location::getAutoIndex() const { return _autoIndex; }
+std::string							Location::getMatchModifier() const { return _matchModifier; }
+std::string							Location::getLocationMatch() const { return _locationMatch; }
+std::string							Location::getRoot() const { return _root; }
+vec_str								Location::getMethods() const { return _methods; }
+vec_str								Location::getErrorPage() const { return _errorPage; }
+std::pair<size_t, std::string>		Location::getRedirection() const { return _redirection; }
+std::string							Location::getIndex() const { return _index; }
+bool								Location::getAutoIndex() const { return _autoIndex; }
+std::pair<std::string, std::string>	Location::getCgiHandler() const { return _cgiHandler; }
 
 /**************************************/
 //				GETTERS				  //
@@ -73,6 +76,7 @@ void	Location::setErrorPage(vec_str errorPage) { _errorPage = errorPage; }
 void	Location::setRedirection(std::pair<size_t, std::string> redirection) { _redirection = redirection; }
 void	Location::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
 void	Location::setIndex(std::string index) { _index = index; }
+void	Location::setCgiHandler(std::pair<std::string, std::string> cgiHandler) { _cgiHandler = cgiHandler; }
 
 /**************************************/
 //			PARSING HELPERS			  //
@@ -140,10 +144,23 @@ size_t	Location::dirRedirection(vec_str::iterator it, vec_str::iterator vend) {
 
 	if (code < 300 || code > 308)
 		throw NonValidRedirectionException();
-	else if ((*(it + 1)).find(";") == std::string::npos && *(it + 2) != ";")
+	else if (it->find(";") != std::string::npos || ((*(it + 1)).find(";") == std::string::npos && *(it + 2) != ";"))
 		throw NonValidRedirectionException();
 	_redirection.first = code;
 	_redirection.second = uri.substr(0, pos);
+	(void)vend;
+	return 3;
+}
+
+/**
+ * dirCgiHandler(): sets cgiHandler (called by dirLocation()) (to execute CGI based on certain file extension)
+**/
+size_t	Location::dirCgiHandler(vec_str::iterator it, vec_str::iterator vend) {
+	if (it->find(";") != std::string::npos || ((it + 1)->find(";") == std::string::npos && *(it + 2) != ";"))
+		throw NonValidCgiHandlerException();
+	_cgiHandler.first = *it;
+	size_t	pos = (*(it + 1)).find(";");
+	_cgiHandler.second = (*(it + 1)).substr(0, pos);
 	(void)vend;
 	return 3;
 }
@@ -224,5 +241,8 @@ void	Location::print_loc() {
 		std::cout << COLOR_LOC <<  "   Status code: " << NC << _redirection.first << std::endl 
 				<< COLOR_LOC << "   URI: " << NC << _redirection.second << std::endl;
 	}
+	std::cout << COLOR_LOC << "CGI handler: " << NC << std::endl;
+	std::cout << COLOR_LOC <<  "   File extension: " << NC << _cgiHandler.first << std::endl; 
+	std::cout << COLOR_LOC << "   CGI: " << NC << _cgiHandler.second << std::endl;
 	std::cout << std::endl;
 }

@@ -99,7 +99,7 @@ wont be using regexp):
 
 	∗ default file to answer if the request is a directory (DIR: index)
 
-	∗ execute CGI based on certain file extension (for example .php) (check_file_extension() in Parser.cpp)
+	∗ execute CGI based on certain file extension (for example .php) (check_file_extension() in Parser.cpp or DIR: cgi_handler ?)
 		· You wonder what a CGI is ?
 		· Because you won’t call the CGI directly use the full path as PATH_INFO
 		· Just remembers that for chunked request, your server needs to unchunked it and the CGI will expect EOF as end of the body.

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 15:24:31 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 16:25:42 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,25 +37,27 @@ class Location {
 
 	// directives
 	private:
-		std::string						_matchModifier;
-		std::string						_locationMatch;
-		std::string						_root;
-		vec_str							_methods;
-		vec_str							_errorPage;
-		std::pair<size_t, std::string>	_redirection;
-		std::string						_index;
-		bool							_autoIndex;
+		std::string							_matchModifier;
+		std::string							_locationMatch;
+		std::string							_root;
+		vec_str								_methods;
+		vec_str								_errorPage;
+		std::pair<size_t, std::string>		_redirection;
+		std::string							_index;
+		bool								_autoIndex;
+		std::pair<std::string, std::string>	_cgiHandler;
 
 		// getters
 	public:
-		std::string 					getMatchModifier() const;
-		std::string						getLocationMatch() const;
-		std::string						getRoot() const;
-		vec_str							getMethods() const;
-		vec_str							getErrorPage() const;
-		std::pair<size_t, std::string>	getRedirection() const;
-		std::string						getIndex() const;
-		bool							getAutoIndex() const;
+		std::string 						getMatchModifier() const;
+		std::string							getLocationMatch() const;
+		std::string							getRoot() const;
+		vec_str								getMethods() const;
+		vec_str								getErrorPage() const;
+		std::pair<size_t, std::string>		getRedirection() const;
+		std::string							getIndex() const;
+		bool								getAutoIndex() const;
+		std::pair<std::string, std::string>	getCgiHandler() const;
 
 		//setters
 	public:
@@ -67,6 +69,7 @@ class Location {
 		void	setRedirection(std::pair<size_t, std::string> redirection);
 		void	setIndex(std::string index);
 		void	setAutoIndex(bool autoIndex);
+		void	setCgiHandler(std::pair<std::string, std::string> cgiHandler);
 
 		// parsing helpers
 	public:
@@ -76,6 +79,7 @@ class Location {
 		size_t	dirAutoIndex(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirRedirection(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirIndex(vec_str::iterator it, vec_str::iterator vend);
+		size_t	dirCgiHandler(vec_str::iterator it, vec_str::iterator vend);
 
 		// utils
 	public:
@@ -104,6 +108,11 @@ class Location {
 		};
 
 		class NonValidIndexException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class NonValidCgiHandlerException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};
