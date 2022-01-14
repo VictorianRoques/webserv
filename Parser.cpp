@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 13:07:04 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 13:28:23 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ char const *Parser::FailedToOpenException::what() const throw() { return ("Faile
 char const *Parser::WrongValue_AutoIndexException::what() const throw() { return ("Wrong value for autoindex."); }
 char const *Parser::NonValidRedirectionException::what() const throw() { return ("Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;)."); }
 char const *Parser::NonValidRootException::what() const throw() { return ("Non valid root\nUsage: root <path>; (you probably forgot a \";\")."); }
+char const *Parser::NonValidIndexException::what() const throw() { return ("Non valid index\nUsage: index <file_name>; (you probably forgot a \";\")."); }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -123,6 +124,26 @@ size_t	Parser::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	root = (*it).substr(pos, posend - pos);
 
 	setRoot(root);
+	(void)vend;
+	return 2;
+}
+
+/**
+ * dirIndex(): sets index from parsing (called by interpret())
+**/
+size_t	Parser::dirIndex(vec_str::iterator it, vec_str::iterator vend) {
+	std::string	index;
+	size_t		pos;
+	size_t		posend;
+
+	if ((*it).find(";") == std::string::npos && *(it + 1) != ";")
+		throw NonValidIndexException();
+	//remove the trailing ';'
+	pos = (*it).find_first_not_of(";");
+	posend = std::min((*it).find_first_of(";", pos), (*it).length());
+	index = (*it).substr(pos, posend - pos);
+
+	setIndex(index);
 	(void)vend;
 	return 2;
 }
@@ -375,6 +396,7 @@ void	Parser::interpreter(vec_str tok) {
 	dir.push_back(std::make_pair("server", &Parser::dirServer));
 	dir.push_back(std::make_pair("listen", &Parser::dirListen));
 	dir.push_back(std::make_pair("root", &Parser::dirRoot));
+	dir.push_back(std::make_pair("index", &Parser::dirIndex));
 	dir.push_back(std::make_pair("client_max_body_size", &Parser::dirMaxBodySize));
 	dir.push_back(std::make_pair("autoindex", &Parser::dirAutoIndex));
 	dir.push_back(std::make_pair("return", &Parser::dirRedirection));
@@ -401,7 +423,7 @@ void	Parser::interpreter(vec_str tok) {
 			}
 		}
 		if (idir == dir.end()) {
-			std::cout << "IDIR = " << *itok << std::endl;
+			std::cout << "Unknown directive: " << *itok << std::endl;
 			throw NoSuchDirectiveException();
 		}
 	}

@@ -97,7 +97,7 @@ wont be using regexp):
 	
 	∗ turn on or off directory listing (DIR: autoindex)
 
-	∗ default file to answer if the request is a directory (???)
+	∗ default file to answer if the request is a directory (DIR: index)
 
 	∗ execute CGI based on certain file extension (for example .php) (check_file_extension() in Parser.cpp)
 		· You wonder what a CGI is ?

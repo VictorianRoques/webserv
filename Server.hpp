@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 12:06:20 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 13:20:32 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ class Server {
 		std::vector<Location *>			_location;
 		size_t							_serverNb;
 		std::pair<size_t, std::string>	_redirection;
+		std::string						_index;
 
 		// getters
 	public:
@@ -82,6 +83,7 @@ class Server {
 		std::vector<Location *>			getLocation() const;
 		size_t							getServerNb() const;
 		std::pair<size_t, std::string>	getRedirection() const;
+		std::string						getIndex() const;
 
 		//setters
 	protected:
@@ -96,6 +98,7 @@ class Server {
 		void	setLocation(std::vector<Location *> location);
 		void	setServerNb(size_t serverNb);
 		void	setRedirection(std::pair<size_t, std::string> redirection);
+		void	setIndex(std::string index);
 
 		// adding parsed server
 	public:

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 13:02:58 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 13:22:30 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ Server&	Server::operator=(const Server &x) {
 		_location = x.getLocation();
 		_serverNb = x.getServerNb();
 		_redirection = x.getRedirection();
+		_index = x.getIndex();
 	}
 	return *this;
 }
@@ -61,6 +62,7 @@ bool							Server::getAutoIndex() const { return _autoIndex; }
 std::vector<Location *>			Server::getLocation() const { return _location; }
 size_t							Server::getServerNb() const { return _serverNb; }
 std::pair<size_t, std::string>	Server::getRedirection() const { return _redirection; }
+std::string						Server::getIndex() const { return _index; }
 
 /**************************************/
 //				SETTERS				  //
@@ -89,6 +91,7 @@ void	Server::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
 void	Server::setLocation(std::vector<Location *> location) { _location = location; }
 void	Server::setServerNb(size_t serverNb) { _serverNb = serverNb; }
 void	Server::setRedirection(std::pair<size_t, std::string> redirection) { _redirection = redirection; }
+void	Server::setIndex(std::string index) { _index = index; }
 
 /**************************************/
 //			SERVER PARSED			  //
@@ -109,6 +112,7 @@ void	Server::print_serv() {
 	std::cout << COLOR_SERV << "IP: " << NC << _ip << std::endl;
 	std::cout << COLOR_SERV << "Port: " << NC; ft_putvec(_port, " ");
 	std::cout << COLOR_SERV << "Root: " << NC << _root << std::endl;
+	std::cout << COLOR_SERV << "Index (reponse file if request is directory): " << NC << _index << std::endl;
 	std::cout << COLOR_SERV << "Error Page: " << NC; ft_putvec(_errorPage, " ");
 	std::cout << COLOR_SERV << "Client_Max_Body_Size: " << NC << _maxBodySize << std::endl;
 	std::cout << COLOR_SERV << "AutoIndex: " << NC << (_autoIndex ? "on" : "off") << std::endl;
