@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/13 17:13:59 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 13:10:14 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Location {
 		std::string	_locationMatch;
 		std::string	_root;
 		vec_str		_methods;
+		vec_str		_errorPage;
 
 		// getters
 	public:
@@ -48,18 +49,21 @@ class Location {
 		std::string getLocationMatch() const;
 		std::string getRoot() const;
 		vec_str		getMethods() const;
+		vec_str		getErrorPage() const;
 
 		//setters
 	public:
-		void	setMatchModifier(std::string _matchModifier);
-		void	setLocationMatch(std::string _locationMatch);
+		void	setMatchModifier(std::string matchModifier);
+		void	setLocationMatch(std::string locationMatch);
 		void	setRoot(std::string root);
-		void	setMethods(vec_str _methods);
+		void	setMethods(vec_str methods);
+		void	setErrorPage(vec_str errorPage);
 
 		// parsing helpers
 	public:
 		size_t	dirRoot(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirMethods(vec_str::iterator it, vec_str::iterator vend);
+		size_t	dirErrorPage(vec_str::iterator it, vec_str::iterator vend);
 
 		// utils
 	public:

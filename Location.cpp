@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 11:40:24 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 13:10:16 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ Location&	Location::operator=(const Location &x) {
 	if (this != &x) {
 		_root = x.getRoot();
 		_methods = x.getMethods();
+		_errorPage = x.getErrorPage();
 	}
 	return *this;
 }
@@ -47,6 +48,7 @@ std::string	Location::getMatchModifier() const { return _matchModifier; }
 std::string	Location::getLocationMatch() const { return _locationMatch; }
 std::string	Location::getRoot() const { return _root; }
 vec_str		Location::getMethods() const { return _methods; }
+vec_str		Location::getErrorPage() const { return _errorPage; }
 
 /**************************************/
 //				GETTERS				  //
@@ -56,6 +58,7 @@ void	Location::setMatchModifier(std::string matchModifier) { _matchModifier = ma
 void	Location::setLocationMatch(std::string locationMatch) { _locationMatch = locationMatch; }
 void	Location::setRoot(std::string root) { _root = root; }
 void	Location::setMethods(vec_str methods) { _methods = methods; }
+void	Location::setErrorPage(vec_str errorPage) { _errorPage = errorPage; }
 
 /**************************************/
 //			PARSING HELPERS			  //
@@ -74,6 +77,29 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	setRoot(root);
 	(void)vend;
 	return 2;
+}
+
+size_t	Location::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
+	size_t	ret = 1;
+	std::string	errorPage;
+	size_t		pos;
+	size_t		posend;
+
+	for (; it != vend; it++) {
+		//remove the trailing ';'
+		pos = (*it).find_first_not_of(";");
+		posend = std::min((*it).find_first_of(";", pos), (*it).length());
+		errorPage = (*it).substr(pos, posend - pos);
+
+		// set ErrorPage
+		_errorPage.push_back(errorPage);
+		ret++;
+
+		// met a ';' == end of the directive
+		if (it->find(";") != std::string::npos)
+			return ret;
+	}
+	return ret;
 }
 
 size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
@@ -110,12 +136,11 @@ size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
 /**************************************/
 
 void	Location::print_loc() {
-
-	
 	std::cout << std::endl;
 	std::cout << COLOR_LOC << "Match Modifier: " << NC << _matchModifier << std::endl;
 	std::cout << COLOR_LOC << "Location Match: " << NC << _locationMatch << std::endl;
 	std::cout << COLOR_LOC << "Root: " << NC << _root << std::endl;
+	std::cout << COLOR_LOC << "Error Page: " << NC; ft_putvec(_errorPage, " ");
 	std::cout << COLOR_LOC << "Method(s): " << NC; ft_putvec(_methods, " ");
 	std::cout << std::endl;
 }

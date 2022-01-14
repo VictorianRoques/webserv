@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 12:45:52 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 13:07:04 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,6 +286,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 
 	dir.push_back(std::make_pair("root", &Location::dirRoot));
 	dir.push_back(std::make_pair("methods", &Location::dirMethods));
+	dir.push_back(std::make_pair("error_page", &Location::dirErrorPage));
 	
 	std::vector<std::pair<std::string, Location::methodPointer> >::iterator idir;
 	while (it != vend) {
