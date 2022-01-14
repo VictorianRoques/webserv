@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 16:36:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 16:48:19 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,14 @@
 
 char const *Location::WrongMethodException::what() const throw() { return ("Wrong method."); }
 char const *Location::WrongValue_AutoIndexException::what() const throw() { return ("Wrong value for autoindex."); }
-char const *Location::NonValidRedirectionException::what() const throw() { return ("Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;)."); }
 char const *Location::NonValidRootException::what() const throw() { return ("Non valid root\nUsage: root <path>; (you probably forgot a \";\")."); }
 char const *Location::NonValidIndexException::what() const throw() { return ("Non valid index\nUsage: index <file_name>; (you probably forgot a \";\")."); }
-char const *Location::NonValidCgiHandlerException::what() const throw() { return ("Non valid CGI Handler\nUsage: cgi_handler <file_extension> <CGI binary>; (you probably forgot a \";\")."); }
+char const *Location::NonValidCgiHandlerException::what() const throw() {
+	return ("Non valid CGI Handler\nUsage: cgi_handler <file_extension> <CGI binary>; (you probably forgot a \";\").");
+}
+char const *Location::NonValidRedirectionException::what() const throw() {
+	return ("Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;).");
+}
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -46,6 +50,7 @@ Location&	Location::operator=(const Location &x) {
 		_autoIndex = x.getAutoIndex();
 		_index = x.getIndex();
 		_cgiHandler = x.getCgiHandler();
+		_uploadDest = x.getUploadDest();
 	}
 	return *this;
 }
@@ -63,6 +68,7 @@ std::pair<size_t, std::string>		Location::getRedirection() const { return _redir
 std::string							Location::getIndex() const { return _index; }
 bool								Location::getAutoIndex() const { return _autoIndex; }
 std::pair<std::string, std::string>	Location::getCgiHandler() const { return _cgiHandler; }
+std::string							Location::getUploadDest() const { return _uploadDest; }
 
 /**************************************/
 //				GETTERS				  //
@@ -77,6 +83,7 @@ void	Location::setRedirection(std::pair<size_t, std::string> redirection) { _red
 void	Location::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
 void	Location::setIndex(std::string index) { _index = index; }
 void	Location::setCgiHandler(std::pair<std::string, std::string> cgiHandler) { _cgiHandler = cgiHandler; }
+void	Location::setUploadDest(std::string uploadDest) { _uploadDest = uploadDest; }
 
 /**************************************/
 //			PARSING HELPERS			  //
@@ -96,6 +103,24 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	root = (*it).substr(pos, posend - pos);
 
 	setRoot(root);
+	(void)vend;
+	return 2;
+}
+
+/**
+ * dirUploadDest(): sets uploadDest (called by dirLocation())
+**/
+size_t	Location::dirUploadDest(vec_str::iterator it, vec_str::iterator vend) {
+	std::string	uploadDest;
+	size_t		pos;
+	size_t		posend;
+
+	//remove the trailing ';'
+	pos = (*it).find_first_not_of(";");
+	posend = std::min((*it).find_first_of(";", pos), (*it).length());
+	uploadDest = (*it).substr(pos, posend - pos);
+
+	setUploadDest(uploadDest);
 	(void)vend;
 	return 2;
 }
@@ -244,5 +269,6 @@ void	Location::print_loc() {
 	std::cout << COLOR_LOC << "CGI handler: " << NC << std::endl;
 	std::cout << COLOR_LOC <<  "   File extension: " << NC << _cgiHandler.first << std::endl; 
 	std::cout << COLOR_LOC << "   CGI: " << NC << _cgiHandler.second << std::endl;
+	std::cout << COLOR_LOC << "Upload destination directory: " << NC << _uploadDest << std::endl;
 	std::cout << std::endl;
 }

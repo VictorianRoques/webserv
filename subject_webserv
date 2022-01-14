@@ -110,7 +110,7 @@ wont be using regexp):
 		· your server should work with one CGI (php-cgi, python...)
 
 	∗ make the route able to accept uploaded files and configure where it should
-		be saved (DIR: ?)
+		be saved (DIR: upload_dest)
 
 You must provide some configuration files and default basic files to test/demonstrate
 every feature is working during evaluation.

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 16:25:42 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 16:47:10 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Location {
 		std::string							_index;
 		bool								_autoIndex;
 		std::pair<std::string, std::string>	_cgiHandler;
+		std::string							_uploadDest;
 
 		// getters
 	public:
@@ -58,6 +59,7 @@ class Location {
 		std::string							getIndex() const;
 		bool								getAutoIndex() const;
 		std::pair<std::string, std::string>	getCgiHandler() const;
+		std::string							getUploadDest() const;
 
 		//setters
 	public:
@@ -70,6 +72,7 @@ class Location {
 		void	setIndex(std::string index);
 		void	setAutoIndex(bool autoIndex);
 		void	setCgiHandler(std::pair<std::string, std::string> cgiHandler);
+		void	setUploadDest(std::string uploadDest);
 
 		// parsing helpers
 	public:
@@ -80,6 +83,7 @@ class Location {
 		size_t	dirRedirection(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirIndex(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirCgiHandler(vec_str::iterator it, vec_str::iterator vend);
+		size_t	dirUploadDest(vec_str::iterator it, vec_str::iterator vend);
 
 		// utils
 	public:

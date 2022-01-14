@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 16:33:59 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/14 16:49:04 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,6 +237,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	dir.push_back(std::make_pair("index", &Location::dirIndex));
 	dir.push_back(std::make_pair("return", &Location::dirRedirection));
 	dir.push_back(std::make_pair("cgi_handler", &Location::dirCgiHandler));
+	dir.push_back(std::make_pair("upload_dest", &Location::dirUploadDest));
 	
 	std::vector<std::pair<std::string, Location::methodPointer> >::iterator idir;
 	while (it != vend) {
