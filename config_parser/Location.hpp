@@ -6,14 +6,14 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 16:47:10 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/18 14:53:02 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LOCATION_HPP
 # define LOCATION_HPP
 
-# include "utils.hpp"
+# include "../utils/utils.hpp"
 
 class Location {
 

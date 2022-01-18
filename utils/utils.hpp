@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 12:23:51 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/18 15:44:10 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <string>
 # include <fstream>
 # include <vector>
+# include <map>
 
 /**
  * COLORS
@@ -35,6 +36,7 @@
 
 # define COLOR_SERV CYAN
 # define COLOR_LOC 	PURPLE
+# define COLOR_REQ 	YELLOW
 
 /**
  * type simplification (makes the code 'lighter')
@@ -52,5 +54,11 @@ void	ft_putvec(std::vector<T> v, std::string separator) {
 		std::cout << "<" << *it << ">" << separator;
 	std::cout << std::endl;
 }
+
+/**
+ * prototypes
+**/
+vec_str ft_split(std::string line, std::string delim);
+std::map<std::string, std::string>	ft_map_split(std::string line, std::string delim);
 
 #endif

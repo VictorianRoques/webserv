@@ -6,11 +6,10 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 16:48:19 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/18 14:53:05 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "utils.hpp"
 #include "Location.hpp"
 
 /**************************************/
@@ -259,7 +258,7 @@ void	Location::print_loc() {
 	std::cout << COLOR_LOC << "Root: " << NC << _root << std::endl;
 	std::cout << COLOR_LOC << "Error Page: " << NC; ft_putvec(_errorPage, " ");
 	std::cout << COLOR_LOC << "AutoIndex: " << NC << (_autoIndex ? "on" : "off") << std::endl;
-	std::cout << COLOR_LOC << "Index (reponse file if request is directory): " << NC << _index << std::endl;
+	std::cout << COLOR_LOC << "Index (response file if request is directory): " << NC << _index << std::endl;
 	std::cout << COLOR_LOC << "Method(s): " << NC; ft_putvec(_methods, " ");
 	std::cout << COLOR_LOC << "Redirection: " << NC << (_redirection.first ? "Yes" : "No") << std::endl;
    	if (_redirection.first) {

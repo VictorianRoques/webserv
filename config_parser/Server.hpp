@@ -6,14 +6,14 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/14 15:35:25 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/18 14:52:38 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "utils.hpp"
+# include "../utils/utils.hpp"
 # include "Location.hpp" //--> alternative: 'Location' is a nested class of 'Server'
 # include "Meta.hpp"
 
