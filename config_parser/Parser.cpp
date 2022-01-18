@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 18:10:46 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/18 18:35:54 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ size_t	Parser::dirListen(vec_str::iterator it, vec_str::iterator vend) {
 
 		//listen IP:port
 		if (pos != std::string::npos) {
-			setIP(it->substr(0, pos - 1));
+			setIP(it->substr(0, pos));
 			addPort(it->substr(pos + 1, end));
 		}
 		//listen port
