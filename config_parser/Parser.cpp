@@ -6,13 +6,14 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 14:53:16 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/18 18:10:46 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
+std::vector<Server> servers_g;
 
 /**************************************/
 //           EXCEPTIONS               //
@@ -283,7 +284,7 @@ void	Parser::clear() {
 }
 
 /**
- * dirServer(): add the new server to 'meta_g' class (called by interpret())
+ * dirServer(): add the new server to 'servers_g' vector (called by interpret())
 **/
 size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 
@@ -293,11 +294,11 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 	_serverNb++;
 	_in_server = true;
 
-	// since 'server' directive comes up first, need to iterate once before saving it.
+	// since 'server' directive comes up first, need to iterate once before saving it into servers_g.
 	if (_serverNb > 0) {
 		Server& server = dynamic_cast<Server&>(*this);
-		// testing
-		server.print_serv();
+		// add Server to servers_g
+		servers_g.push_back(server);
 		// clearing Parser class
 		this->clear();
 	}
@@ -336,8 +337,6 @@ void	Parser::interpreter(vec_str tok) {
 	std::vector<std::pair<std::string, methodPointer> >::iterator idir;
 	while (itok != tok.end()) {
 
-		//TESTING ******************
-//		std::cout << "ITOK ORIGIN = " << *itok << " and _in_server = " << (_in_server == true ? "true" : "false") << " and in location = " << (_in_location == true ? "true" : "false") << std::endl;
 		if (*itok != "server" && _in_server == false)
 			throw OutsideServerException();
 
@@ -428,6 +427,7 @@ bool	check_file_extension(char *file_name) {
 int		main(int ac, char **av) {
 
 	Parser	parser;
+	std::vector<Server>::iterator it;
 
 	if (ac != 2)
 		std::cout << RED << "Error: " << NC << "Need one and only one argument\n";
@@ -436,6 +436,10 @@ int		main(int ac, char **av) {
 	else {
 		try {
 			parser.tokenizer(av);
+			// TESTING
+			it = servers_g.begin();
+			for (; it != servers_g.end(); it++)
+				it->print_serv();
 		}
 		catch (std::exception &e) {
 			std::cout << RED << "Error: " << NC << e.what() << std::endl;
