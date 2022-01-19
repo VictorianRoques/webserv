@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 15:44:10 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 18:51:27 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,15 @@ void	ft_putvec(std::vector<T> v, std::string separator) {
 }
 
 /**
- * prototypes
+ * prototypes of utils
 **/
-vec_str ft_split(std::string line, std::string delim);
+vec_str 							ft_split(std::string line, std::string delim);
 std::map<std::string, std::string>	ft_map_split(std::string line, std::string delim);
+size_t								str_match_size(std::string a, std::string b);
+
+/**
+ * prototypes of main functions
+**/
+void	requestParser(std::string rq);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:46:11 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 18:15:20 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define SERVER_HPP
 
 # include "../utils/utils.hpp"
-# include "Location.hpp" //--> alternative: 'Location' is a nested class of 'Server'
+# include "Location.hpp" 
 
 class Location;
 
@@ -70,5 +70,7 @@ class Server {
 	public:
 		void	print_serv();
 };
+
+
 
 # endif

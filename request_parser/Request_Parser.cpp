@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:45:19 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 18:51:00 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,9 +97,26 @@ void	Request::isChunked() {
 /**
  * buildFullPath(): find the relevant Location {} and append correct prefix (root) to path
 **/
-void	Request::buildFullPath() {
-	
-	while ()
+void	Request::buildFullPath(std::vector<Location *> loc) {
+	std::vector<Location *>::iterator it = loc.begin();
+	for (; it != loc.end(); it++) {
+		if (it.getLocationMatch() == _path) {
+			_fullPath = it.getRoot + _path;
+			return ;
+		}
+	}
+	// non exact match found: looking for the longest match	
+	it = loc.begin();
+	size_t max_match = 0;
+	size_t match = 0;
+	for (; it != loc.end(); it++) {
+		match = str_match_size(_path, it.getLocationMatch());
+		if (max_match < match) {
+			_fullPath = it.getRoot + _path;
+			max_match = match;
+		}
+	}
+	return ;
 }
 
 void	Request::requestLine(std::string line) {
@@ -144,6 +161,7 @@ void	Request::bodyLine(std::string line) {
 void	Request::print_request() {
 	std::cout << COLOR_REQ << "Method: " << NC << _method << std::endl;
 	std::cout << COLOR_REQ << "Path: " << NC << _path << std::endl;
+	std::cout << COLOR_REQ << "Full Path: " << NC << _fullPath << std::endl;
 	std::cout << COLOR_REQ << "Protocol Version: " << NC << _protocolVersion << std::endl;
 	std::cout << std::endl;
 	std::cout << COLOR_REQ << "Transfer Encoding: " << NC << _transferEncoding << std::endl;
@@ -158,11 +176,15 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Body: " << NC; ft_putvec(_body, " "); std::cout << std::endl;
 }
 
+/**
+ * requestParser(): rq is the 'Request Header' string
+**/
 void	requestParser(std::string rq) {
 	Request		request;
 	std::string	line;
 	int			i = 0;
 	size_t 		pos;
+	std::vector<Server server>::iterator it = servers_g.begin();
 
 	while (rq.find("\r\n") != 0 && !rq.empty()) {
 		i++;
@@ -178,6 +200,10 @@ void	requestParser(std::string rq) {
 	if (rq.length() > 4)
 		request.bodyLine(line);
 	request.isChunked();
-	request.buildFullPath();
+	for (; it != server_g.end(); it++) {
+		if (it.getServerName() == request.getHost())
+			request.buildFullPath(it);
+	}
+
 	request.print_request();
 }

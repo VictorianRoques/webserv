@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 17:14:10 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 18:51:29 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,4 +40,18 @@ std::map<std::string, std::string>	ft_map_split(std::string line, std::string de
 	std::string second = line.substr(line.find(delim) + 1, std::string::npos);
 	m.insert(std::make_pair<std::string, std::string>(first, second));
 	return m;
+}
+
+/**
+ * str_match_size(): returns the number of matching characters between two strings
+**/
+size_t	str_match_size(std::string a, std::string b) {
+	size_t	i = 0;
+
+	while (!a.empty() && !b.empty() && a[0] == b[0]) {
+		i++;
+		a++;
+		b++;
+	}
+	return (i);
 }

@@ -6,13 +6,16 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:50:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 18:17:06 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
+/**
+ * global variable: vector containing all servers in parsed config file.
+**/
 std::vector<Server> servers_g;
 
 /**************************************/
