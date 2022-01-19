@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 17:35:28 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 13:21:25 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 //           COPLIAN CLASS            //
 /**************************************/
 
-Request::Request() {}
+Request::Request(): _chunked(false) {}
 
 Request::~Request() {}
 
@@ -30,7 +30,12 @@ Request& Request::operator=(const Request &x) {
 		_contentLength = x._contentLength;
 		_contentType = x._contentType;
 		_acceptEncoding = x._acceptEncoding;
+		_transferEncoding = x._transferEncoding;
+		_cacheControl = x._cacheControl;
+		_connection = x._connection;
+		_host = x._host;
 		_body = x._body;
+		_chunked = x._chunked;
 	}
 	return *this;
 }
@@ -43,11 +48,17 @@ std::string	Request::getMethod() { return _method; }
 std::string	Request::getPath() { return _path; }
 std::string	Request::getProtocolVersion() { return _protocolVersion; }
 
-size_t		Request::getContentLength() { return _contentLength; }
+std::string	Request::getContentLength() { return _contentLength; }
 std::string Request::getContentType() { return _contentType; }
 std::string	Request::getAcceptEncoding() { return _acceptEncoding; }
+std::string Request::getTransferEncoding() { return _transferEncoding; }
+std::string Request::getCacheControl() { return _cacheControl; }
+std::string Request::getConnection() { return _connection; }
+std::string Request::getHost() { return _host; }
 
 vec_str	Request::getBody() { return _body; }
+
+bool	Request::getChunked() { return _chunked; }
 
 /**************************************/
 //              SETTERS               //
@@ -57,15 +68,29 @@ void	Request::setMethod(std::string method) { _method = method; }
 void	Request::setPath(std::string path) { _path = path; }
 void	Request::setProtocolVersion(std::string protocolVersion) { _protocolVersion = protocolVersion; }
 
-void	Request::setContentLength(size_t contentLength) { _contentLength = contentLength; }
+void	Request::setContentLength(std::string contentLength) { _contentLength = contentLength; }
 void	Request::setContentType(std::string contentType) { _contentType = contentType; }
 void	Request::setAcceptEncoding(std::string acceptEncoding) { _acceptEncoding = acceptEncoding; }
+void	Request::setTransferEncoding(std::string transferEncoding) { _transferEncoding = transferEncoding; }
+void	Request::setCacheControl(std::string cacheControl) { _cacheControl = cacheControl; }
+void	Request::setConnection(std::string connection) { _connection = connection; }
+void	Request::setHost(std::string host) { _host = host; }
 
 void	Request::setBody(vec_str body) { _body = body; }
+
+void	Request::setChunked(bool chunked) { _chunked = chunked; }
 
 /**************************************/
 //              PARSING               //
 /**************************************/
+
+/**
+ * isChunked(): sets chunked = true/false
+**/
+void	Request::isChunked() {
+	if (_contentLength.size() || _transferEncoding.size())
+		setChunked(true);
+}
 
 void	Request::requestLine(std::string line) {
 	vec_str	rl;
@@ -81,9 +106,13 @@ void	Request::headerLine(std::string line) {
 	std::vector<std::pair<std::string, methodPointer> > vars;
 	methodPointer mp;
 
-//	vars.push_back(std::make_pair("Content-Length", &Request::setContentLength));
+	vars.push_back(std::make_pair("Content-Length", &Request::setContentLength));
+	vars.push_back(std::make_pair("Transfer-Encoding", &Request::setTransferEncoding));
 	vars.push_back(std::make_pair("Content-Type", &Request::setContentType));
 	vars.push_back(std::make_pair("Accept-Encoding", &Request::setAcceptEncoding));
+	vars.push_back(std::make_pair("Cache-Control", &Request::setCacheControl));
+	vars.push_back(std::make_pair("Connection", &Request::setConnection));
+	vars.push_back(std::make_pair("Host", &Request::setHost));
 
 	std::map<std::string, std::string> hl;
 	hl = ft_map_split(line, " ");
@@ -107,9 +136,14 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Path: " << NC << _path << std::endl;
 	std::cout << COLOR_REQ << "Protocol Version: " << NC << _protocolVersion << std::endl;
 	std::cout << std::endl;
+	std::cout << COLOR_REQ << "Transfer Encoding: " << NC << _transferEncoding << std::endl;
 	std::cout << COLOR_REQ << "Content Length: " << NC << _contentLength << std::endl;
 	std::cout << COLOR_REQ << "Content Type: " << NC << _contentType << std::endl;
 	std::cout << COLOR_REQ << "Accept Encoding: " << NC << _acceptEncoding << std::endl;
+	std::cout << COLOR_REQ << "Cache Control: " << NC << _cacheControl << std::endl;
+	std::cout << COLOR_REQ << "Connection: " << NC << _connection << std::endl;
+	std::cout << COLOR_REQ << "Host: " << NC << _host << std::endl;
+	std::cout << COLOR_REQ << "Chunked: " << NC << (_chunked ? "Yes" : "No") << std::endl;
 	std::cout << std::endl;
 	std::cout << COLOR_REQ << "Body: " << NC; ft_putvec(_body, " "); std::cout << std::endl;
 }
@@ -120,8 +154,7 @@ void	requestParser(std::string rq) {
 	int			i = 0;
 	size_t 		pos;
 
-	request.setContentLength(rq.length());
-	while (rq.find("\r\n") != 0) {
+	while (rq.find("\r\n") != 0 && !rq.empty()) {
 		i++;
 		pos = rq.find("\r\n");
 		line = rq.substr(0, pos);
@@ -134,5 +167,6 @@ void	requestParser(std::string rq) {
 	line = rq.substr(0, std::string::npos);
 	if (rq.length() > 4)
 		request.bodyLine(line);
+	request.isChunked();
 	request.print_request();
 }

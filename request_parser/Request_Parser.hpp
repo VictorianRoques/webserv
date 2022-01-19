@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 18:34:01 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 13:21:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,17 @@ class Request {
 		std::string _path;
 		std::string	_protocolVersion;
 
+
 		// request header
-		size_t		_contentLength;
+		std::string	_contentLength;
 		std::string	_contentType;
 		std::string	_acceptEncoding;
+		std::string	_transferEncoding;
+		std::string	_cacheControl;
+		std::string	_connection;
+		std::string	_host;
+
+		bool		_chunked;
 
 		// body (aka payload)
 		vec_str		_body;
@@ -52,15 +59,21 @@ class Request {
 
 		//getters
 	public:
-		std::string	getMethod();
-		std::string	getPath();
-		std::string	getProtocolVersion();
+		std::string	getMethod(); // GET, POST, DELETE, etc
+		std::string	getPath(); // part of the final uri (add the root of the relevant location context)
+		std::string	getProtocolVersion(); // HTTP1.1
 
-		size_t		getContentLength();
-		std::string	getContentType();
-		std::string	getAcceptEncoding();
+		std::string	getContentLength(); // indicates the size of the message body, in bytes, sent to the recipient.
+		std::string	getContentType(); // indicates the original media type of the resource (prior to any content encoding applied for sending).
+		std::string	getAcceptEncoding(); // indicates the content encoding (usually a compression algorithm) that the client can understand. The server uses content negotiation to select one of the proposal and informs the client of that choice with the Content-Encoding response header.
+		std::string	getTransferEncoding(); // specifies the form of encoding used to safely transfer the payload body to the user. (ex.: Transfer-Encoding: chunked)
+		std::string	getCacheControl(); // holds directives (instructions) — in both requests and responses — that control caching in browsers and shared caches (e.g. Proxies, CDNs).
+		std::string	getConnection(); // controls whether the network connection stays open after the current transaction finishes. If the value sent is keep-alive, the connection is persistent and not closed, allowing for subsequent requests to the same server to be done.
+		std::string	getHost(); // host and port number to which the request is being sent.
 
 		vec_str		getBody();
+
+		bool		getChunked();
 
 		//setters
 	public:
@@ -68,15 +81,22 @@ class Request {
 		void	setPath(std::string path);
 		void	setProtocolVersion(std::string protocolVersion);
 	
-		void	setContentLength(size_t contentLength);
+		void	setContentLength(std::string contentLength);
 		void	setContentType(std::string contentType);
 		void	setAcceptEncoding(std::string acceptEncoding);
+		void	setTransferEncoding(std::string transferEncoding);
+		void	setCacheControl(std::string cacheControl);
+		void	setConnection(std::string connection);
+		void	setHost(std::string host);
 
 		void	setBody(vec_str body);
+
+		void	setChunked(bool chunked);
 
 		// parsing
 	public:
 
+		void	isChunked();
 		void	requestLine(std::string line);
 		void	headerLine(std::string line);
 		void	bodyLine(std::string line);
