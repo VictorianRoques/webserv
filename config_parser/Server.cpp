@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:27:39 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 17:51:07 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 
 Server::Server():
 	_ip("127.0.0.1"),
-	_errorPage(1, "defaultErrorPage.html"),
 	_maxBodySize(1000000), //nginx default value
 	_serverNb(-1)
 {}

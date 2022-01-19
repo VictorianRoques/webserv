@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 14:53:02 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 17:51:35 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ class Location {
 		std::string							getLocationMatch() const;
 		std::string							getRoot() const;
 		vec_str								getMethods() const;
-		vec_str								getErrorPage() const;
+		vec_str								getErrorPage() const; // all signals mentionned are redirected to the file contained in the last element
 		std::pair<size_t, std::string>		getRedirection() const;
 		std::string							getIndex() const;
 		bool								getAutoIndex() const;

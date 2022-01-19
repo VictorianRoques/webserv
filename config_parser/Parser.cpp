@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:27:21 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 17:50:22 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,8 +278,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 void	Parser::clear() {
 	_port.clear();
 	_serverName.clear();
-	// just keep the first file (defaultErrorPage.html)
-	_errorPage.erase(_errorPage.begin() + 1, _errorPage.end());
+	_errorPage.erase(_errorPage.begin(), _errorPage.end());
 	_location.clear();
 }
 
@@ -398,13 +397,21 @@ void	Parser::tokenizer(char **av) {
 	interpreter(tok);
 }
 
+// TESTING FUNCTION
+void	print_test() {
+	std::vector<Server>::iterator it;
+	
+	it = servers_g.begin();
+	for (; it != servers_g.end(); it++)
+		it->print_serv();
+}
+
 /**
  * main(): gets a config file in param and parses it
  **/
 int		main(int ac, char **av) {
 
 	Parser	parser;
-	std::vector<Server>::iterator it;
 
 	if (ac != 2)
 		std::cout << RED << "Error: " << NC << "Need one and only one argument\n";
@@ -412,9 +419,7 @@ int		main(int ac, char **av) {
 		try {
 			parser.tokenizer(av);
 			// TESTING
-			it = servers_g.begin();
-			for (; it != servers_g.end(); it++)
-				it->print_serv();
+			print_test();
 		}
 		catch (std::exception &e) {
 			std::cout << RED << "Error: " << NC << e.what() << std::endl;

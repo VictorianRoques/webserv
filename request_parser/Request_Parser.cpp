@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:28:24 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 17:45:19 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,6 @@ void	Request::isChunked() {
 **/
 void	Request::buildFullPath() {
 	
-
 	while ()
 }
 
