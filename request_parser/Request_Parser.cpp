@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 13:21:25 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 17:28:24 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,10 @@ std::string Request::getCacheControl() { return _cacheControl; }
 std::string Request::getConnection() { return _connection; }
 std::string Request::getHost() { return _host; }
 
-vec_str	Request::getBody() { return _body; }
+vec_str		Request::getBody() { return _body; }
 
-bool	Request::getChunked() { return _chunked; }
+bool		Request::getChunked() { return _chunked; }
+std::string	Request::getFullPath() { return _fullPath; }
 
 /**************************************/
 //              SETTERS               //
@@ -79,6 +80,7 @@ void	Request::setHost(std::string host) { _host = host; }
 void	Request::setBody(vec_str body) { _body = body; }
 
 void	Request::setChunked(bool chunked) { _chunked = chunked; }
+void	Request::setFullPath(std::string fullPath) { _fullPath = fullPath; }
 
 /**************************************/
 //              PARSING               //
@@ -90,6 +92,15 @@ void	Request::setChunked(bool chunked) { _chunked = chunked; }
 void	Request::isChunked() {
 	if (_contentLength.size() || _transferEncoding.size())
 		setChunked(true);
+}
+
+/**
+ * buildFullPath(): find the relevant Location {} and append correct prefix (root) to path
+**/
+void	Request::buildFullPath() {
+	
+
+	while ()
 }
 
 void	Request::requestLine(std::string line) {
@@ -168,5 +179,6 @@ void	requestParser(std::string rq) {
 	if (rq.length() > 4)
 		request.bodyLine(line);
 	request.isChunked();
+	request.buildFullPath();
 	request.print_request();
 }

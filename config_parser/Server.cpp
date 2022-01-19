@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 14:53:20 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 17:27:39 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,14 +78,6 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 }
 void	Server::setLocation(std::vector<Location *> location) { _location = location; }
 void	Server::setServerNb(size_t serverNb) { _serverNb = serverNb; }
-
-/**************************************/
-//			SERVER PARSED			  //
-/**************************************/
-
-void	Server::addServer(Meta meta) {
-	meta.addServer(*this);
-}
 
 /**************************************/
 //				UTILS				  //

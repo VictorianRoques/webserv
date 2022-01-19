@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 18:35:54 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 17:27:21 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -399,29 +399,6 @@ void	Parser::tokenizer(char **av) {
 }
 
 /**
- * check_file_extension(): self-explanatory
-**/
-bool	check_file_extension(char *file_name) {
-	std::string file(file_name);
-	if (file.find(".") == std::string::npos)
-		return 1;
-
-	std::string ext;
-	ext = file.substr(file.find(".") + 1, std::string::npos);
-
-	vec_str	good_ext;
-	good_ext.push_back("conf");
-	good_ext.push_back("php");
-
-	vec_str::iterator it = good_ext.begin();
-	for (; it != good_ext.end(); it++) {
-		if (*it == ext)
-			return 0;
-	}
-	return 1;
-}
-
-/**
  * main(): gets a config file in param and parses it
  **/
 int		main(int ac, char **av) {
@@ -431,8 +408,6 @@ int		main(int ac, char **av) {
 
 	if (ac != 2)
 		std::cout << RED << "Error: " << NC << "Need one and only one argument\n";
-	else if (check_file_extension(av[1]))
-		std::cout << RED << "Error: " << NC << "Unauthorized file extension\n";
 	else {
 		try {
 			parser.tokenizer(av);

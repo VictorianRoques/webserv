@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/18 14:52:38 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/19 17:27:56 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,7 @@
 
 # include "../utils/utils.hpp"
 # include "Location.hpp" //--> alternative: 'Location' is a nested class of 'Server'
-# include "Meta.hpp"
 
-class Meta;
 class Location;
 
 /**
@@ -31,31 +29,6 @@ class Server {
 		~Server();
 		Server(const Server &);
 		Server&	operator=(const Server &);
-
-	/**
-	 * NESTED CLASS: Location
-	class Location {
-		// Coplian Class
-		public:
-			Location();
-			~Location();
-			Location(const Location &);
-			Location&	operator=(const Location &);
-	
-		// directives
-		private:
-			std::string		_root;
-	
-			// getters
-		public:
-			std::string		getRoot() const;
-	
-			//setters
-		private:
-			void			setRoot(std::string root);
-	};
-	//END OF NESTED CLASS
-	**/
 
 		// variables
 	protected:
@@ -91,7 +64,7 @@ class Server {
 
 		// adding parsed server
 	public:
-		void	addServer(Meta meta);
+//		void	addServer(Meta meta);
 
 		// utils
 	public:
