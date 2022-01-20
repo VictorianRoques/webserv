@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:28:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 14:17:36 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define REQUEST_PARSER
 
 # include "../utils/utils.hpp"
+# include "../config_parser/Location.hpp"
 
 void	requestParser(std::string rq);
 
@@ -107,7 +108,7 @@ class Request {
 	public:
 		void	print_request();
 		void	isChunked();
-		void	buildFullPath();
+		void	buildFullPath(std::vector<Location *>);
 };
 
 # endif

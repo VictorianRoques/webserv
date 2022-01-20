@@ -6,11 +6,13 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 18:51:00 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 15:05:19 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request_Parser.hpp"
+#include "../config_parser/Server.hpp"
+#include "../config_parser/Location.hpp"
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -100,20 +102,24 @@ void	Request::isChunked() {
 void	Request::buildFullPath(std::vector<Location *> loc) {
 	std::vector<Location *>::iterator it = loc.begin();
 	for (; it != loc.end(); it++) {
-		if (it.getLocationMatch() == _path) {
-			_fullPath = it.getRoot + _path;
+		if ((*it)->getLocationMatch() == _path) {
+			_fullPath = (*it)->getRoot() + _path;
 			return ;
 		}
 	}
 	// non exact match found: looking for the longest match	
 	it = loc.begin();
-	size_t max_match = 0;
-	size_t match = 0;
-	for (; it != loc.end(); it++) {
-		match = str_match_size(_path, it.getLocationMatch());
-		if (max_match < match) {
-			_fullPath = it.getRoot + _path;
-			max_match = match;
+	size_t pos = _path.length();
+	
+	while (pos != 0) {
+		pos = _path.rfind("/", pos - 1);
+		for (; it != loc.end(); it++) {
+			if (!strncmp(_path.c_str(), (*it)->getLocationMatch().c_str(), pos)) {
+				_fullPath = (*it)->getRoot() + _path;
+				break ;
+			}
+			if ((*it)->getLocationMatch() == "/")
+				_fullPath = (*it)->getRoot() + _path;
 		}
 	}
 	return ;
@@ -179,12 +185,12 @@ void	Request::print_request() {
 /**
  * requestParser(): rq is the 'Request Header' string
 **/
-void	requestParser(std::string rq) {
+void	requestParser(std::string rq, std::vector<Server> servers_g) {
 	Request		request;
 	std::string	line;
 	int			i = 0;
 	size_t 		pos;
-	std::vector<Server server>::iterator it = servers_g.begin();
+	std::vector<Server>::iterator it = servers_g.begin();
 
 	while (rq.find("\r\n") != 0 && !rq.empty()) {
 		i++;
@@ -200,9 +206,9 @@ void	requestParser(std::string rq) {
 	if (rq.length() > 4)
 		request.bodyLine(line);
 	request.isChunked();
-	for (; it != server_g.end(); it++) {
-		if (it.getServerName() == request.getHost())
-			request.buildFullPath(it);
+	for (; it != servers_g.end(); it++) {
+		if (vector_contains_str(it->getServerName(), request.getHost()))
+			request.buildFullPath(it->getLocation());
 	}
 
 	request.print_request();

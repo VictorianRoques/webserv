@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 18:51:29 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 15:01:41 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,15 +43,14 @@ std::map<std::string, std::string>	ft_map_split(std::string line, std::string de
 }
 
 /**
- * str_match_size(): returns the number of matching characters between two strings
+ * vector_contains_str(): returns "true" if vector contains str
 **/
-size_t	str_match_size(std::string a, std::string b) {
-	size_t	i = 0;
+bool	vector_contains_str(vec_str v, std::string str) {
+	vec_str::iterator it = v.begin();
 
-	while (!a.empty() && !b.empty() && a[0] == b[0]) {
-		i++;
-		a++;
-		b++;
+	for (; it != v.end(); it++) {
+		if (*it == str)
+			return true;
 	}
-	return (i);
+	return false;
 }

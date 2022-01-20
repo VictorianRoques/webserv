@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 18:51:27 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 15:05:21 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,9 @@
 # include <fstream>
 # include <vector>
 # include <map>
+# include <cstring>
+
+//# include "../config_parser/Server.hpp"
 
 /**
  * COLORS
@@ -61,10 +64,11 @@ void	ft_putvec(std::vector<T> v, std::string separator) {
 vec_str 							ft_split(std::string line, std::string delim);
 std::map<std::string, std::string>	ft_map_split(std::string line, std::string delim);
 size_t								str_match_size(std::string a, std::string b);
+bool								vector_contains_str(vec_str v, std::string str);
 
 /**
- * prototypes of main functions
+ * prototype of testing
 **/
-void	requestParser(std::string rq);
+void	print_test(); //in Parser.cpp to print all servers class
 
 #endif

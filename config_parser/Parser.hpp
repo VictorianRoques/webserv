@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:59:04 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 14:32:56 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,13 @@
 # include "Server.hpp"
 
 class Server;
+
+/**
+ * global variable: vector containing all servers in parsed config file.
+**/
+std::vector<Server> servers_g;
+
+void	requestParser(std::string request_header, std::vector<Server> servers_g);
 
 /**
  * class Parser: holds the server directives while parsing
@@ -101,6 +108,12 @@ class Parser: public Server {
 			public:
 				virtual char const *what() const throw();
 		};
+		
+		class WrongPathException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
 
 };
 

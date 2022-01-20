@@ -6,27 +6,27 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 18:17:06 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 14:30:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
-/**
- * global variable: vector containing all servers in parsed config file.
-**/
-std::vector<Server> servers_g;
+
+//testing (see main(): bottom of the file)
+std::string request_header = "GET /wiki/Wikipedia:Accueil_principal HTTP/2\r\nHost: fr.wikipedia.org\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:96.0) Gecko/20100101 Firefox/96.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate, br\r\nReferer: https://www.google.com/\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nCache-Control: max-age=0";
 
 /**************************************/
 //           EXCEPTIONS               //
 /**************************************/
-char const *Parser::MissingBracketException::what() const throw() { return ("Missing a bracket after 'server' or 'location' directive."); }
-char const *Parser::OutsideServerException::what() const throw() { return ("Some directive is outside a server definition."); }
-char const *Parser::LonelyBracketException::what() const throw() { return ("Lonely opening bracket(s)."); }
-char const *Parser::EmbeddedServersException::what() const throw() { return ("Found a server in another server."); }
-char const *Parser::NoSuchDirectiveException::what() const throw() { return ("Unknown directive in the file."); }
-char const *Parser::FailedToOpenException::what() const throw() { return ("Failed to open <config_file>."); }
+char const *Parser::MissingBracketException::what() const throw() { return "Missing a bracket after 'server' or 'location' directive."; }
+char const *Parser::OutsideServerException::what() const throw() { return "Some directive is outside a server definition."; }
+char const *Parser::LonelyBracketException::what() const throw() { return "Lonely opening bracket(s)."; }
+char const *Parser::EmbeddedServersException::what() const throw() { return "Found a server in another server."; }
+char const *Parser::NoSuchDirectiveException::what() const throw() { return "Unknown directive in the file."; }
+char const *Parser::FailedToOpenException::what() const throw() { return "Failed to open <config_file>."; }
+char const *Parser::WrongPathException::what() const throw() { return "Invalid path for location in config_file. Probably missing a '/' in the beginning."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -213,6 +213,8 @@ size_t locationContext(vec_str::iterator it, Location *location) {
 		location->setLocationMatch(*it);
 		ret += 2;
 	}
+	if (location->getLocationMatch()[0] != '/')
+		throw Parser::WrongPathException();
 	return ret;
 }
 
@@ -409,6 +411,7 @@ void	print_test() {
 		it->print_serv();
 }
 
+
 /**
  * main(): gets a config file in param and parses it
  **/
@@ -423,6 +426,7 @@ int		main(int ac, char **av) {
 			parser.tokenizer(av);
 			// TESTING
 			print_test();
+			requestParser(request_header, servers_g);
 		}
 		catch (std::exception &e) {
 			std::cout << RED << "Error: " << NC << e.what() << std::endl;

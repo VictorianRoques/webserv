@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 18:16:04 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 14:32:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,17 @@
 //           EXCEPTIONS               //
 /**************************************/
 
-char const *Location::WrongMethodException::what() const throw() { return ("Wrong method."); }
-char const *Location::WrongValue_AutoIndexException::what() const throw() { return ("Wrong value for autoindex."); }
-char const *Location::NonValidRootException::what() const throw() { return ("Non valid root\nUsage: root <path>; (you probably forgot a \";\")."); }
-char const *Location::NonValidIndexException::what() const throw() { return ("Non valid index\nUsage: index <file_name>; (you probably forgot a \";\")."); }
+char const *Location::WrongMethodException::what() const throw() { return "Wrong method."; }
+char const *Location::WrongValue_AutoIndexException::what() const throw() { return "Wrong value for autoindex."; }
+char const *Location::NonValidRootException::what() const throw() { return "Non valid root\nUsage: root <path>; (you probably forgot a \";\")."; }
+char const *Location::NonValidIndexException::what() const throw() { return "Non valid index\nUsage: index <file_name>; (you probably forgot a \";\")."; }
 char const *Location::NonValidCgiHandlerException::what() const throw() {
-	return ("Non valid CGI Handler\nUsage: cgi_handler <file_extension> <CGI binary>; (you probably forgot a \";\").");
+	return "Non valid CGI Handler\nUsage: cgi_handler <file_extension> <CGI binary>; (you probably forgot a \";\").";
 }
 char const *Location::NonValidRedirectionException::what() const throw() {
-	return ("Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;).");
+	return "Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;).";
 }
+char const *Location::WrongPathException::what() const throw() { return "Invalid path for root in config_file. Probably missing a '/' in the beginning."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -102,6 +103,8 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	root = (*it).substr(pos, posend - pos);
 
 	setRoot(root);
+	if (getRoot()[0] != '/')
+		throw WrongPathException();
 	(void)vend;
 	return 2;
 }

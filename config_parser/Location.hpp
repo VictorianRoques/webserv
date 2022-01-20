@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 18:15:38 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 14:17:54 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,11 @@ class Location {
 		};
 
 		class NonValidCgiHandlerException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class WrongPathException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};
