@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 15:05:21 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 15:48:07 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@
 # include <vector>
 # include <map>
 # include <cstring>
-
-//# include "../config_parser/Server.hpp"
 
 /**
  * COLORS
@@ -44,7 +42,8 @@
 /**
  * type simplification (makes the code 'lighter')
 **/
-typedef std::vector<std::string>	vec_str;
+typedef std::vector<std::string>			vec_str;
+typedef std::map<std::string, std::string>	map_str;
 
 /**
  * ft_putvec(): prints out the vector v
@@ -55,6 +54,18 @@ void	ft_putvec(std::vector<T> v, std::string separator) {
 		
 	for (; it != v.end(); it++)
 		std::cout << "<" << *it << ">" << separator;
+	std::cout << std::endl;
+}
+
+/**
+ * ft_putmap(): prints out the map m
+**/
+template < class T, class U >
+void	ft_putmap(std::map<T, U> m, std::string separator) {
+	typename std::map<T, U>::iterator it = m.begin();
+
+	for (; it != m.end(); it++)
+		std::cout << "<" << it->first << " = " << it->second << ">" << separator;
 	std::cout << std::endl;
 }
 

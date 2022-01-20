@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 14:30:58 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 16:00:17 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 const std::string WHITESPACE = "\f\t\n\r\v ";
 
 //testing (see main(): bottom of the file)
-std::string request_header = "GET /wiki/Wikipedia:Accueil_principal HTTP/2\r\nHost: fr.wikipedia.org\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:96.0) Gecko/20100101 Firefox/96.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate, br\r\nReferer: https://www.google.com/\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nCache-Control: max-age=0";
+std::string request_header = "GET /wiki/Wikipedia:Accueil_principal?name=napoleon&color=blue HTTP/2\r\nHost: fr.wikipedia.org\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:96.0) Gecko/20100101 Firefox/96.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate, br\r\nReferer: https://www.google.com/\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nCache-Control: max-age=0";
 
 /**************************************/
 //           EXCEPTIONS               //

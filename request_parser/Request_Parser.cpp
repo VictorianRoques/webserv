@@ -6,13 +6,19 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 15:05:19 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 16:00:21 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request_Parser.hpp"
 #include "../config_parser/Server.hpp"
 #include "../config_parser/Location.hpp"
+
+/**************************************/
+//           EXCEPTIONS               //
+/**************************************/
+
+char const *Request::NoHostException::what() const throw() { return "Missing a 'Host:' directive in the request header."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -38,6 +44,8 @@ Request& Request::operator=(const Request &x) {
 		_host = x._host;
 		_body = x._body;
 		_chunked = x._chunked;
+		_fullPath = x._fullPath;
+		_queryString = x._queryString;
 	}
 	return *this;
 }
@@ -62,6 +70,7 @@ vec_str		Request::getBody() { return _body; }
 
 bool		Request::getChunked() { return _chunked; }
 std::string	Request::getFullPath() { return _fullPath; }
+map_str		Request::getQueryString() { return _queryString; }
 
 /**************************************/
 //              SETTERS               //
@@ -83,6 +92,7 @@ void	Request::setBody(vec_str body) { _body = body; }
 
 void	Request::setChunked(bool chunked) { _chunked = chunked; }
 void	Request::setFullPath(std::string fullPath) { _fullPath = fullPath; }
+void	Request::setQueryString(map_str queryString) { _queryString = queryString; }
 
 /**************************************/
 //              PARSING               //
@@ -115,17 +125,40 @@ void	Request::buildFullPath(std::vector<Location *> loc) {
 		pos = _path.rfind("/", pos - 1);
 		for (; it != loc.end(); it++) {
 			if (!strncmp(_path.c_str(), (*it)->getLocationMatch().c_str(), pos)) {
-				_fullPath = (*it)->getRoot() + _path;
+				_fullPath = (*it)->getRoot() + _path.substr(0, _path.find("?"));
 				break ;
 			}
 			if ((*it)->getLocationMatch() == "/")
-				_fullPath = (*it)->getRoot() + _path;
+				_fullPath = (*it)->getRoot() + _path.substr(0, _path.find("?"));
 		}
 	}
 	return ;
 }
 
-void	Request::requestLine(std::string line) {
+/**
+ * queryString(): parse the path and store query string if any.
+**/
+void	Request::queryString() {
+	size_t	pos;
+	std::string	key;
+	std::string	value;
+
+	if ((pos = _path.find("?")) != std::string::npos) {
+		std::string	assign = _path.substr(pos + 1, std::string::npos);
+		while (!assign.empty()) {
+			key = assign.substr(0, assign.find("="));
+			size_t start = assign.find("=") + 1;
+			value = assign.substr(start, assign.find("&") - start);
+			_queryString.insert(std::make_pair<std::string, std::string>(key, value));
+			if (assign.find("&") == std::string::npos)
+				assign.erase(0, assign.length());
+			else
+				assign.erase(0, assign.find("&") + 1);
+		}
+	}	
+}
+
+void	Request::firstLine(std::string line) {
 	vec_str	rl;
 
 	rl = ft_split(line, " ");
@@ -168,6 +201,7 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Method: " << NC << _method << std::endl;
 	std::cout << COLOR_REQ << "Path: " << NC << _path << std::endl;
 	std::cout << COLOR_REQ << "Full Path: " << NC << _fullPath << std::endl;
+	std::cout << COLOR_REQ << "Query String: " << NC; ft_putmap(_queryString, " ");
 	std::cout << COLOR_REQ << "Protocol Version: " << NC << _protocolVersion << std::endl;
 	std::cout << std::endl;
 	std::cout << COLOR_REQ << "Transfer Encoding: " << NC << _transferEncoding << std::endl;
@@ -198,18 +232,23 @@ void	requestParser(std::string rq, std::vector<Server> servers_g) {
 		line = rq.substr(0, pos);
 		rq.erase(0, pos + 2);
 		if (i == 1)
-			request.requestLine(line);
+			request.firstLine(line);
 		else
 			request.headerLine(line);
 	}
 	line = rq.substr(0, std::string::npos);
-	if (rq.length() > 4)
+	if (rq.length() > 2)
 		request.bodyLine(line);
 	request.isChunked();
 	for (; it != servers_g.end(); it++) {
-		if (vector_contains_str(it->getServerName(), request.getHost()))
+		if (vector_contains_str(it->getServerName(), request.getHost())) {
 			request.buildFullPath(it->getLocation());
+			request.queryString();
+			break ;
+		}
 	}
+	if (it == servers_g.end())
+		throw Request::NoHostException();
 
 	request.print_request();
 }

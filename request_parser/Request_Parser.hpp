@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 14:17:36 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 16:00:22 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ class Request {
 
 		bool		_chunked;
 		std::string	_fullPath;
+		map_str		_queryString;
 
 		// body (aka payload)
 		vec_str		_body;
@@ -77,6 +78,7 @@ class Request {
 
 		bool		getChunked();
 		std::string	getFullPath();
+		map_str		getQueryString();
 
 		//setters
 	public:
@@ -96,11 +98,12 @@ class Request {
 
 		void	setChunked(bool chunked);
 		void	setFullPath(std::string fullPath);
+		void	setQueryString(map_str queryString);
 
 		// parsing
 	public:
 
-		void	requestLine(std::string line);
+		void	firstLine(std::string line);
 		void	headerLine(std::string line);
 		void	bodyLine(std::string line);
 		
@@ -109,6 +112,14 @@ class Request {
 		void	print_request();
 		void	isChunked();
 		void	buildFullPath(std::vector<Location *>);
+		void	queryString();
+
+		//EXCEPTIONS
+		class NoHostException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
 };
 
 # endif
