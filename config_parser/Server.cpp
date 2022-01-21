@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/19 17:58:32 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/21 18:18:21 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,11 +68,11 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 	_maxBodySize = static_cast<size_t>(std::atoi(maxBodySize.c_str()));
 	if ((pos = maxBodySize.find_first_not_of("0123456789")) != std::string::npos) {
 		if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k')
-			_maxBodySize *= 1000;
+			_maxBodySize *= 1024;
 		else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm')
-			_maxBodySize *= 1000000;
+			_maxBodySize *= 1048576;
 		else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
-			_maxBodySize *= 1000000000;
+			_maxBodySize *= 1073741824;
 	}
 }
 void	Server::setLocation(std::vector<Location *> location) { _location = location; }
