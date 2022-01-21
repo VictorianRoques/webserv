@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 15:48:07 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/20 16:01:56 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,6 @@ void	ft_putmap(std::map<T, U> m, std::string separator) {
 **/
 vec_str 							ft_split(std::string line, std::string delim);
 std::map<std::string, std::string>	ft_map_split(std::string line, std::string delim);
-size_t								str_match_size(std::string a, std::string b);
 bool								vector_contains_str(vec_str v, std::string str);
 
 /**

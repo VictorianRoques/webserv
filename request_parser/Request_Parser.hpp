@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 16:00:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/21 18:07:33 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,10 +52,10 @@ class Request {
 
 		bool		_chunked;
 		std::string	_fullPath;
-		map_str		_queryString;
+		std::string	_queryString;
 
 		// body (aka payload)
-		vec_str		_body;
+		std::string	_body;
 
 	public:
 		void	requestParser(std::string rq);
@@ -74,11 +74,11 @@ class Request {
 		std::string	getConnection(); // controls whether the network connection stays open after the current transaction finishes. If the value sent is keep-alive, the connection is persistent and not closed, allowing for subsequent requests to the same server to be done.
 		std::string	getHost(); // host and port number to which the request is being sent.
 
-		vec_str		getBody();
+		std::string	getBody();
 
 		bool		getChunked();
 		std::string	getFullPath();
-		map_str		getQueryString();
+		std::string	getQueryString();
 
 		//setters
 	public:
@@ -94,11 +94,11 @@ class Request {
 		void	setConnection(std::string connection);
 		void	setHost(std::string host);
 
-		void	setBody(vec_str body);
+		void	setBody(std::string body);
 
 		void	setChunked(bool chunked);
 		void	setFullPath(std::string fullPath);
-		void	setQueryString(map_str queryString);
+		void	setQueryString(std::string queryString);
 
 		// parsing
 	public:

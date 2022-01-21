@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 16:00:21 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/21 18:08:06 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,11 +66,11 @@ std::string Request::getCacheControl() { return _cacheControl; }
 std::string Request::getConnection() { return _connection; }
 std::string Request::getHost() { return _host; }
 
-vec_str		Request::getBody() { return _body; }
+std::string	Request::getBody() { return _body; }
 
 bool		Request::getChunked() { return _chunked; }
 std::string	Request::getFullPath() { return _fullPath; }
-map_str		Request::getQueryString() { return _queryString; }
+std::string	Request::getQueryString() { return _queryString; }
 
 /**************************************/
 //              SETTERS               //
@@ -88,11 +88,11 @@ void	Request::setCacheControl(std::string cacheControl) { _cacheControl = cacheC
 void	Request::setConnection(std::string connection) { _connection = connection; }
 void	Request::setHost(std::string host) { _host = host; }
 
-void	Request::setBody(vec_str body) { _body = body; }
+void	Request::setBody(std::string body) { _body = body; }
 
 void	Request::setChunked(bool chunked) { _chunked = chunked; }
 void	Request::setFullPath(std::string fullPath) { _fullPath = fullPath; }
-void	Request::setQueryString(map_str queryString) { _queryString = queryString; }
+void	Request::setQueryString(std::string queryString) { _queryString = queryString; }
 
 /**************************************/
 //              PARSING               //
@@ -140,22 +140,10 @@ void	Request::buildFullPath(std::vector<Location *> loc) {
 **/
 void	Request::queryString() {
 	size_t	pos;
-	std::string	key;
-	std::string	value;
 
 	if ((pos = _path.find("?")) != std::string::npos) {
-		std::string	assign = _path.substr(pos + 1, std::string::npos);
-		while (!assign.empty()) {
-			key = assign.substr(0, assign.find("="));
-			size_t start = assign.find("=") + 1;
-			value = assign.substr(start, assign.find("&") - start);
-			_queryString.insert(std::make_pair<std::string, std::string>(key, value));
-			if (assign.find("&") == std::string::npos)
-				assign.erase(0, assign.length());
-			else
-				assign.erase(0, assign.find("&") + 1);
-		}
-	}	
+		_queryString = _path.substr(pos + 1, std::string::npos);
+	}
 }
 
 void	Request::firstLine(std::string line) {
@@ -194,14 +182,14 @@ void	Request::headerLine(std::string line) {
 }
 
 void	Request::bodyLine(std::string line) {
-	setBody(ft_split(line, "\r\n"));
+	setBody(line);
 }
 
 void	Request::print_request() {
 	std::cout << COLOR_REQ << "Method: " << NC << _method << std::endl;
 	std::cout << COLOR_REQ << "Path: " << NC << _path << std::endl;
 	std::cout << COLOR_REQ << "Full Path: " << NC << _fullPath << std::endl;
-	std::cout << COLOR_REQ << "Query String: " << NC; ft_putmap(_queryString, " ");
+	std::cout << COLOR_REQ << "Query String: " << NC << _queryString << std::endl;
 	std::cout << COLOR_REQ << "Protocol Version: " << NC << _protocolVersion << std::endl;
 	std::cout << std::endl;
 	std::cout << COLOR_REQ << "Transfer Encoding: " << NC << _transferEncoding << std::endl;
@@ -213,7 +201,7 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Host: " << NC << _host << std::endl;
 	std::cout << COLOR_REQ << "Chunked: " << NC << (_chunked ? "Yes" : "No") << std::endl;
 	std::cout << std::endl;
-	std::cout << COLOR_REQ << "Body: " << NC; ft_putvec(_body, " "); std::cout << std::endl;
+	std::cout << COLOR_REQ << "Body: " << NC << _body << std::endl;
 }
 
 /**
