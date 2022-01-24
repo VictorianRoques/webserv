@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/21 18:08:06 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/24 19:06:10 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,7 @@ void	Request::buildFullPath(std::vector<Location *> loc) {
 				_fullPath = (*it)->getRoot() + _path.substr(0, _path.find("?"));
 				break ;
 			}
+			std::cout << (*it)->getLocationMatch() << std::endl;
 			if ((*it)->getLocationMatch() == "/")
 				_fullPath = (*it)->getRoot() + _path.substr(0, _path.find("?"));
 		}
@@ -205,10 +206,10 @@ void	Request::print_request() {
 }
 
 /**
- * requestParser(): rq is the 'Request Header' string
+ * request->arser(): rq is the 'request->Header' string
 **/
-void	requestParser(std::string rq, std::vector<Server> servers_g) {
-	Request		request;
+Request *requestParser(std::string rq, std::vector<Server> servers_g) {
+	Request	*request = new Request();
 	std::string	line;
 	int			i = 0;
 	size_t 		pos;
@@ -220,23 +221,24 @@ void	requestParser(std::string rq, std::vector<Server> servers_g) {
 		line = rq.substr(0, pos);
 		rq.erase(0, pos + 2);
 		if (i == 1)
-			request.firstLine(line);
+			request->firstLine(line);
 		else
-			request.headerLine(line);
+			request->headerLine(line);
 	}
 	line = rq.substr(0, std::string::npos);
 	if (rq.length() > 2)
-		request.bodyLine(line);
-	request.isChunked();
+		request->bodyLine(line);
+	request->isChunked();
 	for (; it != servers_g.end(); it++) {
-		if (vector_contains_str(it->getServerName(), request.getHost())) {
-			request.buildFullPath(it->getLocation());
-			request.queryString();
+		if (vector_contains_str(it->getServerName(), request->getHost())) {
+			request->buildFullPath(it->getLocation());
+			request->queryString();
 			break ;
 		}
 	}
-	if (it == servers_g.end())
-		throw Request::NoHostException();
+//	if (it == servers_g.end())
+//		throw Request::NoHostException();
 
-	request.print_request();
+	request->print_request();
+	return request;
 }

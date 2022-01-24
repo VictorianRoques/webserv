@@ -6,15 +6,23 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 15:14:28 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/24 18:20:16 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PARSER_HPP
 # define PARSER_HPP
 
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+
 # include "../utils/utils.hpp"
 # include "Server.hpp"
+# include "../response/Response.hpp"
 
 class Server;
 
@@ -23,7 +31,7 @@ class Server;
 **/
 std::vector<Server> servers_g;
 
-void	requestParser(std::string request_header, std::vector<Server> servers_g);
+Request	*requestParser(std::string request_header, std::vector<Server> servers_g);
 
 /**
  * class Parser: holds the server directives while parsing

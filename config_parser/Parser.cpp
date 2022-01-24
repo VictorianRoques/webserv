@@ -6,16 +6,18 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/21 18:17:17 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/24 19:22:31 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#define PORT 8080
 #include "Parser.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
 
 //testing (see main(): bottom of the file)
-std::string request_header = "GET /wiki/Wikipedia:Accueil_principal?name=napoleon&color=blue HTTP/2\r\nHost: fr.wikipedia.org\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:96.0) Gecko/20100101 Firefox/96.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate, br\r\nReferer: https://www.google.com/\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nCache-Control: max-age=0\r\n\r\nThis is the body";
+//std::string request_header = "GET / HTTP/2\r\nHost: fr.wikipedia.org\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:96.0) Gecko/20100101 Firefox/96.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate, br\r\nReferer: https://www.google.com/\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nCache-Control: max-age=0\r\n\r\nThis is the body";
+//std::string request_header = "GET /get.php?say=hello&to=me HTTP/2\r\nHost: localhost\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:96.0) Gecko/20100101 Firefox/96.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate, br\r\nReferer: https://www.google.com/\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nCache-Control: max-age=0\r\n\r\nThis is the body";
 
 /**************************************/
 //           EXCEPTIONS               //
@@ -426,10 +428,65 @@ int		main(int ac, char **av) {
 			parser.tokenizer(av);
 			// TESTING
 			print_test();
-			requestParser(request_header, servers_g);
+//			requestParser(request_header, servers_g);
 		}
 		catch (std::exception &e) {
 			std::cout << RED << "Error: " << NC << e.what() << std::endl;
 		}
+		
+    int server_fd, new_socket; long valread;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
+    
+    // Response toto;
+    // std::string res = toto.getMethod();
+    // char hello[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    // Creating socket file descriptor
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+    {
+        perror("In socket");
+        exit(EXIT_FAILURE);
+    }
+    
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons( PORT );
+    
+    memset(address.sin_zero, '\0', sizeof address.sin_zero);
+    
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
+    {
+        perror("In bind");
+        exit(EXIT_FAILURE);
+    }
+    if (listen(server_fd, 10) < 0)
+    {
+        perror("In listen");
+        exit(EXIT_FAILURE);
+    }
+    while(1)
+    {
+        printf("\n+++++++ Waiting for new connection ++++++++\n\n");
+        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
+        {
+            perror("In accept");
+            exit(EXIT_FAILURE);
+        }
+        
+        char buffer[30000] = {0};
+        valread = read( new_socket , buffer, 30000);
+        
+        Request req = *(requestParser(buffer, servers_g));
+        std::cout << "AaAAAAAAAAAAAAAAAA PATH= ";
+        std::cout << req.getPath() << std::endl;
+        Response res(req);
+        std::string s_res = res.getMethod();
+		std::cout << s_res << std::endl;
+        printf("%s\n",buffer );
+        write(new_socket , s_res.c_str(), s_res.length());
+        printf("------------------Hello message sent-------------------\n");
+        close(new_socket);
 	}
+	return (0);
+}
 }

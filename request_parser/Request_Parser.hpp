@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/21 18:07:33 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/24 18:19:16 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,7 @@
 
 # include "../utils/utils.hpp"
 # include "../config_parser/Location.hpp"
-
-void	requestParser(std::string rq);
+# include "../config_parser/Server.hpp"
 
 class Request {
 
