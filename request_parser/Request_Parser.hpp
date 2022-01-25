@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/24 18:19:16 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/25 20:38:51 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Request {
 		std::string	_cacheControl;
 		std::string	_connection;
 		std::string	_host;
+		std::string	_secFetchDest;
 
 		bool		_chunked;
 		std::string	_fullPath;
@@ -72,6 +73,7 @@ class Request {
 		std::string	getCacheControl(); // holds directives (instructions) — in both requests and responses — that control caching in browsers and shared caches (e.g. Proxies, CDNs).
 		std::string	getConnection(); // controls whether the network connection stays open after the current transaction finishes. If the value sent is keep-alive, the connection is persistent and not closed, allowing for subsequent requests to the same server to be done.
 		std::string	getHost(); // host and port number to which the request is being sent.
+		std::string	getSecFetchDest(); // gives type of data ('document' or 'image')
 
 		std::string	getBody();
 
@@ -92,6 +94,7 @@ class Request {
 		void	setCacheControl(std::string cacheControl);
 		void	setConnection(std::string connection);
 		void	setHost(std::string host);
+		void	setSecFetchDest(std::string secFetchDest);
 
 		void	setBody(std::string body);
 
@@ -112,6 +115,8 @@ class Request {
 		void	isChunked();
 		void	buildFullPath(std::vector<Location *>);
 		void	queryString();
+		void	solveContentType();
+
 
 		//EXCEPTIONS
 		class NoHostException: public std::exception {

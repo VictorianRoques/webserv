@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/24 19:06:10 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/25 20:44:06 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ Request& Request::operator=(const Request &x) {
 		_cacheControl = x._cacheControl;
 		_connection = x._connection;
 		_host = x._host;
+		_secFetchDest = x._secFetchDest;
 		_body = x._body;
 		_chunked = x._chunked;
 		_fullPath = x._fullPath;
@@ -65,6 +66,7 @@ std::string Request::getTransferEncoding() { return _transferEncoding; }
 std::string Request::getCacheControl() { return _cacheControl; }
 std::string Request::getConnection() { return _connection; }
 std::string Request::getHost() { return _host; }
+std::string Request::getSecFetchDest() { return _secFetchDest; }
 
 std::string	Request::getBody() { return _body; }
 
@@ -87,6 +89,7 @@ void	Request::setTransferEncoding(std::string transferEncoding) { _transferEncod
 void	Request::setCacheControl(std::string cacheControl) { _cacheControl = cacheControl; }
 void	Request::setConnection(std::string connection) { _connection = connection; }
 void	Request::setHost(std::string host) { _host = host; }
+void	Request::setSecFetchDest(std::string secFetchDest) { _secFetchDest = secFetchDest; }
 
 void	Request::setBody(std::string body) { _body = body; }
 
@@ -147,6 +150,21 @@ void	Request::queryString() {
 	}
 }
 
+/**
+ * solveContentType(): called if no ContentType in the request header.
+ * ContentType = img/<extension> if SecFetchDest == image
+ * ContentType = text/<extension> if SecFetchDest == document
+**/
+void	Request::solveContentType() {
+	if (_secFetchDest == "image")
+		_contentType = "img/" + _fullPath.substr(_fullPath.find(".") + 1);
+	else
+		_contentType = "text/" + _fullPath.substr(_fullPath.find(".") + 1);
+}
+
+/**
+ * firstLine(): parse the line "GET /index.html HTTP/1.1"
+**/
 void	Request::firstLine(std::string line) {
 	vec_str	rl;
 
@@ -156,6 +174,9 @@ void	Request::firstLine(std::string line) {
 	setProtocolVersion(rl[2]);
 }
 
+/**
+ * headerLine(): parse the rest of the header
+**/
 void	Request::headerLine(std::string line) {
 
 	std::vector<std::pair<std::string, methodPointer> > vars;
@@ -167,6 +188,7 @@ void	Request::headerLine(std::string line) {
 	vars.push_back(std::make_pair("Accept-Encoding", &Request::setAcceptEncoding));
 	vars.push_back(std::make_pair("Cache-Control", &Request::setCacheControl));
 	vars.push_back(std::make_pair("Connection", &Request::setConnection));
+	vars.push_back(std::make_pair("Sec-Fetch-Dest", &Request::setSecFetchDest));
 	vars.push_back(std::make_pair("Host", &Request::setHost));
 
 	std::map<std::string, std::string> hl;
@@ -182,10 +204,16 @@ void	Request::headerLine(std::string line) {
 	}
 }
 
+/**
+ * bodyLine(): parse the body.
+**/
 void	Request::bodyLine(std::string line) {
 	setBody(line);
 }
 
+/**
+ *  print_request(): self-explanatory
+**/
 void	Request::print_request() {
 	std::cout << COLOR_REQ << "Method: " << NC << _method << std::endl;
 	std::cout << COLOR_REQ << "Path: " << NC << _path << std::endl;
@@ -200,13 +228,14 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Cache Control: " << NC << _cacheControl << std::endl;
 	std::cout << COLOR_REQ << "Connection: " << NC << _connection << std::endl;
 	std::cout << COLOR_REQ << "Host: " << NC << _host << std::endl;
+	std::cout << COLOR_REQ << "Sec-Fetch-Dest: " << NC << _secFetchDest << std::endl;
 	std::cout << COLOR_REQ << "Chunked: " << NC << (_chunked ? "Yes" : "No") << std::endl;
 	std::cout << std::endl;
 	std::cout << COLOR_REQ << "Body: " << NC << _body << std::endl;
 }
 
 /**
- * request->arser(): rq is the 'request->Header' string
+ * requestParser(): rq is the 'request->Header' string and servers_g is the parsed config
 **/
 Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 	Request	*request = new Request();
@@ -239,6 +268,8 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 //	if (it == servers_g.end())
 //		throw Request::NoHostException();
 
+	if (request->getContentType().empty())
+		request->solveContentType();
 	request->print_request();
 	return request;
 }
