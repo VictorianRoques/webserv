@@ -2,9 +2,9 @@
 
 cgiHandler::cgiHandler(Request &req)
 {
-    _env["PATH_TRANSLATED"] = req.getFullPath().substr(req.getFullPath().rfind("/") + 1);
+    _env["PATH_TRANSLATED"] = req.getFullPath();
     _env["QUERY_STRING"] = req.getQueryString();
-    _env["PATH_INFO"] = req.getFullPath();
+    _env["PATH_INFO"] = req.getFullPath().substr(req.getFullPath().rfind("/") + 1);
     _env["REQUEST_METHOD"] = req.getMethod();
     _env["CONTENT_TYPE"] = req.getContentType();
     _env["CONTENT_LENGTH"] = req.getContentLength();
@@ -14,40 +14,48 @@ cgiHandler::cgiHandler(Request &req)
 
 char**        cgiHandler::envToString()
 {
-    char **strEnv = new char *[this->_env.size() + 1];
+    char **strEnv = new char *[_env.size() + 1];
     std::map<std::string, std::string>::const_iterator it = _env.begin();
     std::map<std::string, std::string>::const_iterator ite = _env.end();
     int i = 0;
-	std::cout << "DEVUT" << std::endl;
     while (it != ite)
     {
         std::string elem = it->first + "=" + it->second;
         strEnv[i] = new char[elem.size() + 1];
-        strEnv[i] = strcpy(strEnv[i], (const char*)elem.c_str());
+        strEnv[i] = strcpy(strEnv[i], elem.c_str());
         it++;
         i++;
     }
-	std::cout << "FIN" << std::endl;
     strEnv[i] = NULL;
     return strEnv;
 }
 
-std::string     cgiHandler::execute(std::string  scriptFilename)
+char**          cgiHandler::keyMapConvert(std::string key)
+{
+    char **argv = new char *[2];
+    argv[0] = new char[key.size() + 1];
+    argv[0] = strcpy(argv[0], key.c_str());
+    argv[1] = NULL;
+    return argv;
+}
+std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
 {
     char        **envp;
+    char        **argv;
     pid_t       pid;
     int         tmpStdIn = dup(STDIN_FILENO);
     int         tmpStdOut = dup(STDOUT_FILENO);
-    std::string newBody = "";
+    std::string newBody;
 
     try {
         envp = envToString();
+        argv = keyMapConvert(_env["PATH_TRANSLATED"]);
     }
     catch (std::bad_alloc &e)
     {
             std::cerr << RED << e.what() << NC << std::endl;
     }
-
+    
     FILE*   fileIn = fopen("tmpIn", "w+");
     FILE*   fileOut = fopen("tmpOut", "w+");
     int     fdIn =  fileno(fileIn);
@@ -56,6 +64,7 @@ std::string     cgiHandler::execute(std::string  scriptFilename)
 
     write(fdIn, _body.c_str(), _body.size());
     lseek(fdIn, 0, SEEK_SET);
+
     pid = fork();
     if (pid == -1)
     {
@@ -66,7 +75,7 @@ std::string     cgiHandler::execute(std::string  scriptFilename)
     {
         dup2(fdIn, STDIN_FILENO);
         dup2(fdOut, STDOUT_FILENO);
-        execve(scriptFilename.c_str(), NULL, envp);
+        execve(pathToBinaryCgi.c_str(), argv, envp);
         std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
         write(STDOUT_FILENO, "Status: 500\r\n\r\n", 20);
     }
@@ -91,11 +100,11 @@ std::string     cgiHandler::execute(std::string  scriptFilename)
     fclose(fileOut);
     close(fdIn);
     close(fdOut);
+    
     for (int i = 0; envp[i]; i++)
         delete [] envp[i];
     delete[] envp;
-	std::cout << "PRINT MAPPPPP\n" << std::endl;
-	ft_putmap(_env, "\n");
+
     return newBody;
 }
 

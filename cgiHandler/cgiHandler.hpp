@@ -25,7 +25,8 @@ public:
     cgiHandler(Request &req);
 
     char            **envToString();
-    std::string     execute(std::string scriptFilename);
+    char            **keyMapConvert(std::string key);
+    std::string     execute(std::string pathToBinaryCgi);
 };
 
 #endif
