@@ -1,0 +1,19 @@
+Code    Message    Signification
+100    Continue    Attente de la suite de la requête (pour les chunked requests).
+
+200    OK    Requête traitée avec succès. La réponse dépendra de la méthode de requête utilisée.
+
+308    Permanent Redirect    La requête doit être redirigée définitivement vers l’URI spécifiée.
+310     Too many Redirects    La requête doit être redirigée de trop nombreuses fois, ou est victime d’une boucle de redirection.
+
+400    Bad Request    La syntaxe de la requête est erronée.
+404    Not Found    Ressource non trouvée.
+405    Method Not Allowed    Méthode de requête non autorisée.
+406    Not Acceptable    La ressource demandée n'est pas disponible dans un format qui respecterait les en-têtes « Accept » de la requête (Accept ajoute des content-types à gérer).
+429    Too Many Requests    RFC 658514 : le client a émis trop de requêtes dans un délai donné.
+499    Client Closed Request    Le client a fermé la connexion avant de recevoir la réponse. Cette erreur se produit quand le traitement est trop long côté serveur17.
+
+505    HTTP Version not supported    Version HTTP non gérée par le serveur.
+520    Unknown Error
+521    Web Server Is Down
+522    Connection Timed Out
