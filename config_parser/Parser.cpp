@@ -463,7 +463,12 @@ int		main(int ac, char **av) {
         perror("In socket");
         exit(EXIT_FAILURE);
     }
-    
+	int enable = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+	{
+		perror("In socket");
+		exit(EXIT_FAILURE);
+	}
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
@@ -493,12 +498,9 @@ int		main(int ac, char **av) {
         valread = read( new_socket , buffer, 30000);
         
         Request req = *(requestParser(buffer, servers_g));
-        std::cout << "AaAAAAAAAAAAAAAAAA PATH= ";
-        std::cout << req.getPath() << std::endl;
         Response res(req);
         std::string s_res = res.getMethod();
-		std::cout << s_res << std::endl;
-        printf("%s\n",buffer );
+		printf("%s\n",buffer );
         write(new_socket , s_res.c_str(), s_res.length());
         printf("------------------Hello message sent-------------------\n");
         close(new_socket);

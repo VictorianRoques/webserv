@@ -23,18 +23,20 @@ public:
 
     Response(Request &req);
 
+    std::string     call();
     std::string     readHtml(std::string &path);
     std::string     readContent(std::string &path);
-    std::string     writeHeader();
+    std::string     writeHeader(std::string status, std::string contentType, size_t bodyLength);
     std::string     getMethod();
+   void             setCgiHeader(std::string cgiHeader);
 
     // Utils
     int             pathIsFile(std::string &path);
-    std::string     intToString(int number);
+    std::string     sizeToString(size_t size);
 
 private:
 
-    int                         _bodyLength;
+    std::string                 _bodyLength;
     int                         _code;
 
     Request                     _req;
