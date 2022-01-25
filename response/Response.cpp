@@ -5,7 +5,7 @@ Response::Response(Request &req): _req(req) {
     _status = "200 OK";
     _code = 200;
     _path = req.getFullPath();
-    _contentType = _path.substr(_path.find(".") + 1);
+    _contentType = req.getContentType();
 }
 
 std::string Response::readHtml(std::string &path)
@@ -54,9 +54,9 @@ std::string     Response::writeHeader(std::string status, std::string contentTyp
 {
     std::string header;
 
-    header = "HTTP/1.1 " + status + "\n";
-    header += "Content-Type: " + contentType + "\n";
-    header += "Content-Length: " + sizeToString(bodyLength) + "\n";
+    header = "HTTP/1.1 " + status + "\r\n";
+    header += "Content-Type: " + contentType + "\r\n";
+    header += "Content-Length: " + sizeToString(bodyLength) + "\r\n";
     return header;
 }
 
@@ -89,18 +89,12 @@ std::string     Response::getMethod()
         _response = cgi.execute("../cgi/darwin_phpcgi");
         setCgiHeader(_response.substr(0, _response.find("\r\n\r\n")));      
         _response = _response.substr(_response.find("\r\n\r\n") + 4);
-        return writeHeader(_status, _contentType, _response.length()) + "\r\n\r\n" + _response;
+        return writeHeader(_status, _contentType, _response.length()) + "\r\n" + _response;
     }
     else
     {
         _response = readContent(_path);
-        _bodyLength = sizeToString(_response.length());
-        if (_contentType.empty())
-        {
-            std::cout << "IMG: " << _req.getPath().substr(_req.getPath().find(".") + 1) << std::endl;
-            _contentType = "img/" + _req.getPath().substr(_req.getPath().find(".") + 1);
-        }
-        _response = writeHeader("200 OK", _contentType, _response.length()) +  "\r\n\r\n" + _response;
+        _response = writeHeader("200 OK", _contentType, _response.length()) +  "\r\n" + _response;
     }
     std::cout << "RESPONSE BEGIN\n" << _response << "\nRESPONSE END\n";
     return _response;

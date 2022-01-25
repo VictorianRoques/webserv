@@ -157,7 +157,7 @@ void	Request::queryString() {
 **/
 void	Request::solveContentType() {
 	if (_secFetchDest == "image")
-		_contentType = "img/" + _fullPath.substr(_fullPath.find(".") + 1);
+		_contentType = "image/" + _fullPath.substr(_fullPath.find(".") + 1);
 	else
 		_contentType = "text/" + _fullPath.substr(_fullPath.find(".") + 1);
 }
