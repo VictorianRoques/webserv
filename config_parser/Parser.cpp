@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/24 19:22:31 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/25 16:37:37 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ char const *Parser::EmbeddedServersException::what() const throw() { return "Fou
 char const *Parser::NoSuchDirectiveException::what() const throw() { return "Unknown directive in the file."; }
 char const *Parser::FailedToOpenException::what() const throw() { return "Failed to open <config_file>."; }
 char const *Parser::WrongPathException::what() const throw() { return "Invalid path for location in config_file. Probably missing a '/' in the beginning."; }
+char const *Parser::ErrorPageException::what() const throw() { return "Need at least two arguments to the error_page directive."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -148,7 +149,8 @@ size_t	Parser::dirServerName(vec_str::iterator it, vec_str::iterator vend) {
 **/
 size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 	size_t	ret = 1;
-	std::string	errorPage;
+	std::string	errorCode;
+	vec_str		v;
 	size_t		pos;
 	size_t		posend;
 
@@ -156,15 +158,22 @@ size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 		//remove the trailing ';'
 		pos = (*it).find_first_not_of(";");
 		posend = std::min((*it).find_first_of(";", pos), (*it).length());
-		errorPage = (*it).substr(pos, posend - pos);
+		errorCode = (*it).substr(pos, posend - pos);
 
-		// set ErrorPage
-		_errorPage.push_back(errorPage);
+		// store error codes into a vector (last element of line is the corresponding error file)
+		v.push_back(errorCode);
 		ret++;
 
 		// met a ';' == end of the directive
-		if (it->find(";") != std::string::npos)
+		if (it->find(";") != std::string::npos) {
+			if (v.size() < 2)
+				throw ErrorPageException();
+			// set _errorPage
+			vec_str::iterator iv = v.begin();
+			for (; iv != v.end() - 1; iv++)
+				_errorPage[*iv] = v.back();
 			return ret;
+		}
 	}
 	return ret;
 }
@@ -240,7 +249,6 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 
 	dir.push_back(std::make_pair("root", &Location::dirRoot));
 	dir.push_back(std::make_pair("methods", &Location::dirMethods));
-	dir.push_back(std::make_pair("error_page", &Location::dirErrorPage));
 	dir.push_back(std::make_pair("autoindex", &Location::dirAutoIndex));
 	dir.push_back(std::make_pair("index", &Location::dirIndex));
 	dir.push_back(std::make_pair("return", &Location::dirRedirection));
@@ -285,8 +293,16 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 void	Parser::clear() {
 	_port.clear();
 	_serverName.clear();
-	_errorPage.erase(_errorPage.begin(), _errorPage.end());
 	_location.clear();
+	_maxBodySize = 1000000;
+	_errorPage.clear();
+	_errorPage["400"] = "400.html";
+	_errorPage["404"] = "404.html";
+	_errorPage["405"] = "405.html";
+	_errorPage["406"] = "406.html";
+	_errorPage["429"] = "429.html";
+	_errorPage["499"] = "499.html";
+	_errorPage["520"] = "520.html";
 }
 
 /**

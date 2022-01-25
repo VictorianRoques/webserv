@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/24 18:20:16 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/25 16:28:26 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ class Parser: public Server {
 	public:
 		bool						getInLocation() const;
 		bool						getInServer() const;
+		
 
 		// PARSING
 	public:
@@ -118,6 +119,11 @@ class Parser: public Server {
 		};
 		
 		class WrongPathException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class ErrorPageException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/20 14:19:44 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/25 16:30:22 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,9 @@ class Server {
 	protected:
 		std::string						_ip;
 		std::vector<size_t>				_port;
-		std::vector<std::string>	 	_serverName;
+		vec_str	 						_serverName;
 		std::string						_root;
-		std::vector<std::string>		_errorPage;
+		map_str							_errorPage;
 		size_t							_maxBodySize;
 		std::vector<Location *>			_location;
 		int								_serverNb;
@@ -45,8 +45,8 @@ class Server {
 	public:
 		std::string						getIP() const;
 		std::vector<size_t>				getPort() const;
-		std::vector<std::string>		getServerName() const;
-		std::vector<std::string>		getErrorPage() const;
+		vec_str							getServerName() const;
+		map_str							getErrorPage() const;
 		size_t							getMaxBodySize() const;
 		std::vector<Location *>			getLocation() const;
 		size_t							getServerNb() const;
@@ -56,7 +56,7 @@ class Server {
 		void	setIP(std::string ip);
 		void	setPort(std::vector<size_t> port);
 		void	setServerName(vec_str serverName);
-		void	setErrorPage(vec_str errorPage);
+		void	setErrorPage(map_str errorPage);
 		void	setMaxBodySize(size_t maxBodySize);
 		void	setMaxBodySize(std::string maxBodySize);
 		void	setLocation(std::vector<Location *> location);

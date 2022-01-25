@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/25 15:43:42 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/25 16:38:03 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ Location&	Location::operator=(const Location &x) {
 	if (this != &x) {
 		_root = x.getRoot();
 		_methods = x.getMethods();
-		_errorPage = x.getErrorPage();
 		_redirection = x.getRedirection();
 		_autoIndex = x.getAutoIndex();
 		_index = x.getIndex();
@@ -63,7 +62,6 @@ std::string							Location::getMatchModifier() const { return _matchModifier; }
 std::string							Location::getLocationMatch() const { return _locationMatch; }
 std::string							Location::getRoot() const { return _root; }
 vec_str								Location::getMethods() const { return _methods; }
-vec_str								Location::getErrorPage() const { return _errorPage; }
 std::pair<size_t, std::string>		Location::getRedirection() const { return _redirection; }
 std::string							Location::getIndex() const { return _index; }
 bool								Location::getAutoIndex() const { return _autoIndex; }
@@ -78,7 +76,6 @@ void	Location::setMatchModifier(std::string matchModifier) { _matchModifier = ma
 void	Location::setLocationMatch(std::string locationMatch) { _locationMatch = locationMatch; }
 void	Location::setRoot(std::string root) { _root = root; }
 void	Location::setMethods(vec_str methods) { _methods = methods; }
-void	Location::setErrorPage(vec_str errorPage) { _errorPage = errorPage; }
 void	Location::setRedirection(std::pair<size_t, std::string> redirection) { _redirection = redirection; }
 void	Location::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
 void	Location::setIndex(std::string index) { _index = index; }
@@ -193,32 +190,6 @@ size_t	Location::dirCgiHandler(vec_str::iterator it, vec_str::iterator vend) {
 }
 
 /**
- * dirErrorPage(): sets error_page (called by dirLocation())
-**/
-size_t	Location::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
-	size_t	ret = 1;
-	std::string	errorPage;
-	size_t		pos;
-	size_t		posend;
-
-	for (; it != vend; it++) {
-		//remove the trailing ';'
-		pos = (*it).find_first_not_of(";");
-		posend = std::min((*it).find_first_of(";", pos), (*it).length());
-		errorPage = (*it).substr(pos, posend - pos);
-
-		// set ErrorPage
-		_errorPage.push_back(errorPage);
-		ret++;
-
-		// met a ';' == end of the directive
-		if (it->find(";") != std::string::npos)
-			return ret;
-	}
-	return ret;
-}
-
-/**
  * dirMethods(): sets allowed methods (called by dirLocation())
 **/
 size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
@@ -259,7 +230,6 @@ void	Location::print_loc() {
 	std::cout << COLOR_LOC << "Match Modifier: " << NC << _matchModifier << std::endl;
 	std::cout << COLOR_LOC << "Location Match: " << NC << _locationMatch << std::endl;
 	std::cout << COLOR_LOC << "Root: " << NC << _root << std::endl;
-	std::cout << COLOR_LOC << "Error Page: " << NC; ft_putvec(_errorPage, " ");
 	std::cout << COLOR_LOC << "AutoIndex: " << NC << (_autoIndex ? "on" : "off") << std::endl;
 	std::cout << COLOR_LOC << "Index (response file if request is directory): " << NC << _index << std::endl;
 	std::cout << COLOR_LOC << "Method(s): " << NC; ft_putvec(_methods, " ");

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/21 18:45:49 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/25 16:33:11 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,15 @@ Server::Server():
 	_ip("127.0.0.1"),
 	_maxBodySize(1000000), //nginx default value
 	_serverNb(-1)
-{}
+{
+	_errorPage["400"] = "400.html";
+	_errorPage["404"] = "404.html";
+	_errorPage["405"] = "405.html";
+	_errorPage["406"] = "406.html";
+	_errorPage["429"] = "429.html";
+	_errorPage["499"] = "499.html";
+	_errorPage["520"] = "520.html";
+}
 
 Server::~Server() {}
 
@@ -48,7 +56,7 @@ Server&	Server::operator=(const Server &x) {
 std::string 					Server::getIP() const { return _ip; }
 std::vector<size_t>				Server::getPort() const { return _port; }
 vec_str							Server::getServerName() const { return _serverName; }
-vec_str							Server::getErrorPage() const { return _errorPage; }
+map_str							Server::getErrorPage() const { return _errorPage; }
 size_t							Server::getMaxBodySize() const { return _maxBodySize; }
 std::vector<Location *>			Server::getLocation() const { return _location; }
 size_t							Server::getServerNb() const { return _serverNb; }
@@ -60,7 +68,7 @@ size_t							Server::getServerNb() const { return _serverNb; }
 void	Server::setIP(std::string ip) { _ip = ip; }
 void	Server::setPort(std::vector<size_t> port) { _port = port; }
 void	Server::setServerName(vec_str serverName) { _serverName = serverName; }
-void	Server::setErrorPage(vec_str errorPage) { _errorPage = errorPage; }
+void	Server::setErrorPage(map_str errorPage) { _errorPage = errorPage; }
 void	Server::setMaxBodySize(size_t maxBodySize) { _maxBodySize = maxBodySize; }
 void	Server::setMaxBodySize(std::string maxBodySize) {
 	size_t pos;
@@ -89,7 +97,7 @@ void	Server::print_serv() {
 	std::cout << COLOR_SERV << "Server Name: " << NC; ft_putvec(_serverName, " ");
 	std::cout << COLOR_SERV << "IP: " << NC << _ip << std::endl;
 	std::cout << COLOR_SERV << "Port: " << NC; ft_putvec(_port, " ");
-	std::cout << COLOR_SERV << "Error Page: " << NC; ft_putvec(_errorPage, " ");
+	std::cout << COLOR_SERV << "Error Page: " << NC; ft_putmap(_errorPage, " ");
 	std::cout << COLOR_SERV << "Client_Max_Body_Size: " << NC << _maxBodySize << std::endl;
 
 	std::cout << std::endl;
