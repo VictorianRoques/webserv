@@ -10,7 +10,13 @@ cgiHandler::cgiHandler(Request &req)
     _env["CONTENT_LENGTH"] = req.getContentLength();
 	_env["REDIRECT_STATUS"] = "200";
     _body = req.getBody();
+    std::cout << "SIZE BODY: " << _body.length() << std::endl;
+    std::cout << "PRINT MAP" << std::endl;
+    ft_putmap(_env, "\n");
+    std::cout << "END MAP" << std::endl;
+    std::cout << "BODY: \n<" <<  _body << ">\n";
 }
+
 
 char**        cgiHandler::envToString()
 {
@@ -91,7 +97,6 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
             ret = read(fdOut, buffer, 4096 - 1);
             newBody += buffer;
         }
-
     }
 
     dup2(tmpStdIn, STDOUT_FILENO);

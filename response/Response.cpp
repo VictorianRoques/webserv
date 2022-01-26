@@ -1,9 +1,8 @@
 #include "Response.hpp"
 
-Response::Response(Request &req): _req(req) {
+Response::Response(Request &req, map_str errorPage): _req(req), _errorPage(errorPage) {
 
     _status = "200 OK";
-    _code = 200;
     _path = req.getFullPath();
     _contentType = req.getContentType();
 }
@@ -12,7 +11,7 @@ std::string Response::readHtml(std::string &path)
 {
     std::ifstream       ofs;
     std::stringstream   buffer;
-
+    std::cout << "PATH ERROR PAGES: " << path << std::endl;
     if (pathIsFile(path))
     {
         ofs.open(path.c_str(), std::ifstream::in);
@@ -74,11 +73,22 @@ std::string     Response::call()
 {
     if (_req.getMethod() == "GET")
         return getMethod();
+    else if (_req.getMethod() == "POST")
+        return postMethod();
     else
     {
-        std::string res = "<!DOCTYPE html>\n<html><title>405 Method Not Allow</title><body><h1>Method not Allow</h1></body></html>\n";
+        std::string res = readHtml(_errorPage["405"]);
         return writeHeader("405 Method Not Allow", "text/html", res.length()) + "\r\n\r\n" + res;
     }
+}
+
+std::string     Response::postMethod()
+{
+    cgiHandler cgi(_req);
+    _response = cgi.execute("../cgi/darwin_phpcgi");
+     setCgiHeader(_response.substr(0, _response.find("\r\n\r\n")));      
+    _response = _response.substr(_response.find("\r\n\r\n") + 4);
+    return writeHeader(_status, _contentType, _response.length()) + "\r\n" + _response;
 }
 
 std::string     Response::getMethod()

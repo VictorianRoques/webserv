@@ -403,7 +403,7 @@ void	Parser::tokenizer(char **av) {
 		while (line.find_first_not_of(WHITESPACE) != std::string::npos) {
 			// remove comments before parsing
 			pos = line.find_first_of("#");
-			if (pos == 0)
+			if (pos == 0 || pos == line.find_first_not_of(WHITESPACE))
 				break ;
 			else if (pos != std::string::npos)
 				line.erase(pos);
@@ -485,6 +485,7 @@ int		main(int ac, char **av) {
         perror("In listen");
         exit(EXIT_FAILURE);
     }
+
     while(1)
     {
         printf("\n+++++++ Waiting for new connection ++++++++\n\n");
@@ -493,13 +494,21 @@ int		main(int ac, char **av) {
             perror("In accept");
             exit(EXIT_FAILURE);
         }
-        
         char buffer[30000] = {0};
         valread = read( new_socket , buffer, 30000);
-        
-        Request req = *(requestParser(buffer, servers_g));
-        Response res(req);
-        std::string s_res = res.getMethod();
+		// RESPONSE CREATION
+		std::cout << "AVANT REQUEST" << std::endl;
+        Request *req = requestParser(buffer, servers_g);
+		std::cout << "POST REQUEST" << std::endl;
+		std::vector<Server>::iterator it = servers_g.begin();
+		for (; it != servers_g.end(); it++)
+		{
+			if (vector_contains_str(it->getServerName(), req->getHost()))
+				break ;
+		}
+        Response res(*req, it->getErrorPage());
+        std::string s_res = res.call();
+		delete req;
 		printf("%s\n",buffer );
         write(new_socket , s_res.c_str(), s_res.length());
         printf("------------------Hello message sent-------------------\n");

@@ -21,13 +21,13 @@ Server::Server():
 	_maxBodySize(1000000), //nginx default value
 	_serverNb(-1)
 {
-	_errorPage["400"] = "400.html";
-	_errorPage["404"] = "404.html";
-	_errorPage["405"] = "405.html";
-	_errorPage["406"] = "406.html";
-	_errorPage["429"] = "429.html";
-	_errorPage["499"] = "499.html";
-	_errorPage["520"] = "520.html";
+	_errorPage["400"] = "../error_pages/400.html";
+	_errorPage["404"] = "../error_pages/404.html";
+	_errorPage["405"] = "../error_pages/405.html";
+	_errorPage["406"] = "../error_pages/406.html";
+	_errorPage["429"] = "../error_pages/429.html";
+	_errorPage["499"] = "../error_pages/499.html";
+	_errorPage["520"] = "../error_pages/520.html";
 }
 
 Server::~Server() {}
