@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Response.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
+/*   Updated: 2022/01/26 20:12:24 by viroques         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/Response.hpp"
 
 Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPage(serv.getErrorPage())
@@ -5,9 +17,20 @@ Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPa
     _status = "200 OK";
     _path = req.getFullPath();
     _contentType = req.getContentType();
+    setCgiPath();
+    if (req.getPath() == "/")
+    {
+        _path = _root + "/" + _index;
+        _contentType = "text/html";
+        std::cout << "PATHHH: " << _path << std::endl;
+        // NEXT BUILD DYNAMIC CONTENT TYPE
+        // SET INDEX + ROOT INDEPENDAMENT OF CGI
+    }   
+}
 
-    // FOUND CGI PATH
-    std::vector<Location *> loc = serv.getLocation();
+void        Response::setCgiPath()
+{
+    std::vector<Location *> loc = _serv.getLocation();
     std::vector<Location *>::iterator it = loc.begin();
     size_t pos = _path.length();
 	
@@ -21,52 +44,62 @@ Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPa
             {
                 _pathCgi = (*it)->getCgiHandler().second;
                 _extensionCgi = (*it)->getCgiHandler().first;
+                _index = (*it)->getIndex();
+                _root = (*it)->getRoot();
+                std::cout << "INDEX: " << _index << std::endl;
             }
 		}
 	}
-    std::cout << "PATH CGI: " << _pathCgi << std::endl;
 }
 
-std::string Response::readHtml(std::string &path)
+int      Response::readHtml(std::string &path)
 {
     std::ifstream       ofs;
     std::stringstream   buffer;
-    std::cout << "PATH ERROR PAGES: " << path << std::endl;
-    if (pathIsFile(path))
-    {
-        ofs.open(path.c_str(), std::ifstream::in);
-        if (ofs.is_open() == false)
-            return ("<!DOCTYPE html>\n<html><title>Error</title><body><h1>Something went wrong when reading error page</h1></body></html>\n"); 
-        
-        buffer << ofs.rdbuf();
-        ofs.close();
-        return (buffer.str());
-    }
-    else
-        return ("<!DOCTYPE html>\n<html><title>Error</title><body><h1>Something went wrong when reading error page</h1></body></html>\n");
-}
-
-std::string     Response::readContent(std::string &path)
-{
-    std::ifstream       ofs;
-    std::stringstream   buffer;
-    std::string         error_res;
 
     if (pathIsFile(path))
     {
         ofs.open(path.c_str(), std::ifstream::in);
         if (ofs.is_open() == false)
         {
-            error_res = "<!DOCTYPE html>\n<html><title>403 Forbiden</title><body><h1>Forbiden access</h1></body></html>\n";
-             return  writeHeader("404 Not Found", "text/html", error_res.length()) +  "\r\n\r\n" + error_res;
+            _body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
+            return (1); 
         }
         buffer << ofs.rdbuf();
         ofs.close();
-        return (buffer.str());
+        _body = buffer.str();
+        _header = writeHeader("200 OK", "text/html", buffer.str().length());
+        return (0);
     }
-    error_res = "<!DOCTYPE html>\n<html><title>404 Not Found</title><body><h1>Ressource not found</h1></body></html>\n";
-    return  writeHeader("404 Not Found", "text/html", error_res.length()) +  "\r\n\r\n" + _response;
+    else
+    {
+        _body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
+        return (1);
+    }
+}
 
+void     Response::readContent(std::string &path)
+{
+    std::ifstream       ofs;
+    std::stringstream   buffer;
+
+    if (pathIsFile(path))
+    {
+        ofs.open(path.c_str(), std::ifstream::in);
+        if (ofs.is_open() == false)
+        {
+            if (readHtml(_errorPage["403"]))
+                _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+            return ;
+        }
+        buffer << ofs.rdbuf();
+        ofs.close();
+        _header =  writeHeader("200 OK", _contentType, buffer.str().length());
+        _body = buffer.str();
+        return ;
+    }
+    if (readHtml(_errorPage["404"]))
+        _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
 }
 
 std::string     Response::writeHeader(std::string status, std::string contentType, size_t bodyLength)
@@ -75,7 +108,7 @@ std::string     Response::writeHeader(std::string status, std::string contentTyp
 
     header = "HTTP/1.1 " + status + "\r\n";
     header += "Content-Type: " + contentType + "\r\n";
-    header += "Content-Length: " + sizeToString(bodyLength) + "\r\n";
+    header += "Content-Length: " + sizeToString(bodyLength) + "\r\n\r\n";
     return header;
 }
 
@@ -87,9 +120,51 @@ void    Response::setCgiHeader(std::string cgiHeader)
         _status = cgiHeader.substr(pos, cgiHeader.find("\r\n", pos));
     pos = cgiHeader.find("Content-type: ") + 14;
     _contentType = cgiHeader.substr(pos, cgiHeader.find("\r\n", pos));
-    
 }
-std::string     Response::call()
+
+std::string&     Response::postMethod()
+{
+    cgiHandler cgi(_req);
+    _body = cgi.execute(_pathCgi);
+    if (_body == "<html><body>FATAL ERROR</body></html>")
+    {
+        _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+        _response = _header + _body;
+        return _response;
+    }
+    setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
+    _body = _body.substr(_body.find("\r\n\r\n") + 4);
+    _header = writeHeader(_status, _contentType, _body.length());
+    _response = _header + _body;
+    return _response;
+}
+
+std::string&     Response::getMethod()
+{
+    if (_req.getFullPath().find(_extensionCgi) != std::string::npos)
+    {
+        cgiHandler cgi(_req);
+        _body = cgi.execute(_pathCgi);
+        if (_body == "<html><body>FATAL ERROR</body></html>")
+        {
+            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+            _response = _header + _body;
+            return _response;
+        }
+        setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
+        _body = _body.substr(_body.find("\r\n\r\n") + 4);
+        _header = writeHeader(_status, _contentType, _body.length());
+        _response = _header + _body;
+    }
+    else
+    {
+        readContent(_path);
+        _response = _header + _body;
+    }
+    return _response;
+}
+
+std::string&     Response::call()
 {
     if (_req.getMethod() == "GET")
         return getMethod();
@@ -97,37 +172,11 @@ std::string     Response::call()
         return postMethod();
     else
     {
-        std::string res = readHtml(_errorPage["405"]);
-        return writeHeader("405 Method Not Allow", "text/html", res.length()) + "\r\n\r\n" + res;
+        if (readHtml(_errorPage["405"]))
+             _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+        _response = _header + _body;
+        return _response;
     }
-}
-
-std::string     Response::postMethod()
-{
-    cgiHandler cgi(_req);
-    _response = cgi.execute(_pathCgi);
-     setCgiHeader(_response.substr(0, _response.find("\r\n\r\n")));      
-    _response = _response.substr(_response.find("\r\n\r\n") + 4);
-    return writeHeader(_status, _contentType, _response.length()) + "\r\n" + _response;
-}
-
-std::string     Response::getMethod()
-{
-    if (_req.getFullPath().find(_extensionCgi) != std::string::npos)
-    {
-        cgiHandler cgi(_req);
-        _response = cgi.execute(_pathCgi);
-        setCgiHeader(_response.substr(0, _response.find("\r\n\r\n")));      
-        _response = _response.substr(_response.find("\r\n\r\n") + 4);
-        return writeHeader(_status, _contentType, _response.length()) + "\r\n" + _response;
-    }
-    else
-    {
-        _response = readContent(_path);
-        _response = writeHeader("200 OK", _contentType, _response.length()) +  "\r\n" + _response;
-    }
-    std::cout << "RESPONSE BEGIN\n" << _response << "\nRESPONSE END\n";
-    return _response;
 }
 
 // Utils

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 17:30:01 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/26 19:28:11 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,14 @@ Server::Server():
 	_maxBodySize(1000000), //nginx default value
 	_serverNb(-1)
 {
-	_errorPage["400"] = "../error_pages/400.html";
-	_errorPage["404"] = "../error_pages/404.html";
-	_errorPage["405"] = "../error_pages/405.html";
-	_errorPage["406"] = "../error_pages/406.html";
-	_errorPage["429"] = "../error_pages/429.html";
-	_errorPage["499"] = "../error_pages/499.html";
-	_errorPage["520"] = "../error_pages/520.html";
+	_errorPage["400"] = "error_pages/400.html";
+	_errorPage["403"] = "error_pages/404.html";
+	_errorPage["404"] = "error_pages/404.html";
+	_errorPage["405"] = "error_pages/405.html";
+	_errorPage["406"] = "error_pages/406.html";
+	_errorPage["429"] = "error_pages/429.html";
+	_errorPage["499"] = "error_pages/499.html";
+	_errorPage["520"] = "error_pages/520.html";
 }
 
 Server::~Server() {}

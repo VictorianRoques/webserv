@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Response.hpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
+/*   Updated: 2022/01/26 19:51:23 by viroques         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
@@ -24,13 +36,14 @@ public:
     Response(Request &req, Server &serv);
     Response();
 
-    std::string     call();
-    std::string     readHtml(std::string &path);
-    std::string     readContent(std::string &path);
+    std::string&     call();
+    int             readHtml(std::string &path);
+    void            readContent(std::string &path);
     std::string     writeHeader(std::string status, std::string contentType, size_t bodyLength);
-    std::string     getMethod();
-    std::string     postMethod();
+    std::string&     getMethod();
+    std::string&     postMethod();
     void            setCgiHeader(std::string cgiHeader);
+    void            setCgiPath();
 
     // Utils
     int             pathIsFile(std::string &path);
@@ -38,17 +51,20 @@ public:
 
 private:
 
-    std::string                 _bodyLength;
     Request                     _req;
     std::string                 _status;
     std::string                 _contentType;
+    std::string                 _bodyLength;
     std::string                 _path;
-    std::string                 _response;
+    std::string                 _body;
+    std::string                 _header;
+      std::string               _response;
     Server                      _serv;
     map_str                     _errorPage;
-    std::string                _pathCgi;
+    std::string                 _pathCgi;
     std::string                 _extensionCgi;
-    
+    std::string                 _index;
+    std::string                 _root;
     // std::map<int, std::string>  _errorMap;
 };
 

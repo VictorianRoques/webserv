@@ -10,11 +10,6 @@ cgiHandler::cgiHandler(Request &req)
     _env["CONTENT_LENGTH"] = req.getContentLength();
 	_env["REDIRECT_STATUS"] = "200";
     _body = req.getBody();
-    std::cout << "SIZE BODY: " << _body.length() << std::endl;
-    std::cout << "PRINT MAP" << std::endl;
-    ft_putmap(_env, "\n");
-    std::cout << "END MAP" << std::endl;
-    std::cout << "BODY: \n<" <<  _body << ">\n";
 }
 
 
@@ -75,7 +70,7 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
     if (pid == -1)
     {
         std::cerr << RED << "Fork crashed." << std::endl;
-        return ("Status: 500\r\n\r\n");
+        return ("<html><body>FATAL ERROR</body></html>");
     }
     else if (pid == 0)
     {
@@ -83,7 +78,7 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
         dup2(fdOut, STDOUT_FILENO);
         execve(pathToBinaryCgi.c_str(), argv, envp);
         std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
-        write(STDOUT_FILENO, "Status: 500\r\n\r\n", 16);
+        write(STDOUT_FILENO, "<html><body>FATAL ERROR</body></html>", 38);
     }
     else
     {
@@ -105,7 +100,8 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
     fclose(fileOut);
     close(fdIn);
     close(fdOut);
-    
+    remove("tmpIn");
+    remove("tmpOut");
     for (int i = 0; envp[i]; i++)
         delete [] envp[i];
     delete[] envp;
