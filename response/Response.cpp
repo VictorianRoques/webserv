@@ -85,7 +85,7 @@ std::string     Response::call()
 std::string     Response::postMethod()
 {
     cgiHandler cgi(_req);
-    _response = cgi.execute("../cgi/darwin_phpcgi");
+    _response = cgi.execute("../test/darwin_phpcgi");
      setCgiHeader(_response.substr(0, _response.find("\r\n\r\n")));      
     _response = _response.substr(_response.find("\r\n\r\n") + 4);
     return writeHeader(_status, _contentType, _response.length()) + "\r\n" + _response;
@@ -96,7 +96,7 @@ std::string     Response::getMethod()
     if (_req.getFullPath().find(".php") != std::string::npos)
     {
         cgiHandler cgi(_req);
-        _response = cgi.execute("../cgi/darwin_phpcgi");
+        _response = cgi.execute("../test/darwin_phpcgi");
         setCgiHeader(_response.substr(0, _response.find("\r\n\r\n")));      
         _response = _response.substr(_response.find("\r\n\r\n") + 4);
         return writeHeader(_status, _contentType, _response.length()) + "\r\n" + _response;

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/25 16:38:03 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/26 14:54:08 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ char const *Location::NonValidCgiHandlerException::what() const throw() {
 char const *Location::NonValidRedirectionException::what() const throw() {
 	return "Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;).";
 }
-char const *Location::WrongPathException::what() const throw() { return "Invalid path for root in config_file. Probably missing a '/' in the beginning."; }
+//char const *Location::WrongPathException::what() const throw() { return "Invalid path for root in config_file. Probably missing a '/' in the beginning."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -100,8 +100,8 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	root = (*it).substr(pos, posend - pos);
 
 	setRoot(root);
-	if (getRoot()[0] != '/')
-		throw WrongPathException();
+//	if (getRoot()[0] != '/')
+//		throw WrongPathException();
 	(void)vend;
 	return 2;
 }

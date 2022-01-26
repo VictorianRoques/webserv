@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/25 20:44:06 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/26 15:23:18 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,7 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 	}
 	line = rq.substr(0, std::string::npos);
 	if (rq.length() > 2)
-		request->bodyLine(line);
+		request->bodyLine(line.substr(2));
 	request->isChunked();
 	for (; it != servers_g.end(); it++) {
 		if (vector_contains_str(it->getServerName(), request->getHost())) {

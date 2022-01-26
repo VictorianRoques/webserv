@@ -83,7 +83,7 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
         dup2(fdOut, STDOUT_FILENO);
         execve(pathToBinaryCgi.c_str(), argv, envp);
         std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
-        write(STDOUT_FILENO, "Status: 500\r\n\r\n", 20);
+        write(STDOUT_FILENO, "Status: 500\r\n\r\n", 16);
     }
     else
     {
