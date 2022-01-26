@@ -1,10 +1,30 @@
 #include "Response.hpp"
 
-Response::Response(Request &req, map_str errorPage): _req(req), _errorPage(errorPage) {
-
+Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPage(serv.getErrorPage())
+{
     _status = "200 OK";
     _path = req.getFullPath();
     _contentType = req.getContentType();
+
+    // FOUND CGI PATH
+    std::vector<Location *> loc = serv.getLocation();
+    std::vector<Location *>::iterator it = loc.begin();
+    size_t pos = _path.length();
+	
+	while (pos != 0) {
+		pos = _path.rfind("/", pos - 1);
+		for (; it != loc.end(); it++) {
+			if (!strncmp(_path.c_str(), (*it)->getLocationMatch().c_str(), pos)) {
+				break ;
+			}
+			if ((*it)->getLocationMatch() == "/")
+            {
+                _pathCgi = (*it)->getCgiHandler().second;
+                _extensionCgi = (*it)->getCgiHandler().first;
+            }
+		}
+	}
+    std::cout << "PATH CGI: " << _pathCgi << std::endl;
 }
 
 std::string Response::readHtml(std::string &path)
@@ -85,7 +105,7 @@ std::string     Response::call()
 std::string     Response::postMethod()
 {
     cgiHandler cgi(_req);
-    _response = cgi.execute("../test/darwin_phpcgi");
+    _response = cgi.execute(_pathCgi);
      setCgiHeader(_response.substr(0, _response.find("\r\n\r\n")));      
     _response = _response.substr(_response.find("\r\n\r\n") + 4);
     return writeHeader(_status, _contentType, _response.length()) + "\r\n" + _response;
@@ -93,10 +113,10 @@ std::string     Response::postMethod()
 
 std::string     Response::getMethod()
 {
-    if (_req.getFullPath().find(".php") != std::string::npos)
+    if (_req.getFullPath().find(_extensionCgi) != std::string::npos)
     {
         cgiHandler cgi(_req);
-        _response = cgi.execute("../test/darwin_phpcgi");
+        _response = cgi.execute(_pathCgi);
         setCgiHeader(_response.substr(0, _response.find("\r\n\r\n")));      
         _response = _response.substr(_response.find("\r\n\r\n") + 4);
         return writeHeader(_status, _contentType, _response.length()) + "\r\n" + _response;

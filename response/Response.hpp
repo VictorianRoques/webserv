@@ -15,12 +15,14 @@
 
 # include "../request_parser/Request_Parser.hpp"
 # include "../cgiHandler/cgiHandler.hpp"
+# include "../config_parser/Server.hpp"
 
 class Response {
 
 public:
 
-    Response(Request &req, map_str errorPage);
+    Response(Request &req, Server &serv);
+    Response();
 
     std::string     call();
     std::string     readHtml(std::string &path);
@@ -42,8 +44,11 @@ private:
     std::string                 _contentType;
     std::string                 _path;
     std::string                 _response;
+    Server                      _serv;
     map_str                     _errorPage;
-
+    std::string                _pathCgi;
+    std::string                 _extensionCgi;
+    
     // std::map<int, std::string>  _errorMap;
 };
 

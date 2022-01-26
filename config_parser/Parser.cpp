@@ -506,9 +506,11 @@ int		main(int ac, char **av) {
 			if (vector_contains_str(it->getServerName(), req->getHost()))
 				break ;
 		}
-        Response res(*req, it->getErrorPage());
+		Server *serv = new Server(*it);
+        Response res(*req, *serv);
         std::string s_res = res.call();
 		delete req;
+		delete serv;
 		printf("%s\n",buffer );
         write(new_socket , s_res.c_str(), s_res.length());
         printf("------------------Hello message sent-------------------\n");
