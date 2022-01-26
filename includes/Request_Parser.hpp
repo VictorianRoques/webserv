@@ -6,16 +6,16 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/25 20:38:51 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/26 17:26:59 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_PARSER
 # define REQUEST_PARSER
 
-# include "../utils/utils.hpp"
-# include "../config_parser/Location.hpp"
-# include "../config_parser/Server.hpp"
+# include "utils.hpp"
+# include "Location.hpp"
+# include "Server.hpp"
 
 class Request {
 

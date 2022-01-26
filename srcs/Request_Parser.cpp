@@ -6,13 +6,13 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 15:23:18 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/26 17:29:32 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Request_Parser.hpp"
-#include "../config_parser/Server.hpp"
-#include "../config_parser/Location.hpp"
+#include "../includes/Request_Parser.hpp"
+#include "../includes/Server.hpp"
+#include "../includes/Location.hpp"
 
 /**************************************/
 //           EXCEPTIONS               //

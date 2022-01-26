@@ -1,4 +1,4 @@
-#include "Response.hpp"
+#include "../includes/Response.hpp"
 
 Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPage(serv.getErrorPage())
 {

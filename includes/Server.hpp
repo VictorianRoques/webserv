@@ -6,14 +6,14 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/25 16:30:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/26 17:27:32 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "../utils/utils.hpp"
+# include "utils.hpp"
 # include "Location.hpp" 
 
 class Location;

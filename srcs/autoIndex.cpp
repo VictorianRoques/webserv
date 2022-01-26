@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/25 16:51:47 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/26 17:40:35 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <iostream>
+#include <sstream>
 #include <ctime>
 /**
 void autoIndex(std::string path) {
@@ -51,12 +52,10 @@ std::string autoIndexPageTitle(std::string path) {
 }
 
 std::string	autoIndexColumnNames() {
-	return "<div style=\"float: left; width: 32%;\"><p><strong>File Name:</strong></p></div>"
-		+ "<div style=\"float: left; width: 32%;\"><p><strong>Last Opened:</strong></p></div>"
-		+ "<div style=\"float: left; width: 32%;\"><p><strong>Size (in octets):</strong></p></div>";
+	return "<div style=\"float: left; width: 32%;\"><p><strong>File Name:</strong></p></div>" + "<div style=\"float: left; width: 32%;\"><p><strong>Last Opened:</strong></p></div>" + "<div style=\"float: left; width: 32%;\"><p><strong>Size (in octets):</strong></p></div>";
 }
 
-std::string	autoIndexDrawnLine(std::string path) {
+std::string	autoIndexDrawnLine() {
 	return "<hr size=\"1\" width=\"100%\" color=\"black\">";
 }
 
@@ -84,7 +83,7 @@ std::string autoIndexVarDate(struct stat buf) {
 }
 
 std::string autoIndexVarSize(struct stat buf) {
-		off_t				size = buf.st_size;
+		size_t				size = buf.st_size;
 		std::stringstream	ss;
 		std::string			putSize;
 		size_t				giga = 1073741824;

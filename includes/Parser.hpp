@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/25 16:28:26 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/26 17:26:41 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@
 #include <netinet/in.h>
 #include <string.h>
 
-# include "../utils/utils.hpp"
+# include "utils.hpp"
 # include "Server.hpp"
-# include "../response/Response.hpp"
+# include "Response.hpp"
 
 class Server;
 

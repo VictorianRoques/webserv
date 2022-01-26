@@ -13,9 +13,9 @@
 # include <sys/stat.h>
 # include <unistd.h>
 
-# include "../request_parser/Request_Parser.hpp"
-# include "../cgiHandler/cgiHandler.hpp"
-# include "../config_parser/Server.hpp"
+# include "Request_Parser.hpp"
+# include "cgiHandler.hpp"
+# include "Server.hpp"
 
 class Response {
 

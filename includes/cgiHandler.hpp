@@ -1,9 +1,9 @@
 #ifndef CGI_HANDLER_H
 # define CGI_HANDLER_H
 
-# include "../request_parser/Request_Parser.hpp"
+# include "Request_Parser.hpp"
 # include <unistd.h>
-# include "../utils/utils.hpp"
+# include "utils.hpp"
 
 // Open include
 #include <sys/types.h>
