@@ -29,9 +29,8 @@ class Server;
 /**
  * global variable: vector containing all servers in parsed config file.
 **/
-std::vector<Server> servers_g;
 
-Request	*requestParser(std::string request_header, std::vector<Server> servers_g);
+Request	*requestParser(std::string request_header, std::vector<Server> _servers_g);
 
 /**
  * class Parser: holds the server directives while parsing
@@ -60,11 +59,13 @@ class Parser: public Server {
 	private:
 		bool						_in_server;
 		bool						_in_location;
+		std::vector<Server>			_servers_g;
 	
 		// getters
 	public:
 		bool						getInLocation() const;
 		bool						getInServer() const;
+		std::vector<Server>			&getServersG();
 		
 
 		// PARSING
@@ -86,6 +87,7 @@ class Parser: public Server {
 		size_t	dirClose(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirOpen(vec_str::iterator it, vec_str::iterator vend);
 
+		void	print_test();
 		//EXCEPTION
 
 		class MissingBracketException: public std::exception {

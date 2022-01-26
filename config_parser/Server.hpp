@@ -40,6 +40,7 @@ class Server {
 		size_t							_maxBodySize;
 		std::vector<Location *>			_location;
 		int								_serverNb;
+		std::vector<Server>					_servers_g;
 
 		// getters
 	public:
