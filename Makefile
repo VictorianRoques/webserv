@@ -11,6 +11,8 @@ SRC 		=	srcs/main.cpp \
 				srcs/Request_Parser.cpp \
 				srcs/Response.cpp \
 				srcs/Server.cpp \
+				srcs/socket.cpp \
+				srcs/socketUtils.cpp \
 				srcs/utils.cpp
 
 RED			=	\033[0;31m
