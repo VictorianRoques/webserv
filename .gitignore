@@ -4,3 +4,6 @@ utils.hpp.gch
 tmpIn
 tmpOut
 .vscode/settings.json
+webserv
+*.o
+*/*.o

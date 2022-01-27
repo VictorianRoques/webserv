@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 17:29:05 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 17:02:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ char const *Parser::NoSuchDirectiveException::what() const throw() { return "Unk
 char const *Parser::FailedToOpenException::what() const throw() { return "Failed to open <config_file>."; }
 char const *Parser::WrongPathException::what() const throw() { return "Invalid path for location in config_file. Probably missing a '/' in the beginning."; }
 char const *Parser::ErrorPageException::what() const throw() { return "Need at least two arguments to the error_page directive."; }
+char const *Parser::NeedOnePortException::what() const throw() { return "Need one and only one port per listen directive."; }
+char const *Parser::UnaccessiblePortException::what() const throw() { return "Ports below 1024 are considered \"privileged\".\n Only privileged users (e.g. root) can access them."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -68,6 +70,7 @@ Parser&	Parser::operator=(const Parser &x) {
 bool		 				Parser::getInServer() const { return _in_server; }
 bool		 				Parser::getInLocation() const { return _in_location; }
 std::vector<Server>&		Parser::getServersG() { return _servers_g; }
+std::vector<size_t>		Parser::getPortsG() { return _ports_g; }
 
 /**************************************/
 //			PARSING HELPERS			  //
@@ -107,6 +110,12 @@ size_t	Parser::dirListen(vec_str::iterator it, vec_str::iterator vend) {
 		if (end != std::string::npos)
 			break ;
 	}
+	
+	if (*_port.begin() < 1024)
+		throw UnaccessiblePortException();
+	if (_port.size() != 1)
+		throw NeedOnePortException();
+
 	return ret;
 }
 
@@ -319,8 +328,17 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 
 	// since 'server' directive comes up first, need to iterate once before saving it into servers_g.
 	if (_serverNb > 0) {
-		Server& server = dynamic_cast<Server&>(*this);
+
+		// 8080 is default port
+		if (_port.size() == 0)
+			_port.push_back(8080);
+
+		// update list of all ports
+		if (find(_ports_g.begin(), _ports_g.end(), *_port.begin()) == _ports_g.end())
+			_ports_g.push_back(*_port.begin());
+
 		// add Server to servers_g
+		Server& server = dynamic_cast<Server&>(*this);
 		_servers_g.push_back(server);
 		// clearing Parser class
 		this->clear();
@@ -428,6 +446,8 @@ void	Parser::print_test() {
 	it = _servers_g.begin();
 	for (; it != _servers_g.end(); it++)
 		it->print_serv();
+	std::cout << COLOR_SERV << "List of all the ports: " << NC;
+	ft_putvec(_ports_g, " ");
 }
 
 
