@@ -25,7 +25,7 @@ Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPa
         else
             _path = _root + "/" + _index;
         _contentType = "text/html";
-    }   
+    }
 }
 
 void        Response::setCgiPath()
@@ -47,6 +47,7 @@ void        Response::setCgiPath()
                 _index = (*it)->getIndex();
                 _root = (*it)->getRoot();
                 _AutoIndex = (*it)->getAutoIndex();
+                _allowMethods = (*it)->getMethods();
             }
 		}
 	}
@@ -127,7 +128,7 @@ std::string&     Response::postMethod()
 {
     cgiHandler cgi(_req);
     _body = cgi.execute(_pathCgi);
-    if (_body == "<html><body>FATAL ERROR</body></html>")
+    if (_body == "<html><body>FATAL ERROR CGI</body></html>")
     {
         _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
         _response = _header + _body;
@@ -146,7 +147,7 @@ std::string&     Response::getMethod()
     {
         cgiHandler cgi(_req);
         _body = cgi.execute(_pathCgi);
-        if (_body == "<html><body>FATAL ERROR</body></html>")
+        if (_body == "<html><body>FATAL ERROR CGI</body></html>")
         {
             _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
             _response = _header + _body;
@@ -158,7 +159,6 @@ std::string&     Response::getMethod()
     }
     else if (_AutoIndex == true && pathIsDirectory(_path))
     {
-        std::cout << "HERE" << std::endl;
         _body = autoIndexBuilder(_path);
         _header = writeHeader("200 OK", "text/html", _body.length());
     }
@@ -170,12 +170,47 @@ std::string&     Response::getMethod()
     return _response;
 }
 
+std::string&     Response::deleteMethod()
+{
+    _body = "";
+    if (pathIsFile(_path) || pathIsDirectory(_path))
+    {
+        if (remove(_path.c_str()))
+        {
+            if (readHtml(_errorPage["403"]))
+                _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+        }
+        _header = "HTTP/1.1 204\r\n\r\n";
+    }
+    else
+    {
+        if (readHtml(_errorPage["404"]))
+            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+    }
+    _response = _header + _body;
+    return _response; 
+}
+
+bool             Response::isAllow(std::string method)
+{
+    vec_str::iterator it = _allowMethods.begin();
+    vec_str::iterator ite = _allowMethods.end();
+    for (; it != ite; it++)
+    {
+        if (*it == method)
+            return true;
+    }
+    return false;
+}
+
 std::string&     Response::call()
 {
-    if (_req.getMethod() == "GET")
+    if (_req.getMethod() == "GET" && isAllow("GET"))
         return getMethod();
-    else if (_req.getMethod() == "POST")
+    else if (_req.getMethod() == "POST" && isAllow("POST"))
         return postMethod();
+    else if (_req.getMethod() == "DELETE" && isAllow("DELETE"))
+        return deleteMethod();
     else
     {
         if (readHtml(_errorPage["405"]))
