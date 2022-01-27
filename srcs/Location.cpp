@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 17:28:52 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 16:45:14 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,11 @@ char const *Location::NonValidRedirectionException::what() const throw() {
 Location::Location():
 	_root("/"),
 	_autoIndex(true)
-{}
+{
+	_methods.push_back("GET");
+	_methods.push_back("POST");
+	_methods.push_back("DELETE");
+}
 
 Location::~Location() {}
 

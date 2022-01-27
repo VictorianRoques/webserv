@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 18:33:12 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 16:51:31 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <vector>
 # include <map>
 # include <cstring>
+# include <algorithm> // find() (in Parser.cpp)
 
 /**
  * COLORS

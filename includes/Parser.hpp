@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 17:26:41 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 17:02:33 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,12 +60,14 @@ class Parser: public Server {
 		bool						_in_server;
 		bool						_in_location;
 		std::vector<Server>			_servers_g;
+		std::vector<size_t>			_ports_g;
 	
 		// getters
 	public:
 		bool						getInLocation() const;
 		bool						getInServer() const;
 		std::vector<Server>			&getServersG();
+		std::vector<size_t>			getPortsG();
 		
 
 		// PARSING
@@ -126,6 +128,16 @@ class Parser: public Server {
 		};
 
 		class ErrorPageException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class UnaccessiblePortException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class NeedOnePortException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};

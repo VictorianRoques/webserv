@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Request_parser.cpp                                 :+:      :+:    :+:   */
+/*   Request_Parser.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 17:29:32 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 16:46:33 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,6 +258,11 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 	if (rq.length() > 2)
 		request->bodyLine(line.substr(2));
 	request->isChunked();
+			
+	// first server is default server
+	request->buildFullPath(it->getLocation());
+	request->queryString();
+	// find the correct server (if any)
 	for (; it != servers_g.end(); it++) {
 		if (vector_contains_str(it->getServerName(), request->getHost())) {
 			request->buildFullPath(it->getLocation());
@@ -265,8 +270,6 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 			break ;
 		}
 	}
-//	if (it == servers_g.end())
-//		throw Request::NoHostException();
 
 	if (request->getContentType().empty())
 		request->solveContentType();
