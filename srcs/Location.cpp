@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/27 16:45:14 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/27 18:14:36 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 char const *Location::WrongMethodException::what() const throw() { return "Wrong method."; }
 char const *Location::WrongValue_AutoIndexException::what() const throw() { return "Wrong value for autoindex."; }
-char const *Location::NonValidRootException::what() const throw() { return "Non valid root\nUsage: root <path>; (you probably forgot a \";\")."; }
+char const *Location::NonValidRootException::what() const throw() { return "Non valid root\nUsage: root <path>;\nYou probably forgot a \";\".\nYou probably wrote a path starting with a '/' but containing '..' (mixed absolute and relative path)"; }
 char const *Location::NonValidIndexException::what() const throw() { return "Non valid index\nUsage: index <file_name>; (you probably forgot a \";\")."; }
 char const *Location::NonValidCgiHandlerException::what() const throw() {
 	return "Non valid CGI Handler\nUsage: cgi_handler <file_extension> <CGI binary>; (you probably forgot a \";\").";
@@ -35,11 +35,7 @@ char const *Location::NonValidRedirectionException::what() const throw() {
 Location::Location():
 	_root("/"),
 	_autoIndex(true)
-{
-	_methods.push_back("GET");
-	_methods.push_back("POST");
-	_methods.push_back("DELETE");
-}
+{}
 
 Location::~Location() {}
 
@@ -104,8 +100,15 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	root = (*it).substr(pos, posend - pos);
 
 	setRoot(root);
-//	if (getRoot()[0] != '/')
-//		throw WrongPathException();
+
+	// turn relative path into absolute
+	if (getRoot()[0] != '/') {
+		const char *env_pwd = std::getenv("PWD");
+		std::string	pwd(env_pwd);
+		setRoot(pwd + "/" + getRoot());
+	}
+	else if (getRoot().find("..") != std::string::npos)
+		throw NonValidRootException();
 	(void)vend;
 	return 2;
 }
@@ -212,8 +215,9 @@ size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
 		no_match = true;
 		for (vec_str::iterator mit = methods.begin(); mit != methods.end(); mit++) {
 			if (*mit == tmp) {
-				_methods.push_back(tmp);
 				no_match = false;
+			       	if (find(_methods.begin(), _methods.end(), *mit) == _methods.end())
+					_methods.push_back(tmp);
 			}
 		}
 		if (no_match == true)
