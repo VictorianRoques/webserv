@@ -3,19 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   autoIndex.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 17:40:35 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 11:29:14 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../includes/autoIndex.hpp"
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <string>
+
 /**
 void autoIndex(std::string path) {
 	
@@ -52,7 +55,9 @@ std::string autoIndexPageTitle(std::string path) {
 }
 
 std::string	autoIndexColumnNames() {
-	return "<div style=\"float: left; width: 32%;\"><p><strong>File Name:</strong></p></div>" + "<div style=\"float: left; width: 32%;\"><p><strong>Last Opened:</strong></p></div>" + "<div style=\"float: left; width: 32%;\"><p><strong>Size (in octets):</strong></p></div>";
+	return "<div style=\"float: left; width: 32%;\"><p><strong>File Name:</strong></p></div>"
+	"<div style=\"float: left; width: 32%;\"><p><strong>Last Opened:</strong></p></div>"
+	"<div style=\"float: left; width: 32%;\"><p><strong>Size (in octets):</strong></p></div>";
 }
 
 std::string	autoIndexDrawnLine() {

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/01/26 20:12:24 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 11:42:59 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,11 @@ Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPa
     setCgiPath();
     if (req.getPath() == "/")
     {
-        _path = _root + "/" + _index;
+        if (_AutoIndex == true)
+            _path.pop_back();
+        else
+            _path = _root + "/" + _index;
         _contentType = "text/html";
-        std::cout << "PATHHH: " << _path << std::endl;
-        // NEXT BUILD DYNAMIC CONTENT TYPE
-        // SET INDEX + ROOT INDEPENDAMENT OF CGI
     }   
 }
 
@@ -46,7 +46,7 @@ void        Response::setCgiPath()
                 _extensionCgi = (*it)->getCgiHandler().first;
                 _index = (*it)->getIndex();
                 _root = (*it)->getRoot();
-                std::cout << "INDEX: " << _index << std::endl;
+                _AutoIndex = (*it)->getAutoIndex();
             }
 		}
 	}
@@ -154,13 +154,18 @@ std::string&     Response::getMethod()
         setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
         _body = _body.substr(_body.find("\r\n\r\n") + 4);
         _header = writeHeader(_status, _contentType, _body.length());
-        _response = _header + _body;
+    }
+    else if (_AutoIndex == true && pathIsDirectory(_path))
+    {
+        std::cout << "HERE" << std::endl;
+        _body = autoIndexBuilder(_path);
+        _header = writeHeader("200 OK", "text/html", _body.length());
     }
     else
     {
         readContent(_path);
-        _response = _header + _body;
     }
+    _response = _header + _body;
     return _response;
 }
 
@@ -194,6 +199,16 @@ int     Response::pathIsFile(std::string &path)
 
 	if (stat(path.c_str(), &s) == 0)
         if (s.st_mode & S_IFREG)
+			return 1;
+	return 0;
+}
+
+int     Response::pathIsDirectory(std::string &path)
+{
+    struct stat s;
+
+	if (stat(path.c_str(), &s) == 0)
+        if (s.st_mode & S_IFDIR)
 			return 1;
 	return 0;
 }

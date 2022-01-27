@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/01/26 19:51:23 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 11:20:40 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 # include "Request_Parser.hpp"
 # include "cgiHandler.hpp"
 # include "Server.hpp"
+# include "autoIndex.hpp"
 
 class Response {
 
@@ -47,7 +48,9 @@ public:
 
     // Utils
     int             pathIsFile(std::string &path);
+    int             pathIsDirectory(std::string &path);
     std::string     sizeToString(size_t size);
+
 
 private:
 
@@ -65,7 +68,7 @@ private:
     std::string                 _extensionCgi;
     std::string                 _index;
     std::string                 _root;
-    // std::map<int, std::string>  _errorMap;
+    bool                        _AutoIndex;
 };
 
 #endif

@@ -4,6 +4,7 @@ CFLAGS		=	-Wall -Werror -Wextra -std=c++98
 OBJ 		=	$(SRC:.cpp=.o)
 
 SRC 		=	srcs/main.cpp \
+				srcs/autoIndex.cpp \
 				srcs/cgiHandler.cpp \
 				srcs/Location.cpp \
 				srcs/Parser.cpp \
