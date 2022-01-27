@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/27 16:46:33 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/27 18:17:56 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,9 +270,7 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 			break ;
 		}
 	}
-
-	if (request->getContentType().empty())
-		request->solveContentType();
+	
 	request->print_request();
 	return request;
 }

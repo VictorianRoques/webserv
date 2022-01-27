@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/27 16:51:31 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/27 17:59:10 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define UTILS_HPP
 
 # include <iostream>
-# include <cstdlib> // std::atoi()
+# include <cstdlib> // std::atoi() ; std::getenv()
 # include <utility> // std::make_pair
 # include <string>
 # include <fstream>

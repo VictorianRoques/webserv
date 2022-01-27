@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/01/27 11:42:59 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/27 18:03:32 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ void     Response::readContent(std::string &path)
     std::ifstream       ofs;
     std::stringstream   buffer;
 
-    std::cout << "PATH: " << path << std::endl;
+ //   std::cout << "PATH: " << path << std::endl;
     if (pathIsFile(path))
     {
         ofs.open(path.c_str(), std::ifstream::in);
@@ -167,6 +167,7 @@ std::string&     Response::getMethod()
         readContent(_path);
     }
     _response = _header + _body;
+//    std::cout << "RES: \n" << _response << "\nEND\n";
     return _response;
 }
 
