@@ -1,0 +1,20 @@
+Everyone:
+
+- Chunk request what is it ? 
+- Testeur du sujet
+
+Victorian:
+
+- Page de reponse Html + php
+- Upload CGI
+
+Padoue:
+
+- AutoIndex corriger
+- Resoudre maxBodySize execption
+
+Florian:
+
+- Refaire Makefile
+- tester sa mere le serveur , NO CRASH
+- Recuperer liste des ports std::vector<size_t> _ports_g (belongs to Parser) dans sa fonction sockServ()

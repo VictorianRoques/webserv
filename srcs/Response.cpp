@@ -206,6 +206,13 @@ bool             Response::isAllow(std::string method)
 
 std::string&     Response::call()
 {
+    if (_req.getBody().size() + 2 > _serv.getMaxBodySize())
+    {
+        if (readHtml(_errorPage["413"]))
+            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+        _response = _header + _body;
+        return _response;
+    }
     if (_req.getMethod() == "GET" && isAllow("GET"))
         return getMethod();
     else if (_req.getMethod() == "POST" && isAllow("POST"))

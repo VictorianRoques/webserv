@@ -40,7 +40,7 @@ class Server {
 		size_t							_maxBodySize;
 		std::vector<Location *>			_location;
 		int								_serverNb;
-		std::vector<Server>					_servers_g;
+		std::vector<Server>				_servers_g;
 
 		// getters
 	public:
@@ -70,6 +70,13 @@ class Server {
 		// utils
 	public:
 		void	print_serv();
+
+	//EXCEPTION
+
+		class ExceededMaxBodySizeException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
 };
 
 

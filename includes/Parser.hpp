@@ -90,6 +90,7 @@ class Parser: public Server {
 		size_t	dirOpen(vec_str::iterator it, vec_str::iterator vend);
 
 		void	print_test();
+		
 		//EXCEPTION
 
 		class MissingBracketException: public std::exception {

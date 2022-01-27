@@ -113,6 +113,7 @@ int     main(int ac , char **av)
         catch (std::exception &e)
         {
             std::cout << RED << "Error: " << NC << e.what() << std::endl;
+            return (1);
         }
 
         std::vector<Server> server_g = parser.getServersG();

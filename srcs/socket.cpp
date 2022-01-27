@@ -77,8 +77,10 @@ void	addClient(int fd, fd_set *activeSet)
 ** 2) Sent a request
 ** this function manages those 2 cases (+ the case of a read error)
 */
+
 void	readClient(int fd, fd_set *activeSet, fd_set *writeSet, std::map<int, std::string> &answer, std::vector<Server> server_g)
 {
+	// Do while loop to read <3
 	char	buffer[4096];
 	int		ret = read(fd, buffer, 4095);
 	if (ret == ERROR) {

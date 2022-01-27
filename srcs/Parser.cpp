@@ -307,9 +307,11 @@ void	Parser::clear() {
 	_maxBodySize = 1000000;
 	_errorPage.clear();
 	_errorPage["400"] = "400.html";
+	_errorPage["403"] = "403.html";
 	_errorPage["404"] = "404.html";
 	_errorPage["405"] = "405.html";
 	_errorPage["406"] = "406.html";
+	_errorPage["413"] = "413.html";
 	_errorPage["429"] = "429.html";
 	_errorPage["499"] = "499.html";
 	_errorPage["520"] = "520.html";

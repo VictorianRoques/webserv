@@ -13,6 +13,11 @@
 #include "../includes/Server.hpp"
 
 /**************************************/
+//           EXCEPTIONS               //
+/**************************************/
+char const *Server::ExceededMaxBodySizeException::what() const throw() { return "Exceeded max body size!"; }
+
+/**************************************/
 //           COPLIAN CLASS            //
 /**************************************/
 
@@ -22,10 +27,11 @@ Server::Server():
 	_serverNb(-1)
 {
 	_errorPage["400"] = "error_pages/400.html";
-	_errorPage["403"] = "error_pages/404.html";
+	_errorPage["403"] = "error_pages/403.html";
 	_errorPage["404"] = "error_pages/404.html";
 	_errorPage["405"] = "error_pages/405.html";
 	_errorPage["406"] = "error_pages/406.html";
+	_errorPage["413"] = "error_pages/413.html";
 	_errorPage["429"] = "error_pages/429.html";
 	_errorPage["499"] = "error_pages/499.html";
 	_errorPage["520"] = "error_pages/520.html";
@@ -82,6 +88,8 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 			_maxBodySize *= 1048576;
 		else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
 			_maxBodySize *= 1073741824;
+		// if (_maxBodySize > (1048576 * 16))
+		// 	throw ExceededMaxBodySizeException();
 	}
 }
 void	Server::setLocation(std::vector<Location *> location) { _location = location; }
