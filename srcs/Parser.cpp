@@ -394,7 +394,7 @@ void	Parser::tokenizer(char **av) {
 	size_t	pos;
 	size_t	posend;
 
-	file.open(fileName);
+	file.open(fileName.c_str());
 	if (!file.is_open())
 		throw FailedToOpenException();
 

@@ -21,7 +21,7 @@ Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPa
     if (req.getPath() == "/")
     {
         if (_AutoIndex == true)
-            _path.pop_back();
+            _path.erase(_path.size() - 1);
         else
             _path = _root + "/" + _index;
         _contentType = "text/html";
@@ -83,6 +83,7 @@ void     Response::readContent(std::string &path)
     std::ifstream       ofs;
     std::stringstream   buffer;
 
+    std::cout << "PATH: " << path << std::endl;
     if (pathIsFile(path))
     {
         ofs.open(path.c_str(), std::ifstream::in);

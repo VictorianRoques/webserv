@@ -38,7 +38,7 @@ std::map<std::string, std::string>	ft_map_split(std::string line, std::string de
 
 	std::string first = line.substr(0, line.find(delim) - 1);
 	std::string second = line.substr(line.find(delim) + 1, std::string::npos);
-	m.insert(std::make_pair<std::string, std::string>(first, second));
+	m.insert(std::make_pair(first, second));
 	return m;
 }
 
