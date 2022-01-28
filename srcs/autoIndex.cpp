@@ -6,51 +6,26 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/27 11:29:14 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/28 16:58:59 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/autoIndex.hpp"
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <iostream>
-#include <sstream>
-#include <ctime>
-#include <string>
+#include "../includes/Response.hpp"
 
-/**
-void autoIndex(std::string path) {
-	
-	DIR	*dirStream;
-	struct dirent	*nextEntry;
-	struct stat		buf;
+/**************************************/
+//           EXCEPTIONS               //
+/**************************************/
+char const *StatFailedException::what() const throw() { return "stat() failed in the autoIndexBuilder() function."; }
 
-	dirStream = opendir(path.c_str());
-
-	while ((nextEntry = readdir(dirStream)) != NULL) {
-		std::string name(nextEntry->d_name);
-		name = path + "/" + name;
-		stat(name.c_str(), &buf);
-
-		std::cout << nextEntry->d_name; // name
-		if (S_ISDIR(buf.st_mode))
-			std::cout << "/";
-		std::cout << " ";
-		std::string time = asctime(localtime(&buf.st_ctime));
-		std::cout << time.substr(0, time.size() - 1); // last modif date
-		std::cout << buf.st_size << std::endl; // size
-	}
-
-	closedir(dirStream);
-	return ;
-}
-**/
 std::string	autoIndexHeader(std::string path) {
 	return "<!DOCTYPE html><html><head><title>" + path + "</title></head><body>";
 }
 
 std::string autoIndexPageTitle(std::string path) {
+	size_t end = path.find("..");
+
+	path = (end != std::string::npos) ? path.substr(0, end - 1) : path.substr(0, end);
 	return "<h1>Index of " + path + "/" + "</h1>";
 }
 
@@ -64,11 +39,14 @@ std::string	autoIndexDrawnLine() {
 	return "<hr size=\"1\" width=\"100%\" color=\"black\">";
 }
 
-std::string	autoIndexVarName(std::string path, std::string name, struct stat buf) {
+/**
+ * varName(): File Name
+**/
+std::string	autoIndexVarName(std::string name, struct stat buf) {
 	std::string content;
 
 	content = "<div style=\"float: left; width: 32%;\"><a href=\"";
-	content += path;
+	content += "/" + name;
 	content += "\">";
 	content += name;
 	if (S_ISDIR(buf.st_mode))
@@ -77,6 +55,9 @@ std::string	autoIndexVarName(std::string path, std::string name, struct stat buf
 	return content;
 }
 
+/**
+ * VarDate(): Last Opened
+**/
 std::string autoIndexVarDate(struct stat buf) {
 	
 	std::string time;
@@ -87,6 +68,9 @@ std::string autoIndexVarDate(struct stat buf) {
 	return "<div style=\"float: left; width: 32%;\">" + time + "</div>";
 }
 
+/**
+ * varSize(): Size (in octets)
+**/
 std::string autoIndexVarSize(struct stat buf) {
 		size_t				size = buf.st_size;
 		std::stringstream	ss;
@@ -98,42 +82,57 @@ std::string autoIndexVarSize(struct stat buf) {
 		if (size >= giga) {
 			size /= giga;
 			ss << size;
-			putSize = ss.str() + "G";
+			putSize = ss.str() + "Go";
 		}
 		else if (size >= mega) {
 			size /= mega;
 			ss << size;
-			putSize = ss.str() + "M";
+			putSize = ss.str() + "Mo";
 		}
 		else if (size >= kilo) {
 			size /= kilo;
 			ss << size;
-			putSize = ss.str() + "K";
+			putSize = ss.str() + "Ko";
 		}
-		return "<div style=\"float: left; width: 32%;\">" + putSize + "</div>";
+		if (putSize == "")
+			putSize = "<1Ko";
+		return "<div style=\"float: right; width: 32%;\">" + putSize + "</div>";
 }
 
-std::string	autoIndexBuilder(std::string path) {
+/**
+ * builder()
+**/
+std::string	Response::autoIndexBuilder(std::string path) {
 	DIR				*dirStream;
 	struct dirent	*nextEntry;
 	struct stat		buf;
 	std::string		content;
+	std::string		newPath;
 
-	dirStream = opendir(path.c_str());
+	dirStream = opendir(path.c_str()); // get list of files and directories
 
 	content = autoIndexHeader(path);
 	content += autoIndexPageTitle(path);
 	content += autoIndexColumnNames();
 	content += autoIndexDrawnLine();
 
+	readdir(dirStream); // skip "."
 	while ((nextEntry = readdir(dirStream)) != NULL) {
 		std::string name(nextEntry->d_name);
-		path = path + "/" + name;
-		stat(path.c_str(), &buf);
-
-		content += autoIndexVarName(path, name, buf);
+		newPath = path + "/" + name;
+		if (stat(newPath.c_str(), &buf) < 0) // get Date and Size
+			throw StatFailedException();
+		
+		content += autoIndexVarName(name, buf);
 		content += autoIndexVarDate(buf);
-		content += autoIndexVarSize(buf);
+		
+		// ".." is a special case
+		if (name == "..") {
+			content += "<div style=\"float: right; width: 32%;\">-</div>";
+		}
+		else {
+			content += autoIndexVarSize(buf);
+		}
 	}
 
 	content += "</body></html>";
@@ -141,8 +140,3 @@ std::string	autoIndexBuilder(std::string path) {
 
 	return content;
 }
-/**
-int	main(void) {
-	std::string path("/Users/pnielly/pnielly/viro");
-	autoIndex(path);
-}**/

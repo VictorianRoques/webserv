@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/27 11:13:32 by viroques          #+#    #+#             */
-/*   Updated: 2022/01/27 11:29:43 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/28 16:35:37 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,17 @@
 # define AUTO_INDEX_H
 
 # include <string>
+# include <dirent.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <iostream>
+# include <sstream>
+# include <ctime>
 
-std::string	autoIndexBuilder(std::string path);
+class StatFailedException: public std::exception {
+	public:
+		virtual char const *what() const throw();
+};
+
 
 #endif

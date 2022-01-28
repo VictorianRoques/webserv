@@ -6,11 +6,16 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/01/27 18:03:32 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/28 16:36:09 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/Response.hpp"
+
+
+/**************************************/
+//           FUNCTIONS                //
+/**************************************/
 
 Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPage(serv.getErrorPage())
 {
