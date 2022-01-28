@@ -1,0 +1,21 @@
+Process gitHub pour push:
+
+- git branch NEW_FEATURE
+- git checkout NEW_FEATURE
+- git add, commmit
+- git push origin NEW_FEATURE
+
+Verifier que la branch master est a jour: 
+
+- git checkout master
+- git pull origin master
+- git merge NEW_FEATURE
+- git push origin master
+
+Potential Error avec git pull:
+ERROR:  Your local changes to the following files would be overwritten by merge:
+
+case 1: Je ne veux pas push mes changements, et je veux que le merge overwrite mes changements
+- git stash
+
+case 2: Je veux conserver mes changements, je crée une branch en suivant le process 
