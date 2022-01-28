@@ -19,3 +19,10 @@ case 1: Je ne veux pas push mes changements, et je veux que le merge overwrite m
 - git stash
 
 case 2: Je veux conserver mes changements, je crée une branch en suivant le process 
+
+
+Bonne pratique avant de commencer a travailler:
+
+- Pull pour s'assurer de bosser sur la derniere version
+- Creer sa branch avec le nom de la feature à implementer
+ 
