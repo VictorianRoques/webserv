@@ -6,11 +6,12 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/27 18:14:36 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/31 11:59:20 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/Location.hpp"
+#include "../includes/utils.hpp"
 
 /**************************************/
 //           EXCEPTIONS               //
@@ -98,6 +99,9 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	pos = (*it).find_first_not_of(";");
 	posend = std::min((*it).find_first_of(";", pos), (*it).length());
 	root = (*it).substr(pos, posend - pos);
+
+	//remove useless backwards (would puzzle the cgi)
+	root = removeBackwards(root);
 
 	setRoot(root);
 

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/27 17:59:10 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/31 12:15:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,10 +76,17 @@ void	ft_putmap(std::map<T, U> m, std::string separator) {
 vec_str 							ft_split(std::string line, std::string delim);
 std::map<std::string, std::string>	ft_map_split(std::string line, std::string delim);
 bool								vector_contains_str(vec_str v, std::string str);
+std::string							removeBackwards(std::string path);
 
 /**
  * prototype of testing
 **/
 void	print_test(); //in Parser.cpp to print all servers class
+
+//Exception
+class WrongPathFormatException: public std::exception {
+	public:
+		virtual char const *what() const throw();
+};
 
 #endif
