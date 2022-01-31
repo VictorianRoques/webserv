@@ -6,7 +6,7 @@
 #    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
-#    Updated: 2022/01/30 20:54:19 by fhamel           ###   ########.fr        #
+#    Updated: 2022/01/31 15:08:21 by fhamel           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,7 +32,7 @@ _SRC_		=	main.cpp \
 				socket.cpp \
 				utils.cpp \
 
-SRCS		=	$(addprex$(D_SRCS), $(_SRC_))
+SRCS		=	$(addprefix $(D_SRCS), $(_SRC_))
 
 OBJS		=	$(addprefix $(D_OBJS), $(_SRC_:.cpp=.o))
 
