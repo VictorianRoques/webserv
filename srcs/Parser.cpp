@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/31 15:01:54 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/01/31 16:17:40 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,7 +246,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	size_t ret = 1;
 	size_t iter;
 	
-	Location *location = new Location();
+	Location *location = new Location(_maxBodySize);
 	_in_location = true;
 
 	iter = locationContext(it, location);
@@ -257,6 +257,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	std::vector<std::pair<std::string, Location::methodPointer> > dir;
 	Location::methodPointer mp;
 
+	dir.push_back(std::make_pair("client_max_body_size", &Location::dirMaxBodySize));
 	dir.push_back(std::make_pair("root", &Location::dirRoot));
 	dir.push_back(std::make_pair("methods", &Location::dirMethods));
 	dir.push_back(std::make_pair("autoindex", &Location::dirAutoIndex));
@@ -272,7 +273,6 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 			it++;
 		else {
 			idir = dir.begin();
-//			iter = 0;
 			for (; idir < dir.end(); idir++) {
 				if (*it == idir->first) {
 					mp = idir->second;
@@ -451,9 +451,3 @@ void	Parser::print_test() {
 	std::cout << COLOR_SERV << "List of all the ports: " << NC;
 	ft_putvec(_ports_g, " ");
 }
-
-
-/**
- * main(): gets a config file in param and parses it
- **/
-

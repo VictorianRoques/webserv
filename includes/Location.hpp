@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 17:27:57 by viroques         ###   ########.fr       */
+/*   Updated: 2022/01/31 16:17:10 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class Location {
 	// Coplian Class
 	public:
 		Location();
+		Location(size_t maxBodySize); //init
 		~Location();
 		Location(const Location &);
 		Location&	operator=(const Location &);
@@ -46,6 +47,7 @@ class Location {
 		bool								_autoIndex;
 		std::pair<std::string, std::string>	_cgiHandler;
 		std::string							_uploadDest;
+		size_t								_maxBodySize;
 
 		// getters
 	public:
@@ -58,6 +60,7 @@ class Location {
 		bool								getAutoIndex() const;
 		std::pair<std::string, std::string>	getCgiHandler() const;
 		std::string							getUploadDest() const;
+		size_t								getMaxBodySize() const;
 
 		//setters
 	public:
@@ -70,6 +73,8 @@ class Location {
 		void	setAutoIndex(bool autoIndex);
 		void	setCgiHandler(std::pair<std::string, std::string> cgiHandler);
 		void	setUploadDest(std::string uploadDest);
+		void	setMaxBodySize(size_t maxBodySize);
+		void	setMaxBodySize(std::string maxBodySize);
 
 		// parsing helpers
 	public:
@@ -80,6 +85,7 @@ class Location {
 		size_t	dirIndex(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirCgiHandler(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirUploadDest(vec_str::iterator it, vec_str::iterator vend);
+		size_t	dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend);
 
 		// utils
 	public:

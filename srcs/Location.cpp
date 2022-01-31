@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/31 15:01:49 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/01/31 16:27:24 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,12 @@ char const *Location::NonValidRedirectionException::what() const throw() {
 Location::Location():
 	_root("/"),
 	_autoIndex(true)
+{}
+
+Location::Location(size_t maxBodySize):
+	_root("/"),
+	_autoIndex(true),
+	_maxBodySize(maxBodySize)
 {}
 
 Location::~Location() {}
@@ -68,9 +74,10 @@ std::string							Location::getIndex() const { return _index; }
 bool								Location::getAutoIndex() const { return _autoIndex; }
 std::pair<std::string, std::string>	Location::getCgiHandler() const { return _cgiHandler; }
 std::string							Location::getUploadDest() const { return _uploadDest; }
+size_t								Location::getMaxBodySize() const { return _maxBodySize; }
 
 /**************************************/
-//				GETTERS				  //
+//				SETTERS				  //
 /**************************************/
 
 void	Location::setMatchModifier(std::string matchModifier) { _matchModifier = matchModifier; }
@@ -82,10 +89,35 @@ void	Location::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
 void	Location::setIndex(std::string index) { _index = index; }
 void	Location::setCgiHandler(std::pair<std::string, std::string> cgiHandler) { _cgiHandler = cgiHandler; }
 void	Location::setUploadDest(std::string uploadDest) { _uploadDest = uploadDest; }
+void	Location::setMaxBodySize(size_t maxBodySize) { _maxBodySize = maxBodySize; }
+void	Location::setMaxBodySize(std::string maxBodySize) {
+	size_t pos;
+
+	_maxBodySize = static_cast<size_t>(std::atoi(maxBodySize.c_str()));
+	if ((pos = maxBodySize.find_first_not_of("0123456789")) != std::string::npos) {
+		if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k')
+			_maxBodySize *= 1024;
+		else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm')
+			_maxBodySize *= 1048576;
+		else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
+			_maxBodySize *= 1073741824;
+		// if (_maxBodySize > (1048576 * 16))
+		// 	throw ExceededMaxBodySizeException();
+	}
+}
 
 /**************************************/
 //			PARSING HELPERS			  //
 /**************************************/
+
+/**
+ * dirMaxBodySize(): sets client_max_body_size from parsing (called by interpret())
+**/
+size_t Location::dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend) {
+	setMaxBodySize(*it);
+	(void)vend;
+	return 2;
+}
 
 /**
  * dirRoot(): sets root (called by dirLocation())
@@ -242,6 +274,7 @@ void	Location::print_loc() {
 	std::cout << COLOR_LOC << "Match Modifier: " << NC << _matchModifier << std::endl;
 	std::cout << COLOR_LOC << "Location Match: " << NC << _locationMatch << std::endl;
 	std::cout << COLOR_LOC << "Root: " << NC << _root << std::endl;
+	std::cout << COLOR_LOC << "Max Body Size: " << NC << _maxBodySize << std::endl;
 	std::cout << COLOR_LOC << "AutoIndex: " << NC << (_autoIndex ? "on" : "off") << std::endl;
 	std::cout << COLOR_LOC << "Index (response file if request is directory): " << NC << _index << std::endl;
 	std::cout << COLOR_LOC << "Method(s): " << NC; ft_putvec(_methods, " ");
