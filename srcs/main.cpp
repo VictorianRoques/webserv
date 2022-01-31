@@ -117,9 +117,8 @@ int     main(int ac , char **av)
         }
 
         std::vector<Server> server_g = parser.getServersG();
-        std::vector<size_t> ports;
-        ports.push_back(8080); ports.push_back(8081);
-        sockServ(server_g, ports);
+        std::vector<size_t> ports_g = parser.getPortsG();
+        sockServ(server_g, ports_g);
     }
     return (0);
 }
