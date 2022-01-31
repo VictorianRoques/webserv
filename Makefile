@@ -1,38 +1,80 @@
-NAME 		=	webserv
-CC			=	clang++
-CFLAGS		=	-Wall -Werror -Wextra -std=c++98
-OBJ 		=	$(SRC:.cpp=.o)
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
+#    Updated: 2022/01/30 20:54:19 by fhamel           ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-SRC 		=	srcs/main.cpp \
-				srcs/autoIndex.cpp \
-				srcs/cgiHandler.cpp \
-				srcs/Location.cpp \
-				srcs/Parser.cpp \
-				srcs/Request_Parser.cpp \
-				srcs/Response.cpp \
-				srcs/Server.cpp \
-				srcs/socket.cpp \
-				srcs/socketUtils.cpp \
-				srcs/utils.cpp
+################################################################################
+#####                              FILES VARS                              #####
+################################################################################
 
-RED			=	\033[0;31m
-GREEN		=	\033[0;32m
-WHITE		=	\033[0m
+NAME		=	webserv
 
-all: $(NAME)
+D_OBJS		=	objs/
 
-$(NAME): $(OBJ) $(HEADER)
-	@printf "[ $(NAME) ] Compiling...\r"
-	@($(CC) -o $(NAME) $(SRC) $(CFLAGS))
+D_SRCS		=	srcs/
 
-clean:
-	@rm -f $(OBJ)
-	@printf "Object files ${RED}removed\n${WHITE}"
+_SRC_		=	main.cpp \
+				autoIndex.cpp \
+				cgiHandler.cpp \
+				Location.cpp \
+				Parser.cpp \
+				Request_Parser.cpp \
+				Response.cpp \
+				Server.cpp \
+				SockData.cpp \
+				socket.cpp \
+				utils.cpp \
 
-fclean: clean
-	@rm -f $(NAME)
-	@printf "[ $(NAME) ] ${RED}removed\n${WHITE}"
+SRCS		=	$(addprex$(D_SRCS), $(_SRC_))
 
-re: fclean all
+OBJS		=	$(addprefix $(D_OBJS), $(_SRC_:.cpp=.o))
 
-.PHONY: all clean fclean re
+R			=	\033[0;31m
+G			=	\033[0;32m
+B			=	\033[0;34m
+W			=	\033[0m
+
+################################################################################
+#####                           COMPILER OPTIONS                           #####
+################################################################################
+
+CC			=	clang++ -std=c++98
+
+FLAGS		=	-Wall -Wextra -Werror
+
+FSANITIZE	=	-g -fsanitize=address
+
+################################################################################
+#####                            MAKEFILE RULES                            #####
+################################################################################
+
+all	: $(D_OBJS) $(NAME)
+
+$(D_OBJS) :
+	@mkdir objs
+
+$(D_OBJS)%.o : $(D_SRCS)%.cpp Makefile
+	@$(CC) $(FLAGS) -c $< -o $@ -Iincludes
+	@printf "$(B)$<$(W) linking...\n"
+
+$(NAME) : $(OBJS) Makefile
+	@printf "Compiling objects...\n"
+	@$(CC) $(FSANITIZE) $(OBJS) -o $(NAME)
+	@printf "[ $(G)$(NAME)$(W) ] Compiled\n"
+
+clean :
+	@rm -rf $(D_OBJS)
+	@printf "[ Object files ] $(R)removed\n$(W)"
+
+fclean : clean
+	@rm -rf $(NAME)
+	@printf "[ $(NAME) ] $(R)removed\n$(W)"
+
+re : fclean all
