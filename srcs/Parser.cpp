@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/31 12:11:16 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/31 15:01:54 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-#include "../includes/Parser.hpp"
+#include "Parser.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
 

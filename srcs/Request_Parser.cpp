@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Request_Parser.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/28 17:08:15 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/30 21:03:01 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/Request_Parser.hpp"
-#include "../includes/Server.hpp"
-#include "../includes/Location.hpp"
+#include "Request_Parser.hpp"
+#include "Server.hpp"
+#include "Location.hpp"
 
 /**************************************/
 //           EXCEPTIONS               //

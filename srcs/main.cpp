@@ -1,5 +1,5 @@
-#include "../includes/Parser.hpp"
-#include "../includes/socket.hpp"
+#include "Parser.hpp"
+#include "socket.hpp"
 
 #define PORT 8080
 
@@ -117,7 +117,9 @@ int     main(int ac , char **av)
         }
 
         std::vector<Server> server_g = parser.getServersG();
-        sockServ(server_g);
+        std::vector<size_t> ports;
+        ports.push_back(8080); ports.push_back(8081);
+        sockServ(server_g, ports);
     }
     return (0);
 }

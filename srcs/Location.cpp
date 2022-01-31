@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/31 11:59:20 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/31 15:01:49 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/Location.hpp"
-#include "../includes/utils.hpp"
+#include "Location.hpp"
+#include "utils.hpp"
 
 /**************************************/
 //           EXCEPTIONS               //

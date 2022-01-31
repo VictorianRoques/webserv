@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   autoIndex.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/28 16:58:59 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/01/30 21:02:29 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/autoIndex.hpp"
-#include "../includes/Response.hpp"
+#include "autoIndex.hpp"
+#include "Response.hpp"
 
 /**************************************/
 //           EXCEPTIONS               //
