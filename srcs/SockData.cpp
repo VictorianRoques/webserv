@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/01/30 20:53:22 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/01/31 16:30:48 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ SockData	&SockData::operator=(const SockData &sockData)
 {
 	servers_ = sockData.servers_;
 	sockListen_ = sockData.sockListen_;
+	requestStr_ = sockData.requestStr_;
 	answer_ = sockData.answer_;
 	activeSet_ = sockData.activeSet_;
 	readSet_ = sockData.readSet_;
@@ -91,7 +92,13 @@ size_t	SockData::getSizeListen(void) const
 int		SockData::getSockListen(size_t index) const
 	{ return sockListen_[index]; }
 
-/* client manager */
+/*
+** client manager
+**
+** After finding there was some activity on a listening fd
+** a new socket is created in order to create a connexion with the client.
+** This fd is then added to the active set of fds to be monitored
+*/
 void	SockData::addClient(int fd)
 {
 	std::string	red = "\033[0;31m";
@@ -131,13 +138,16 @@ void	SockData::addClient(int fd)
 	}
 }
 
+/*
+**
+*/
 void	SockData::readClient(int fd)
 {
 	std::string	red = "\033[0;31m";
 	std::string	blue = "\033[0;34m";
 	std::string white = "\033[0m";
-	char	buffer[8192];
-	int		ret = read(fd, buffer, 8191);
+	char		buffer[BUF_SIZE];
+	int			ret = read(fd, buffer, BUF_SIZE - 1);
 	if (ret == ERROR || ret == 0) {
 		std::cout << "-----------------------------" << std::endl;
 		std::cout << red;
@@ -150,26 +160,30 @@ void	SockData::readClient(int fd)
 	}
 	else {
 		buffer[ret] = '\0';
-		std::cout << "-----------------------------" << std::endl;
-		std::cout << blue;
-		std::cout << "Server: new message from ";
-		std::cout << "client " << fd << ":" <<std::endl;
-		std::cout << white;
-		std::cout << "-----------------------------" << std::endl;
-		std::cout << buffer << std::endl;
-		std::cout << "-----------------------------" << std::endl;
-		FD_SET(fd, &writeSet_);
-		Request	*request = requestParser(buffer, servers_);
-		std::vector<Server>::iterator	it = servers_.begin();
-		std::vector<Server>::iterator	ite = servers_.end();
-		for (; it != ite; ++it) {
-			if (vector_contains_str(it->getServerName(), request->getHost())) {
-				break;
+		requestStr_ += std::string(buffer);
+		if (ret != BUF_SIZE - 1) {
+			std::cout << "-----------------------------" << std::endl;
+			std::cout << blue;
+			std::cout << "Server: new message from ";
+			std::cout << "client " << fd << ":" <<std::endl;
+			std::cout << white;
+			std::cout << "-----------------------------" << std::endl;
+			std::cout << requestStr_ << std::endl;
+			std::cout << "-----------------------------" << std::endl;
+			FD_SET(fd, &writeSet_);
+			Request	*request = requestParser(requestStr_, servers_);
+			std::vector<Server>::iterator	it = servers_.begin();
+			std::vector<Server>::iterator	ite = servers_.end();
+			for (; it != ite; ++it) {
+				if (vector_contains_str(it->getServerName(), request->getHost())) {
+					break;
+				}
 			}
+			Response	response(*request, *it);
+			answer_[fd] = response.call();
+			requestStr_.clear();
+			delete request;
 		}
-		Response	response(*request, *it);
-		answer_[fd] = response.call();
-		delete request;
 	}
 }
 

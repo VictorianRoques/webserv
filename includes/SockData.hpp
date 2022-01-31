@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/01/30 20:52:59 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/01/31 16:32:05 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,13 @@
 # include "Response.hpp"
 
 # define ERROR -1
+# define BUF_SIZE 2048
 
 class SockData {
 	private:
 		std::vector<Server>			servers_;
 		std::vector<int>			sockListen_;
+		std::string					requestStr_;
 		std::map<int, std::string>	answer_;
 		fd_set						activeSet_;
 		fd_set						readSet_;
