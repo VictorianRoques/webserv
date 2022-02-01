@@ -44,6 +44,7 @@ public:
     std::string&    getMethod();
     std::string&    postMethod();
     std::string&    deleteMethod();
+    std::string&    putMethod();
     void            setCgiHeader(std::string cgiHeader);
     void            setCgiPath();
 

@@ -86,21 +86,20 @@ int      Response::readHtml(std::string &path)
 
 void     Response::readContent(std::string &path)
 {
-    std::ifstream       ofs;
+    std::ifstream       fd;
     std::stringstream   buffer;
 
- //   std::cout << "PATH: " << path << std::endl;
     if (pathIsFile(path))
     {
-        ofs.open(path.c_str(), std::ifstream::in);
-        if (ofs.is_open() == false)
+        fd.open(path.c_str(), std::ifstream::in);
+        if (fd.is_open() == false)
         {
             if (readHtml(_errorPage["403"]))
                 _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
             return ;
         }
-        buffer << ofs.rdbuf();
-        ofs.close();
+        buffer << fd.rdbuf();
+        fd.close();
         _header =  writeHeader("200 OK", _contentType, buffer.str().length());
         _body = buffer.str();
         return ;
@@ -172,7 +171,6 @@ std::string&     Response::getMethod()
         readContent(_path);
     }
     _response = _header + _body;
-//    std::cout << "RES: \n" << _response << "\nEND\n";
     return _response;
 }
 
@@ -186,7 +184,7 @@ std::string&     Response::deleteMethod()
             if (readHtml(_errorPage["403"]))
                 _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
         }
-        _header = "HTTP/1.1 204\r\n\r\n";
+        _header = "HTTP/1.1 204 No Content\r\n\r\n";
     }
     else
     {
@@ -196,7 +194,32 @@ std::string&     Response::deleteMethod()
     _response = _header + _body;
     return _response; 
 }
+std::string&    Response::putMethod()
+{
+    std::ofstream fd;
+    std::stringstream buffer;
 
+    _body = "";
+    if (pathIsFile(_path))
+    {
+        fd.open(_path.c_str());
+        fd << _req.getBody();
+        fd.close();
+        _header = "HTTP/1.1 204 No Content\r\n\r\n";
+    }
+    else
+    {
+        fd.open(_path.c_str(), std::ofstream::out | std::ofstream::trunc);
+        if (fd.is_open() == false)
+            readHtml(_errorPage["403"]);
+        fd << _req.getBody();
+        fd.close();
+        _header = "HTTP/1.1 201 Created\r\n\r\n";
+    }
+    _response = _header + _body;
+    return _response;
+
+}
 bool             Response::isAllow(std::string method)
 {
     vec_str::iterator it = _allowMethods.begin();
@@ -211,19 +234,21 @@ bool             Response::isAllow(std::string method)
 
 std::string&     Response::call()
 {
-    if (_req.getBody().size() + 2 > _serv.getMaxBodySize())
+    if (_req.getBody().size() > _serv.getMaxBodySize())
     {
         if (readHtml(_errorPage["413"]))
             _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
         _response = _header + _body;
         return _response;
     }
-    if (_req.getMethod() == "GET" && isAllow("GET"))
-        return getMethod();
-    else if (_req.getMethod() == "POST" && isAllow("POST"))
-        return postMethod();
-    else if (_req.getMethod() == "DELETE" && isAllow("DELETE"))
-        return deleteMethod();
+    typedef std::string& (Response::*ptr)();
+    std::map<std::string, ptr> methods;
+    methods["GET"] = &Response::getMethod;
+    methods["POST"] = &Response::postMethod;
+    methods["DELETE"] = &Response::deleteMethod;
+    methods["PUT"] = &Response::putMethod;
+    if (methods.find(_req.getMethod()) != methods.end() && isAllow(_req.getMethod()))
+        methods[_req.getMethod()]();
     else
     {
         if (readHtml(_errorPage["405"]))
@@ -231,6 +256,7 @@ std::string&     Response::call()
         _response = _header + _body;
         return _response;
     }
+    return _response;
 }
 
 // Utils
