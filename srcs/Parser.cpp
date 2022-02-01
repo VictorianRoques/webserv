@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/31 16:17:40 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/01 14:47:23 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -314,7 +314,7 @@ void	Parser::clear() {
 	_errorPage["413"] = "413.html";
 	_errorPage["429"] = "429.html";
 	_errorPage["499"] = "499.html";
-	_errorPage["520"] = "520.html";
+	_errorPage["500"] = "500.html";
 }
 
 /**

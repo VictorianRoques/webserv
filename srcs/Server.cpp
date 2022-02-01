@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/31 16:26:26 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/01 14:45:59 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ Server::Server():
 	_errorPage["413"] = "error_pages/413.html";
 	_errorPage["429"] = "error_pages/429.html";
 	_errorPage["499"] = "error_pages/499.html";
-	_errorPage["520"] = "error_pages/520.html";
+	_errorPage["500"] = "error_pages/500.html";
 }
 
 Server::~Server() {}

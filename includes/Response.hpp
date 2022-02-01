@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/01/28 16:35:55 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/01 14:56:18 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,19 +35,19 @@ class Response {
 public:
 
     Response(Request &req, Server &serv);
-    Response();
 
-    std::string&    call();
-    int             readHtml(std::string &path);
+    void            makeAnswer();
+    int             readErrorPage(std::string &path);
     void            readContent(std::string &path);
     std::string     writeHeader(std::string status, std::string contentType, size_t bodyLength);
-    std::string&    getMethod();
-    std::string&    postMethod();
-    std::string&    deleteMethod();
-    std::string&    putMethod();
+    void            getMethod();
+    void            postMethod();
+    void            deleteMethod();
+    void            putMethod();
     void            setCgiHeader(std::string cgiHeader);
     void            setCgiPath();
-
+    std::string&    getResponse();
+    
     // Utils
     bool            isAllow(std::string method);
     int             pathIsFile(std::string &path);

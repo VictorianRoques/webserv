@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/01/30 21:03:04 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/01 15:53:13 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,28 +58,30 @@ void        Response::setCgiPath()
 	}
 }
 
-int      Response::readHtml(std::string &path)
+int      Response::readErrorPage(std::string &path)
 {
     std::ifstream       ofs;
     std::stringstream   buffer;
 
+    _header = "";
     if (pathIsFile(path))
     {
         ofs.open(path.c_str(), std::ifstream::in);
         if (ofs.is_open() == false)
         {
             _body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-            return (1); 
+            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+            return (1);
         }
         buffer << ofs.rdbuf();
         ofs.close();
         _body = buffer.str();
-        _header = writeHeader("200 OK", "text/html", buffer.str().length());
         return (0);
     }
     else
     {
         _body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
+        _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
         return (1);
     }
 }
@@ -89,13 +91,14 @@ void     Response::readContent(std::string &path)
     std::ifstream       fd;
     std::stringstream   buffer;
 
+    std::cout << "PATHHHHH: " << path << std::endl;
     if (pathIsFile(path))
     {
         fd.open(path.c_str(), std::ifstream::in);
         if (fd.is_open() == false)
         {
-            if (readHtml(_errorPage["403"]))
-                _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+            if (!readErrorPage(_errorPage["403"]))
+                _header = writeHeader("403 Forbidden", "text/html", _body.length());
             return ;
         }
         buffer << fd.rdbuf();
@@ -104,8 +107,11 @@ void     Response::readContent(std::string &path)
         _body = buffer.str();
         return ;
     }
-    if (readHtml(_errorPage["404"]))
-        _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+    else
+    {
+        if (!readErrorPage(_errorPage["404"]))
+            _header = writeHeader("404 Not Found", "text/html", _body.length());
+    }
 }
 
 std::string     Response::writeHeader(std::string status, std::string contentType, size_t bodyLength)
@@ -128,24 +134,7 @@ void    Response::setCgiHeader(std::string cgiHeader)
     _contentType = cgiHeader.substr(pos, cgiHeader.find("\r\n", pos));
 }
 
-std::string&     Response::postMethod()
-{
-    cgiHandler cgi(_req);
-    _body = cgi.execute(_pathCgi);
-    if (_body == "<html><body>FATAL ERROR CGI</body></html>")
-    {
-        _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
-        _response = _header + _body;
-        return _response;
-    }
-    setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
-    _body = _body.substr(_body.find("\r\n\r\n") + 4);
-    _header = writeHeader(_status, _contentType, _body.length());
-    _response = _header + _body;
-    return _response;
-}
-
-std::string&     Response::getMethod()
+void        Response::getMethod()
 {
     if (_req.getFullPath().find(_extensionCgi) != std::string::npos)
     {
@@ -153,9 +142,10 @@ std::string&     Response::getMethod()
         _body = cgi.execute(_pathCgi);
         if (_body == "<html><body>FATAL ERROR CGI</body></html>")
         {
-            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+            if (!readErrorPage(_errorPage["500"]))
+                _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
             _response = _header + _body;
-            return _response;
+            return ;
         }
         setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
         _body = _body.substr(_body.find("\r\n\r\n") + 4);
@@ -171,30 +161,46 @@ std::string&     Response::getMethod()
         readContent(_path);
     }
     _response = _header + _body;
-    return _response;
 }
 
-std::string&     Response::deleteMethod()
+void     Response::postMethod()
+{
+    cgiHandler cgi(_req);
+    _body = cgi.execute(_pathCgi);
+    if (_body == "<html><body>FATAL ERROR CGI</body></html>")
+    {
+        if (!readErrorPage(_errorPage["500"]))
+            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+        _response = _header + _body;
+        return ;
+    }
+    setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
+    _body = _body.substr(_body.find("\r\n\r\n") + 4);
+    _header = writeHeader(_status, _contentType, _body.length());
+    _response = _header + _body;
+}
+
+void        Response::deleteMethod()
 {
     _body = "";
     if (pathIsFile(_path) || pathIsDirectory(_path))
     {
         if (remove(_path.c_str()))
         {
-            if (readHtml(_errorPage["403"]))
-                _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+            if (!readErrorPage(_errorPage["403"]))
+                _header = writeHeader("403 Forbidden", "text/html", _body.length());
         }
         _header = "HTTP/1.1 204 No Content\r\n\r\n";
     }
     else
     {
-        if (readHtml(_errorPage["404"]))
-            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+        if (!readErrorPage(_errorPage["404"]))
+            _header = writeHeader("404 Not Found", "text/html", _body.length());
     }
     _response = _header + _body;
-    return _response; 
 }
-std::string&    Response::putMethod()
+
+void    Response::putMethod()
 {
     std::ofstream fd;
     std::stringstream buffer;
@@ -203,6 +209,13 @@ std::string&    Response::putMethod()
     if (pathIsFile(_path))
     {
         fd.open(_path.c_str());
+         if (fd.is_open() == false)
+        {
+            if (!readErrorPage(_errorPage["403"]))
+                _header = writeHeader("403 Forbidden", "text/html", _body.length());
+            _response = _header + _body;
+            return ;
+        }
         fd << _req.getBody();
         fd.close();
         _header = "HTTP/1.1 204 No Content\r\n\r\n";
@@ -211,15 +224,51 @@ std::string&    Response::putMethod()
     {
         fd.open(_path.c_str(), std::ofstream::out | std::ofstream::trunc);
         if (fd.is_open() == false)
-            readHtml(_errorPage["403"]);
+        {
+            if (!readErrorPage(_errorPage["403"]))
+                _header = writeHeader("403 Forbidden", "text/html", _body.length());
+            _response = _header + _body;
+            return ;
+        }
         fd << _req.getBody();
         fd.close();
         _header = "HTTP/1.1 201 Created\r\n\r\n";
     }
     _response = _header + _body;
-    return _response;
-
 }
+
+
+void     Response::makeAnswer()
+{
+    if (_req.getBody().size() > _serv.getMaxBodySize())
+    {
+        if (!readErrorPage(_errorPage["413"]))
+            _header = writeHeader("413 Payload Too Large", "text/html", _body.length());
+        _response = _header + _body;
+        return;
+    }
+    
+    typedef void (Response::*ptr)();
+    std::map<std::string, ptr> methods;
+    methods["GET"] = &Response::getMethod;
+    methods["POST"] = &Response::postMethod;
+    methods["DELETE"] = &Response::deleteMethod;
+    methods["PUT"] = &Response::putMethod;
+
+    if (methods.find(_req.getMethod()) != methods.end() && isAllow(_req.getMethod()))
+        (this->*methods[_req.getMethod()])();
+    else
+    {
+        if (!readErrorPage(_errorPage["405"]))
+            _header = writeHeader("405 Method Not Allowed", "text/html", _body.length());
+        _response = _header + _body;
+    }
+}
+
+std::string&    Response::getResponse() { return _response;}
+
+// Utils
+
 bool             Response::isAllow(std::string method)
 {
     vec_str::iterator it = _allowMethods.begin();
@@ -231,35 +280,6 @@ bool             Response::isAllow(std::string method)
     }
     return false;
 }
-
-std::string&     Response::call()
-{
-    if (_req.getBody().size() > _serv.getMaxBodySize())
-    {
-        if (readHtml(_errorPage["413"]))
-            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
-        _response = _header + _body;
-        return _response;
-    }
-    typedef std::string& (Response::*ptr)();
-    std::map<std::string, ptr> methods;
-    methods["GET"] = &Response::getMethod;
-    methods["POST"] = &Response::postMethod;
-    methods["DELETE"] = &Response::deleteMethod;
-    methods["PUT"] = &Response::putMethod;
-    if (methods.find(_req.getMethod()) != methods.end() && isAllow(_req.getMethod()))
-        methods[_req.getMethod()]();
-    else
-    {
-        if (readHtml(_errorPage["405"]))
-             _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
-        _response = _header + _body;
-        return _response;
-    }
-    return _response;
-}
-
-// Utils
 
 std::string Response::sizeToString(size_t size)
 {

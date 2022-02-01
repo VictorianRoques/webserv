@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/01/31 17:07:53 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/01 14:36:58 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,8 @@ void	SockData::readClient(int fd)
 				}
 			}
 			Response	response(*request, *it);
-			answer_[fd] = response.call();
+			response.makeAnswer();
+			answer_[fd] = response.getResponse();
 			requestStr_.clear();
 			delete request;
 		}
