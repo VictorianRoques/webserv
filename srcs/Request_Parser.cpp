@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/01 15:48:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/01 16:10:57 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,7 @@ void	Request::firstLine(std::string line) {
 	rl = ft_split(line, " ");
 	setMethod(rl[0]);
 	setPath(rl[1]);
+	std::cout << getPath() << std::endl;
 	setProtocolVersion(rl[2]);
 }
 
