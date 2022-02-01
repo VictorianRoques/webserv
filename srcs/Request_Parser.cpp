@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/30 21:03:01 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/01 15:48:22 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,33 +110,11 @@ void	Request::isChunked() {
 }
 
 /**
- * buildFullPath(): find the relevant Location {} and append correct prefix (root) to path
+ * buildFullPath(): append correct root to path without query string (symbol: '?')
 **/
-void	Request::buildFullPath(std::vector<Location *> loc) {
-	std::vector<Location *>::iterator it = loc.begin();
-	for (; it != loc.end(); it++) {
-		if ((*it)->getLocationMatch() == _path) {
-			_fullPath = (*it)->getRoot() + _path;
-			return ;
-		}
-	}
-	// non exact match found: looking for the longest match	
-	it = loc.begin();
-	size_t pos = _path.length();
-	
-	while (pos != 0) {
-		pos = _path.rfind("/", pos - 1);
-		for (; it != loc.end(); it++) {
-			if (!strncmp(_path.c_str(), (*it)->getLocationMatch().c_str(), pos)) {
-				_fullPath = (*it)->getRoot() + _path.substr(0, _path.find("?"));
-				break ;
-			}
-			std::cout << (*it)->getLocationMatch() << std::endl;
-			if ((*it)->getLocationMatch() == "/")
-				_fullPath = (*it)->getRoot() + _path.substr(0, _path.find("?"));
-		}
-	}
-	return ;
+void	Request::buildFullPath(Location *loc) {
+		_fullPath = loc->getRoot() + _path.substr(0, _path.find("?"));
+		return ;
 }
 
 /**
@@ -163,7 +141,7 @@ void	Request::solveContentType() {
 }
 
 /**
- * firstLine(): parse the line "GET /index.html HTTP/1.1"
+ * firstLine(): parse the first line, for ex.: "GET /index.html HTTP/1.1"
 **/
 void	Request::firstLine(std::string line) {
 	vec_str	rl;
@@ -235,14 +213,58 @@ void	Request::print_request() {
 }
 
 /**
+ * findRightLocation(): find the relevant Location {}
+**/
+Location *findRightLocation(std::vector<Location *> loc, Request* req) {
+	std::vector<Location *>::iterator it = loc.begin();
+	// looking for exact match
+	for (; it != loc.end(); it++) {
+		if ((*it)->getLocationMatch() == req->getPath()) {
+			return *it;
+		}
+	}
+	// no exact match found: looking for the longest match	
+	it = loc.begin();
+	size_t pos = req->getPath().length();
+	
+	while (pos != 0) {
+		pos = req->getPath().rfind("/", pos - 1);
+		for (; it != loc.end(); it++) {
+			if (!strncmp(req->getPath().c_str(), (*it)->getLocationMatch().c_str(), pos))
+				return *it ;
+//			std::cout << (*it)->getLocationMatch() << std::endl;
+			if ((*it)->getLocationMatch() == "/")
+				return *it;
+		}
+	}
+	return *it;
+}
+
+/**
+ * findRightServer(): finds correct server
+**/
+Server findRightServer(std::vector<Server> servers_g, Request *request) {
+	std::vector<Server>::iterator it = servers_g.begin();
+	for (; it != servers_g.end(); it++) {
+		if (vector_contains_str(it->getServerName(), request->getHost())) {
+			return *it;
+		}
+	}
+	// if no exact match found: first server is default server
+	return *(servers_g.begin());
+	
+}
+
+/**
  * requestParser(): rq is the 'request->Header' string and servers_g is the parsed config
 **/
 Request *requestParser(std::string rq, std::vector<Server> servers_g) {
+	Server	serv;
+	Location	*loc;
 	Request	*request = new Request();
 	std::string	line;
 	int			i = 0;
 	size_t 		pos;
-	std::vector<Server>::iterator it = servers_g.begin();
 
 	while (rq.find("\r\n") != 0 && !rq.empty()) {
 		i++;
@@ -254,22 +276,18 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 		else
 			request->headerLine(line);
 	}
-	line = rq.substr(0, std::string::npos);
+	serv = findRightServer(servers_g, request);
+	loc = findRightLocation(serv.getLocation(), request);
+	if (rq.length() > loc->getMaxBodySize()) {
+		std::cout << RED << "Error: " << NC << "Max Body Size for this Location is " << RED << loc->getMaxBodySize() << NC << std::endl;
+		return request;
+	}
 	if (rq.length() > 2)
-		request->bodyLine(line.substr(2));
+		request->bodyLine(rq.substr(2));
 	request->isChunked();
 			
-	// first server is default server
-	request->buildFullPath(it->getLocation());
+	request->buildFullPath(loc);
 	request->queryString();
-	// find the correct server (if any)
-	for (; it != servers_g.end(); it++) {
-		if (vector_contains_str(it->getServerName(), request->getHost())) {
-			request->buildFullPath(it->getLocation());
-			request->queryString();
-			break ;
-		}
-	}
 	
 	request->print_request();
 	return request;
