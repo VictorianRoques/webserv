@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/26 17:26:59 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/01 15:48:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,11 +111,13 @@ class Request {
 		
 		// utils
 	public:
-		void	print_request();
-		void	isChunked();
-		void	buildFullPath(std::vector<Location *>);
-		void	queryString();
-		void	solveContentType();
+		void		print_request();
+		void		isChunked();
+		void		buildFullPath(Location *loc);
+		Server		findRightServer(std::vector<Server> servers_g, Request *request);
+		Location	*findRightLocation(std::vector<Location *> loc, Request *request);
+		void		queryString();
+		void		solveContentType();
 
 
 		//EXCEPTIONS

@@ -6,12 +6,13 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/30 21:02:29 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/01 17:07:36 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "autoIndex.hpp"
 #include "Response.hpp"
+#include "utils.hpp"
 
 /**************************************/
 //           EXCEPTIONS               //
@@ -41,12 +42,16 @@ std::string	autoIndexDrawnLine() {
 
 /**
  * varName(): File Name
+ * DATA_FOLDER is the folder's name where all data is stored (default: test)
 **/
-std::string	autoIndexVarName(std::string name, struct stat buf) {
+std::string	autoIndexVarName(std::string path, std::string name, struct stat buf) {
 	std::string content;
+	size_t	pos;
+	std::string	data_folder(DATA_FOLDER);
 
 	content = "<div style=\"float: left; width: 32%;\"><a href=\"";
-	content += "/" + name;
+	pos = path.rfind(data_folder) + data_folder.size();
+	content += path.substr(pos, path.length()) + "/" + name;
 	content += "\">";
 	content += name;
 	if (S_ISDIR(buf.st_mode))
@@ -123,7 +128,7 @@ std::string	Response::autoIndexBuilder(std::string path) {
 		if (stat(newPath.c_str(), &buf) < 0) // get Date and Size
 			throw StatFailedException();
 		
-		content += autoIndexVarName(name, buf);
+		content += autoIndexVarName(path, name, buf);
 		content += autoIndexVarDate(buf);
 		
 		// ".." is a special case
