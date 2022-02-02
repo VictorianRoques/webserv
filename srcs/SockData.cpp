@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/02 11:15:40 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/02 18:55:21 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,10 @@ SockData::SockData(void)
 	initActiveSet();
 	initReadSet();
 	initWriteSet();
+	red = "\033[0;31m";
+	green = "\033[0;32m";
+	blue = "\033[0;34m";
+	white = "\033[0m";
 }
 
 SockData::SockData(const SockData &sockData)
@@ -30,8 +34,9 @@ SockData	&SockData::operator=(const SockData &sockData)
 {
 	servers_ = sockData.servers_;
 	sockListen_ = sockData.sockListen_;
-	requestStr_ = sockData.requestStr_;
 	answer_ = sockData.answer_;
+	// chunk_ = sockData.chunk_;
+	clients_ = sockData.clients_;
 	activeSet_ = sockData.activeSet_;
 	readSet_ = sockData.readSet_;
 	writeSet_ = sockData.writeSet_;
@@ -79,6 +84,18 @@ bool	SockData::isReadSet(int fd) const
 bool	SockData::isWriteSet(int fd) const
 	{ return FD_ISSET(fd, &writeSet_); }
 
+bool	SockData::isChunkFd(int fd) const
+{
+	fd = (int)fd;
+	return false;
+}
+
+bool	SockData::isChunkRequest(std::string request) const
+{
+	request = (std::string)request;
+	return false;
+}
+
 /* getters */
 fd_set	*SockData::getReadSet(void)
 	{ return &readSet_; }
@@ -101,77 +118,54 @@ int		SockData::getSockListen(size_t index) const
 */
 void	SockData::addClient(int fd)
 {
-	std::string	red = "\033[0;31m";
-	std::string	green = "\033[0;32m";
-	std::string white = "\033[0m";
-	int			sockClient;
+	int			newSock;
 	sockaddr_in addrClient;
 	socklen_t	addrClientLen = sizeof(addrClient);
-	if ((sockClient = accept(fd, reinterpret_cast<sockaddr*>(&addrClient),
+	if ((newSock = accept(fd, reinterpret_cast<sockaddr*>(&addrClient),
 	&addrClientLen)) == ERROR) {
-		std::cout << "-----------------------------" << std::endl;
-		std::cout << red;
-		std::cout << "Server: connection with client failed";
-		std::cout << white;
-		std::cout << "-----------------------------" << std::endl;
+		cnxFailed();
 	}
 	else {
-		if (sockClient > FD_SETSIZE) {
-			std::cout << "-----------------------------" << std::endl;
-			std::cout << red;
-			std::cout << "Server: connection refused from " << inet_ntoa(addrClient.sin_addr);
-			std::cout << " on port " << ntohs(addrClient.sin_port);
-			std::cout << ": too many clients connected" << std::endl;
-			std::cout << white;
-			std::cout << "-----------------------------" << std::endl;
-			close(sockClient);
+		SockClient	sockClient;
+		// std::cout << "test\n";
+		// std::cout << inet_ntoa(addrClient.sin_addr);
+		// std::cout << "test\n";
+		sockClient.setIp(inet_ntoa(addrClient.sin_addr));
+		sockClient.setPort(ntohs(addrClient.sin_port));
+		if (newSock > FD_SETSIZE) {
+			close(newSock);
+			cnxRefused(sockClient);
 		}
 		else {
-			std::cout << "-----------------------------" << std::endl;
-			std::cout << green;
-			std::cout << "Server: connection from " << inet_ntoa(addrClient.sin_addr);
-			std::cout << " on port " << ntohs(addrClient.sin_port) << std::endl;
-			std::cout << white;
-			std::cout << "-----------------------------" << std::endl;
-			FD_SET(sockClient, &activeSet_);
+			FD_SET(newSock, &activeSet_);
+			clients_[newSock] = sockClient;
+			cnxAccepted(sockClient);
 		}
 	}
 }
 
-/*
-**
-*/
 void	SockData::readClient(int fd)
 {
-	std::string	red = "\033[0;31m";
-	std::string	blue = "\033[0;34m";
-	std::string white = "\033[0m";
 	char		buffer[BUF_SIZE];
 	int			ret = read(fd, buffer, BUF_SIZE - 1);
 	if (ret == ERROR || ret == 0) {
-		std::cout << "-----------------------------" << std::endl;
-		std::cout << red;
-		std::cout << "Server: client " << fd;
-		std::cout << ": connection lost" << std::endl;
-		std::cout << white;
-		std::cout << "-----------------------------" << std::endl;
-		close(fd);
+		clients_.erase(fd);
+		answer_.erase(fd);
 		FD_CLR(fd, &activeSet_);
+		close(fd);
+		cnxCloseRead(fd);
 	}
 	else {
 		buffer[ret] = '\0';
-		requestStr_ += std::string(buffer);
+		/* chunk requests management */
+		// if (isChunkFd(fd)) {
+		// }
+		// else if (isChunkRequest(requestStr_)) {
+		// }
+		clients_[fd].getRequest() += std::string(buffer);
 		if (ret != BUF_SIZE - 1) {
-			std::cout << "-----------------------------" << std::endl;
-			std::cout << blue;
-			std::cout << "Server: new message from ";
-			std::cout << "client " << fd << ":" <<std::endl;
-			std::cout << white;
-			std::cout << "-----------------------------" << std::endl;
-			std::cout << requestStr_ << std::endl;
-			std::cout << "-----------------------------" << std::endl;
 			FD_SET(fd, &writeSet_);
-			Request	*request = requestParser(requestStr_, servers_);
+			Request	*request = requestParser(clients_[fd].getRequest(), servers_);
 			std::vector<Server>::iterator	it = servers_.begin();
 			std::vector<Server>::iterator	ite = servers_.end();
 			for (; it != ite; ++it) {
@@ -182,38 +176,110 @@ void	SockData::readClient(int fd)
 					break;
 				}
 			}
-			requestStr_.clear();
 			delete request;
+			msgRecv(fd);
+			clients_[fd].getRequest().clear();
 		}
 	}
 }
 
 void	SockData::writeClient(int fd)
 {
-	std::string	red = "\033[0;31m";
-	std::string	blue = "\033[0;34m";
-	std::string white = "\033[0m";
 	if (write(fd, answer_[fd].c_str(), answer_[fd].size()) == ERROR) {
-		std::cout << "-----------------------------" << std::endl;
-		std::cout << red;
-		std::cout << "Server: couldn't write response to ";
-		std::cout << "client " << fd << ": " <<std::endl;
-		std::cout << "closing connection" << std::endl;
-		std::cout << white;
-		std::cout << "-----------------------------" << std::endl;
-		close(fd);
 		answer_.erase(fd);
 		FD_CLR(fd, &activeSet_);
 		FD_CLR(fd, &writeSet_);
+		close(fd);
+		cnxCloseWrite(fd);
 	}
 	else {
-		std::cout << "-----------------------------" << std::endl;
-		std::cout << blue;
-		std::cout << "Server: message successfully sent to ";
-		std::cout << "client " << fd << ": " <<std::endl;
-		std::cout << white;
-		std::cout << "-----------------------------" << std::endl;
 		answer_.erase(fd);
 		FD_CLR(fd, &writeSet_);
+		msgSent(fd);
 	}
+}
+
+void	SockData::cnxFailed(void)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: connection with client failed";
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::cnxRefused(SockClient sockClient)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: connection refused from " << sockClient.getIp();
+	std::cout << " on port " << sockClient.getPort();
+	std::cout << ": too many clients connected" << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::cnxAccepted(SockClient sockClient)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << green;
+	std::cout << "Server: connection from " << sockClient.getIp();
+	std::cout << " on port " << sockClient.getPort() << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::cnxCloseRead(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: couldn't read request from " << clients_[fd].getIp();
+	std::cout << " on port " << clients_[fd].getPort();
+	std::cout << " | socket fd: " << fd;
+	std::cout << "closing connection";
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::cnxCloseWrite(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: couldn't write response to " << clients_[fd].getIp();
+	std::cout << " on port " << clients_[fd].getPort();
+	std::cout << " | socket fd: " << fd;
+	std::cout << "closing connection";
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::msgRecv(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << blue;
+	std::cout << "Server: new message from " << clients_[fd].getIp();
+	std::cout << " on port " << clients_[fd].getPort();
+	std::cout << " | socket fd: " << fd;
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << blue;
+	std::cout << "Message: " << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << clients_[fd].getRequest() << std::endl;
+}
+
+void	SockData::msgSent(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << blue;
+	std::cout << "Server: message successfully sent to " << clients_[fd].getIp();
+	std::cout << " on port " << clients_[fd].getPort();
+	std::cout << " | socket fd: " << fd;
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
 }
