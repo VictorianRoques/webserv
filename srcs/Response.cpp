@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/01 17:07:06 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/02 10:12:36 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,21 +17,7 @@
 //           FUNCTIONS                //
 /**************************************/
 
-Response::Response(Request &req, Server &serv): _req(req), _serv(serv), _errorPage(serv.getErrorPage())
-{
-    _status = "200 OK";
-    _path = req.getFullPath();
-    _contentType = req.getContentType();
-    setCgiPath();
-    if (req.getPath() == "/")
-    {
-        if (_AutoIndex == true)
-            _path.erase(_path.size() - 1);
-        else
-            _path = _root + "/" + _index;
-        _contentType = "text/html";
-    }
-}
+Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()) {}
 
 void        Response::setCgiPath()
 {
@@ -237,9 +223,33 @@ void    Response::putMethod()
     _response = _header + _body;
 }
 
-
-void     Response::makeAnswer()
+int      Response::initRequest(Request &req)
 {
+     _req = req;
+    _path = req.getFullPath();
+    if (_path.empty())
+    {
+        if (!readErrorPage(_errorPage["400"]))
+            _header = writeHeader("400 Bad Request", "text/html", _body.length());
+        _response = _header + _body;
+        return (1);
+    }
+    _contentType = req.getContentType();
+    setCgiPath();
+    if (req.getPath() == "/")
+    {
+        if (_AutoIndex == true)
+            _path.erase(_path.size() - 1);
+        else
+            _path = _root + "/" + _index;
+        _contentType = "text/html";
+    }
+    return (0);
+}
+void     Response::makeAnswer(Request &req)
+{
+    if (initRequest(req))
+        return ;
     if (_req.getBody().size() > _serv.getMaxBodySize())
     {
         if (!readErrorPage(_errorPage["413"]))

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/01 14:56:18 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/02 09:54:27 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,10 @@ class Response {
 
 public:
 
-    Response(Request &req, Server &serv);
+    Response(Server &serv);
 
-    void            makeAnswer();
+    void            makeAnswer(Request &req);
+    int             initRequest(Request &req);
     int             readErrorPage(std::string &path);
     void            readContent(std::string &path);
     std::string     writeHeader(std::string status, std::string contentType, size_t bodyLength);

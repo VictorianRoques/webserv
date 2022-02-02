@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/01 14:36:58 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/02 10:35:09 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,12 +176,14 @@ void	SockData::readClient(int fd)
 			std::vector<Server>::iterator	ite = servers_.end();
 			for (; it != ite; ++it) {
 				if (vector_contains_str(it->getServerName(), request->getHost())) {
+					Response	response(*it);
+					response.makeAnswer(*request);
+					answer_[fd] = response.getResponse();
 					break;
 				}
 			}
-			Response	response(*request, *it);
-			response.makeAnswer();
-			answer_[fd] = response.getResponse();
+			if (it == ite)
+				answer_[fd] = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length:37\r\n\r\n<html><body>Bad Request</body></html>";
 			requestStr_.clear();
 			delete request;
 		}
