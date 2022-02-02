@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/02 18:59:51 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/02 19:17:52 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ class SockClient {
 	private:
 		char		*ip_;
 		size_t		port_;
-		size_t		maxSize_;
+		// size_t		maxSize_;
 		std::string	request_;
 
 	public:
