@@ -6,7 +6,7 @@
 #    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
-#    Updated: 2022/01/31 16:30:57 by pnielly          ###   ########.fr        #
+#    Updated: 2022/02/02 18:47:42 by fhamel           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,6 +29,7 @@ _SRC_		=	main.cpp \
 				Response.cpp \
 				Server.cpp \
 				SockData.cpp \
+				SockClient.cpp \
 				socket.cpp \
 				utils.cpp \
 
