@@ -6,7 +6,7 @@
 /*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/02 10:12:36 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/02 11:15:24 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,6 @@ void     Response::readContent(std::string &path)
     std::ifstream       fd;
     std::stringstream   buffer;
 
-    std::cout << "PATHHHHH: " << path << std::endl;
     if (pathIsFile(path))
     {
         fd.open(path.c_str(), std::ifstream::in);

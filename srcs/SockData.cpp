@@ -6,7 +6,7 @@
 /*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/02 10:35:09 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/02 11:15:40 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,8 +182,6 @@ void	SockData::readClient(int fd)
 					break;
 				}
 			}
-			if (it == ite)
-				answer_[fd] = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length:37\r\n\r\n<html><body>Bad Request</body></html>";
 			requestStr_.clear();
 			delete request;
 		}
