@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/01 15:21:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/02 15:10:26 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class Location {
 
 	// directives
 	private:
-		std::string							_matchModifier;
+		std::string							_matchModifier; // always empty in this project
 		std::string							_locationMatch;
 		std::string							_root;
 		vec_str								_methods;
