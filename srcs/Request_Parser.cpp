@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/01 16:10:57 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/02 15:06:34 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,8 @@ void	Request::isChunked() {
  * buildFullPath(): append correct root to path without query string (symbol: '?')
 **/
 void	Request::buildFullPath(Location *loc) {
-		_fullPath = loc->getRoot() + _path.substr(0, _path.find("?"));
+		size_t	start = loc->getLocationMatch().length();
+		_fullPath = loc->getRoot() + _path.substr(start - 1, _path.find("?"));
 		return ;
 }
 
@@ -126,18 +127,6 @@ void	Request::queryString() {
 	if ((pos = _path.find("?")) != std::string::npos) {
 		_queryString = _path.substr(pos + 1, std::string::npos);
 	}
-}
-
-/**
- * solveContentType(): called if no ContentType in the request header.
- * ContentType = img/<extension> if SecFetchDest == image
- * ContentType = text/<extension> if SecFetchDest == document
-**/
-void	Request::solveContentType() {
-	if (_secFetchDest == "image")
-		_contentType = "image/" + _fullPath.substr(_fullPath.find(".") + 1);
-	else
-		_contentType = "text/" + _fullPath.substr(_fullPath.find(".") + 1);
 }
 
 /**
