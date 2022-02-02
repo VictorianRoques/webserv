@@ -10,8 +10,7 @@ Victorian:
 
 Padoue:
 
-- AutoIndex corriger
-- Resoudre maxBodySize execption
+- ajout de la methode HEAD: si body dans request avec methode HEAD, ignorer requete
 
 Florian:
 
