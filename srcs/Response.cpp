@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/02 11:15:24 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/02 17:24:02 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,11 @@ std::string     Response::writeHeader(std::string status, std::string contentTyp
     std::string header;
 
     header = "HTTP/1.1 " + status + "\r\n";
-    header += "Content-Type: " + contentType + "\r\n";
-    header += "Content-Length: " + sizeToString(bodyLength) + "\r\n\r\n";
+    if (contentType.empty() == false)
+        header += "Content-Type: " + contentType + "\r\n";
+    if (bodyLength > 0)
+        header += "Content-Length: " + sizeToString(bodyLength) + "\r\n";
+    header += "\r\n";
     return header;
 }
 
@@ -226,7 +229,7 @@ int      Response::initRequest(Request &req)
 {
      _req = req;
     _path = req.getFullPath();
-    if (_path.empty())
+    if (_req.getPath().empty() || _req.getMethod().empty() || _req.getProtocolVersion() != "HTTP/1.1")
     {
         if (!readErrorPage(_errorPage["400"]))
             _header = writeHeader("400 Bad Request", "text/html", _body.length());
@@ -245,6 +248,29 @@ int      Response::initRequest(Request &req)
     }
     return (0);
 }
+void    Response::headMethod()
+{
+    readContent(_path);
+    _response = _header;
+}
+
+void    Response::optionMethod()
+{
+    std::string Allow = "Allow: ";
+    vec_str::iterator it = _allowMethods.begin();
+    vec_str::iterator ite = _allowMethods.end();
+    for (; it != ite; it++)
+    {
+        Allow += *it;
+        if (it != ite - 1)
+            Allow += ", ";
+    }
+    readContent(_path);
+    if (_header.find("40") == std::string::npos)
+        _header = _header.substr(0, _header.size() - 2) + Allow + "\r\n\r\n";
+    _response = _header;
+}
+
 void     Response::makeAnswer(Request &req)
 {
     if (initRequest(req))
@@ -263,6 +289,8 @@ void     Response::makeAnswer(Request &req)
     methods["POST"] = &Response::postMethod;
     methods["DELETE"] = &Response::deleteMethod;
     methods["PUT"] = &Response::putMethod;
+    methods["HEAD"] = &Response::headMethod;
+    methods["OPTIONS"] = &Response::optionMethod;
 
     if (methods.find(_req.getMethod()) != methods.end() && isAllow(_req.getMethod()))
         (this->*methods[_req.getMethod()])();

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/02 09:54:27 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/02 15:44:20 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,11 @@ public:
     void            readContent(std::string &path);
     std::string     writeHeader(std::string status, std::string contentType, size_t bodyLength);
     void            getMethod();
+    void            headMethod();
     void            postMethod();
     void            deleteMethod();
     void            putMethod();
+    void            optionMethod();
     void            setCgiHeader(std::string cgiHeader);
     void            setCgiPath();
     std::string&    getResponse();
