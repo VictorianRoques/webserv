@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/01/31 16:32:05 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/02 18:46:36 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include "Request_Parser.hpp"
 # include "Parser.hpp"
 # include "Response.hpp"
+# include "SockClient.hpp"
 
 # define ERROR -1
 # define BUF_SIZE 2048
@@ -31,11 +32,17 @@ class SockData {
 	private:
 		std::vector<Server>			servers_;
 		std::vector<int>			sockListen_;
-		std::string					requestStr_;
 		std::map<int, std::string>	answer_;
+		std::map<int, SockClient>	clients_;
+		// std::vector<int>			chunk_;
 		fd_set						activeSet_;
 		fd_set						readSet_;
 		fd_set						writeSet_;
+
+		std::string	red;
+		std::string	green;
+		std::string	blue;
+		std::string white;
 
 	public:
 		SockData(void);
@@ -54,6 +61,8 @@ class SockData {
 		bool		isSockListen(int fd) const;
 		bool		isReadSet(int fd) const;
 		bool		isWriteSet(int fd) const;
+		bool		isChunkFd(int fd) const;
+		bool		isChunkRequest(std::string request) const;
 		/* getters */
 		fd_set		*getReadSet(void);
 		fd_set		*getWriteSet(void);
@@ -63,6 +72,16 @@ class SockData {
 		void		addClient(int fd);
 		void		readClient(int fd);
 		void		writeClient(int fd);
+		/* connexion */
+		void		cnxFailed(void);
+		void		cnxRefused(SockClient sockClient);
+		void		cnxAccepted(SockClient sockClient);
+		/* read */
+		void		cnxCloseRead(int fd);
+		void		cnxCloseWrite(int fd);
+		/* write */
+		void		msgRecv(int fd);
+		void		msgSent(int fd);
 };
 
 #endif
