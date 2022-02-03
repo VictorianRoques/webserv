@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/02 15:06:34 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 17:15:08 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,7 @@ void	Request::isChunked() {
 **/
 void	Request::buildFullPath(Location *loc) {
 		size_t	start = loc->getLocationMatch().length();
+
 		_fullPath = loc->getRoot() + _path.substr(start - 1, _path.find("?"));
 		return ;
 }
@@ -138,7 +139,6 @@ void	Request::firstLine(std::string line) {
 	rl = ft_split(line, " ");
 	setMethod(rl[0]);
 	setPath(rl[1]);
-	std::cout << getPath() << std::endl;
 	setProtocolVersion(rl[2]);
 }
 
@@ -221,11 +221,14 @@ Location *findRightLocation(std::vector<Location *> loc, Request* req) {
 		pos = req->getPath().rfind("/", pos - 1);
 		for (; it != loc.end(); it++) {
 			if (!strncmp(req->getPath().c_str(), (*it)->getLocationMatch().c_str(), pos))
-				return *it ;
-//			std::cout << (*it)->getLocationMatch() << std::endl;
-			if ((*it)->getLocationMatch() == "/")
 				return *it;
 		}
+	}
+	// no match fond --> return "location /"
+	it = loc.begin();
+	for (; it != loc.end(); it++) {
+		if ((*it)->getLocationMatch() == "/")
+		return *it;
 	}
 	return *it;
 }
