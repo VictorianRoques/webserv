@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/03 17:15:12 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 19:38:27 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ class Location {
 		std::pair<std::string, std::string>	_cgiHandler;
 		std::string							_uploadDest;
 		size_t								_maxBodySize;
+	
+		std::string							_generalRoot;
 
 		// getters
 	public:
@@ -62,6 +64,8 @@ class Location {
 		std::string							getUploadDest() const;
 		size_t								getMaxBodySize() const;
 
+		std::string							getGeneralRoot() const;
+		
 		//setters
 	public:
 		void	setMatchModifier(std::string matchModifier);
@@ -75,6 +79,8 @@ class Location {
 		void	setUploadDest(std::string uploadDest);
 		void	setMaxBodySize(size_t maxBodySize);
 		void	setMaxBodySize(std::string maxBodySize);
+		
+		void	setGeneralRoot(std::string generalRoot);
 
 		// parsing helpers
 	public:

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/02 15:44:20 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/03 17:39:35 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ private:
     std::string                 _extensionCgi;
     std::string                 _index;
     std::string                 _root;
+    std::string                 _generalRoot;
     bool                        _AutoIndex;
     vec_str                     _allowMethods;
 };

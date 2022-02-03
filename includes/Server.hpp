@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/31 16:00:05 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 19:19:43 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@ class Server {
 		int								_serverNb;
 		std::vector<Server>				_servers_g;
 
+		std::string							_generalRoot;
+
 		// getters
 	public:
 		std::string						getIP() const;
@@ -52,6 +54,8 @@ class Server {
 		std::vector<Location *>			getLocation() const;
 		size_t							getServerNb() const;
 
+		std::string							getGeneralRoot() const;
+		
 		//setters
 	protected:
 		void	setIP(std::string ip);
@@ -62,6 +66,8 @@ class Server {
 		void	setMaxBodySize(std::string maxBodySize);
 		void	setLocation(std::vector<Location *> location);
 		void	setServerNb(size_t serverNb);
+
+		void	setGeneralRoot(std::string generalRoot);
 
 		// adding parsed server
 	public:

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/03 16:52:14 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 19:47:28 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,7 +252,6 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	iter = locationContext(it, location);
 	it += iter;
 	ret += iter;
-	std::cout << "Location Max Body Size: " << location->getMaxBodySize() << std::endl;
 
 	// set directives
 	std::vector<std::pair<std::string, Location::methodPointer> > dir;
@@ -285,6 +284,10 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 			}
 			// meets a '}' == end of the location directive
 			if (it->find("}") != std::string::npos) {
+				if (location->getLocationMatch() == "/") {
+					_generalRoot = location->getGeneralRoot();
+				}
+
 				this->_location.push_back(location);
 				return ret;
 			}

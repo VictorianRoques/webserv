@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/03 17:28:38 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 19:36:05 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ Request& Request::operator=(const Request &x) {
 		_host = x._host;
 		_secFetchDest = x._secFetchDest;
 		_body = x._body;
+		_generalRoot = x._generalRoot;
 		_chunked = x._chunked;
 		_fullPath = x._fullPath;
 		_queryString = x._queryString;
@@ -74,6 +75,8 @@ bool		Request::getChunked() { return _chunked; }
 std::string	Request::getFullPath() { return _fullPath; }
 std::string	Request::getQueryString() { return _queryString; }
 
+std::string	Request::getGeneralRoot() { return _generalRoot; }
+
 /**************************************/
 //              SETTERS               //
 /**************************************/
@@ -96,6 +99,8 @@ void	Request::setBody(std::string body) { _body = body; }
 void	Request::setChunked(bool chunked) { _chunked = chunked; }
 void	Request::setFullPath(std::string fullPath) { _fullPath = fullPath; }
 void	Request::setQueryString(std::string queryString) { _queryString = queryString; }
+
+void	Request::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoot; }
 
 /**************************************/
 //              PARSING               //
@@ -238,11 +243,11 @@ Location *findRightLocation(std::vector<Location *> loc, Request* req) {
 				return *it;
 		}
 	}
-	// no match fond --> return "location /"
+	// no match found --> return "location /"
 	it = loc.begin();
 	for (; it != loc.end(); it++) {
 		if ((*it)->getLocationMatch() == "/")
-		return *it;
+			return *it;
 	}
 	return *it;
 }
@@ -296,6 +301,8 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 	request->buildFullPath(loc);
 	request->queryString();
 	
+	request->setGeneralRoot(serv.getGeneralRoot());
+
 	request->print_request();
 	return request;
 }

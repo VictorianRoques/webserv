@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/03 17:28:35 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 19:47:38 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,10 @@ std::string	autoIndexDrawnLine() {
  * varName(): File Name
  * DATA_FOLDER is the folder's name where all data is stored (default: test)
 **/
-std::string	autoIndexVarName(std::string path, std::string name, struct stat buf) {
+std::string	autoIndexVarName(std::string path, std::string name, struct stat buf, std::string generalRoot) {
 	std::string content;
 	size_t	pos;
-	std::string	data_folder(DATA_FOLDER);
+	std::string	data_folder("/" + generalRoot);
 
 	content = "<div style=\"float: left; width: 32%;\"><a href=\"";
 	pos = path.rfind(data_folder) + data_folder.size();
@@ -130,7 +130,7 @@ std::string	Response::autoIndexBuilder(std::string path) {
 		if (stat(newPath.c_str(), &buf) < 0) // get Date and Size
 			throw StatFailedException();
 		
-		content += autoIndexVarName(path, name, buf);
+		content += autoIndexVarName(path, name, buf, _generalRoot);
 		content += autoIndexVarDate(buf);
 		
 		// ".." is a special case

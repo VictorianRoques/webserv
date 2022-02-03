@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/01 15:48:58 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 19:34:31 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,8 @@ class Request {
 		// body (aka payload)
 		std::string	_body;
 
+		std::string	_generalRoot;
+
 	public:
 		void	requestParser(std::string rq);
 
@@ -80,6 +82,8 @@ class Request {
 		bool		getChunked();
 		std::string	getFullPath();
 		std::string	getQueryString();
+		
+		std::string	getGeneralRoot();
 
 		//setters
 	public:
@@ -101,6 +105,8 @@ class Request {
 		void	setChunked(bool chunked);
 		void	setFullPath(std::string fullPath);
 		void	setQueryString(std::string queryString);
+		
+		void	setGeneralRoot(std::string generalRoot);
 
 		// parsing
 	public:
@@ -117,7 +123,6 @@ class Request {
 		Server		findRightServer(std::vector<Server> servers_g, Request *request);
 		Location	*findRightLocation(std::vector<Location *> loc, Request *request);
 		void		queryString();
-		void		solveContentType();
 
 
 		//EXCEPTIONS

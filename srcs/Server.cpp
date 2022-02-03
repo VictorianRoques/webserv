@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/03 16:55:53 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 19:37:00 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ Server&	Server::operator=(const Server &x) {
 		_maxBodySize = x.getMaxBodySize();
 		_location = x.getLocation();
 		_serverNb = x.getServerNb();
+		_generalRoot = x.getGeneralRoot();
 	}
 	return *this;
 }
@@ -67,6 +68,8 @@ map_str							Server::getErrorPage() const { return _errorPage; }
 size_t							Server::getMaxBodySize() const { return _maxBodySize; }
 std::vector<Location *>			Server::getLocation() const { return _location; }
 size_t							Server::getServerNb() const { return _serverNb; }
+
+std::string						Server::getGeneralRoot() const { return _generalRoot; }
 
 /**************************************/
 //				SETTERS				  //
@@ -88,12 +91,12 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 			_maxBodySize *= 1048576;
 		else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
 			_maxBodySize *= 1073741824;
-		// if (_maxBodySize > (1048576 * 16))
-		// 	throw ExceededMaxBodySizeException();
 	}
 }
 void	Server::setLocation(std::vector<Location *> location) { _location = location; }
 void	Server::setServerNb(size_t serverNb) { _serverNb = serverNb; }
+
+void	Server::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoot; }
 
 /**************************************/
 //				UTILS				  //
