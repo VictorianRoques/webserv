@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/01 16:05:34 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 13:39:48 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,26 +238,15 @@ size_t	Location::dirCgiHandler(vec_str::iterator it, vec_str::iterator vend) {
 size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
 
 	vec_str methods;
-	bool	no_match;
+	
 	size_t	ret = 1;
-
-	methods.push_back("GET");
-	methods.push_back("POST");
-	methods.push_back("DELETE");
 
 	for (; it != vend; it++) {
 		ret++;
 		std::string tmp = it->substr(0, it->find(";"));
-		no_match = true;
-		for (vec_str::iterator mit = methods.begin(); mit != methods.end(); mit++) {
-			if (*mit == tmp) {
-				no_match = false;
-			       	if (find(_methods.begin(), _methods.end(), *mit) == _methods.end())
+		if (find(_methods.begin(), _methods.end(), tmp) == _methods.end()) {
 					_methods.push_back(tmp);
-			}
 		}
-		if (no_match == true)
-			throw WrongMethodException();
 		if (it->find(";") != std::string::npos) {
 			break ;
 		}
