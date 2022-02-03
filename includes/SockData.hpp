@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/02 18:46:36 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/03 12:09:25 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ class SockData {
 		void		cnxAccepted(SockClient sockClient);
 		/* read */
 		void		cnxCloseRead(int fd);
+		void		cnxCloseRead2(int fd);
 		void		cnxCloseWrite(int fd);
 		/* write */
 		void		msgRecv(int fd);

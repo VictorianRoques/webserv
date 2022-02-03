@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/02 18:55:21 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/03 12:10:36 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,11 +149,16 @@ void	SockData::readClient(int fd)
 	char		buffer[BUF_SIZE];
 	int			ret = read(fd, buffer, BUF_SIZE - 1);
 	if (ret == ERROR || ret == 0) {
-		clients_.erase(fd);
-		answer_.erase(fd);
 		FD_CLR(fd, &activeSet_);
 		close(fd);
-		cnxCloseRead(fd);
+		answer_.erase(fd);
+		if (ret == ERROR) {
+			cnxCloseRead(fd);
+		}
+		else {
+			cnxCloseRead2(fd);
+		}
+		clients_.erase(fd);
 	}
 	else {
 		buffer[ret] = '\0';
@@ -236,7 +241,20 @@ void	SockData::cnxCloseRead(int fd)
 	std::cout << "Server: couldn't read request from " << clients_[fd].getIp();
 	std::cout << " on port " << clients_[fd].getPort();
 	std::cout << " | socket fd: " << fd;
-	std::cout << "closing connection";
+	std::cout << " | closing connection";
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::cnxCloseRead2(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: EOF sent by " << clients_[fd].getIp();
+	std::cout << " on port " << clients_[fd].getPort();
+	std::cout << " | socket fd: " << fd;
+	std::cout << " | closing connection";
 	std::cout << std::endl;
 	std::cout << white;
 	std::cout << "-----------------------------" << std::endl;
@@ -249,7 +267,7 @@ void	SockData::cnxCloseWrite(int fd)
 	std::cout << "Server: couldn't write response to " << clients_[fd].getIp();
 	std::cout << " on port " << clients_[fd].getPort();
 	std::cout << " | socket fd: " << fd;
-	std::cout << "closing connection";
+	std::cout << " | closing connection";
 	std::cout << std::endl;
 	std::cout << white;
 	std::cout << "-----------------------------" << std::endl;
