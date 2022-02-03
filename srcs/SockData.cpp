@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/03 12:10:36 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/03 18:11:09 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ SockData	&SockData::operator=(const SockData &sockData)
 {
 	servers_ = sockData.servers_;
 	sockListen_ = sockData.sockListen_;
-	answer_ = sockData.answer_;
+	response_ = sockData.response_;
 	// chunk_ = sockData.chunk_;
 	clients_ = sockData.clients_;
 	activeSet_ = sockData.activeSet_;
@@ -64,6 +64,26 @@ void	SockData::setSockListen(std::vector<int> sockListen)
 
 void	SockData::setReadToActive(void)
 	{ readSet_ = activeSet_; }
+
+void	SockData::setResponse(int fd)
+{
+	Request	*request = requestParser(clients_[fd].getRequest(), servers_);
+	std::vector<Server>::iterator	it = servers_.begin();
+	std::vector<Server>::iterator	ite = servers_.end();
+	for (; it != ite; ++it) {
+		if (vector_contains_str(it->getServerName(), request->getHost())) {
+			Response	response(*it);
+			response.makeAnswer(*request);
+			response_[fd] = response.getResponse();
+			break;
+		}
+	}
+	delete request;
+	clients_[fd].getTmpRequest().clear();
+	clients_[fd].getRequest().clear();
+	clients_[fd].setChunk(false);
+	FD_SET(fd, &writeSet_);
+}
 
 /* checkers */
 bool	SockData::isSockListen(int fd) const
@@ -148,57 +168,57 @@ void	SockData::readClient(int fd)
 {
 	char		buffer[BUF_SIZE];
 	int			ret = read(fd, buffer, BUF_SIZE - 1);
-	if (ret == ERROR || ret == 0) {
-		FD_CLR(fd, &activeSet_);
+	if (ret == ERROR) {
 		close(fd);
-		answer_.erase(fd);
-		if (ret == ERROR) {
-			cnxCloseRead(fd);
-		}
-		else {
-			cnxCloseRead2(fd);
-		}
+		cnxCloseRead(fd);
 		clients_.erase(fd);
+		FD_CLR(fd, &activeSet_);
+		return ;
 	}
-	else {
-		buffer[ret] = '\0';
-		/* chunk requests management */
-		// if (isChunkFd(fd)) {
-		// }
-		// else if (isChunkRequest(requestStr_)) {
-		// }
-		clients_[fd].getRequest() += std::string(buffer);
-		if (ret != BUF_SIZE - 1) {
-			FD_SET(fd, &writeSet_);
-			Request	*request = requestParser(clients_[fd].getRequest(), servers_);
-			std::vector<Server>::iterator	it = servers_.begin();
-			std::vector<Server>::iterator	ite = servers_.end();
-			for (; it != ite; ++it) {
-				if (vector_contains_str(it->getServerName(), request->getHost())) {
-					Response	response(*it);
-					response.makeAnswer(*request);
-					answer_[fd] = response.getResponse();
-					break;
-				}
+	else if (ret == 0) {
+		close(fd);
+		cnxCloseRead2(fd);
+		clients_.erase(fd);
+		FD_CLR(fd, &activeSet_);
+		return ;
+	}
+	buffer[ret] = '\0';
+	clients_[fd].getTmpRequest() += std::string(buffer);
+	if (ret < BUF_SIZE - 1) {
+		clients_[fd].getRequest() += clients_[fd].getTmpRequest();
+		if (!clients_[fd].isChunk()) {
+			/* it's a new request: 1) it's a chunk 2) it's not */
+			if (clients_[fd].isTmpRequestChunk()) {
+				/* start of a chunk request */
+				clients_[fd].setChunk(true);
 			}
-			delete request;
-			msgRecv(fd);
-			clients_[fd].getRequest().clear();
+			else {
+				/* not a chunk request: set response for client */
+				msgRecv(fd);
+				setResponse(fd);
+				return ;
+			}
 		}
+		if (clients_[fd].isChunkEof()) {
+			msgRecv(fd);
+			setResponse(fd);
+			return ;
+		}
+		clients_[fd].getTmpRequest().clear();
 	}
 }
 
 void	SockData::writeClient(int fd)
 {
-	if (write(fd, answer_[fd].c_str(), answer_[fd].size()) == ERROR) {
-		answer_.erase(fd);
+	if (write(fd, response_[fd].c_str(), response_[fd].size()) == ERROR) {
+		response_.erase(fd);
 		FD_CLR(fd, &activeSet_);
 		FD_CLR(fd, &writeSet_);
 		close(fd);
 		cnxCloseWrite(fd);
 	}
 	else {
-		answer_.erase(fd);
+		response_.erase(fd);
 		FD_CLR(fd, &writeSet_);
 		msgSent(fd);
 	}
