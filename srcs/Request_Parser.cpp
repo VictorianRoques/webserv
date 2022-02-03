@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/03 17:15:08 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 17:28:38 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,12 +110,26 @@ void	Request::isChunked() {
 }
 
 /**
+ * removeDoubleSlash(): removes duplicated slashes in the path (purely estethic, would work without this function)
+ * called by buildFullPath() (see below)
+**/
+std::string	removeDoubleSlash(std::string path) {
+	size_t pos;
+
+	while ((pos = path.find("//")) != std::string::npos) {
+		path.erase(pos, 1);
+	}
+	return path;
+}
+
+/**
  * buildFullPath(): append correct root to path without query string (symbol: '?')
 **/
 void	Request::buildFullPath(Location *loc) {
 		size_t	start = loc->getLocationMatch().length();
 
 		_fullPath = loc->getRoot() + _path.substr(start - 1, _path.find("?"));
+		_fullPath = removeDoubleSlash(_fullPath);
 		return ;
 }
 

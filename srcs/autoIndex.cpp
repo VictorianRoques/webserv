@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/01 17:07:36 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/03 17:28:35 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ std::string autoIndexPageTitle(std::string path) {
 	size_t end = path.find("..");
 
 	path = (end != std::string::npos) ? path.substr(0, end - 1) : path.substr(0, end);
+	if (path[path.size() - 1] == '/')
+		path.erase(path.size() - 1);
 	return "<h1>Index of " + path + "/" + "</h1>";
 }
 
