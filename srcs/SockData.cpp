@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/03 12:10:36 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/04 23:01:46 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,7 @@ SockData	&SockData::operator=(const SockData &sockData)
 {
 	servers_ = sockData.servers_;
 	sockListen_ = sockData.sockListen_;
-	answer_ = sockData.answer_;
-	// chunk_ = sockData.chunk_;
+	response_ = sockData.response_;
 	clients_ = sockData.clients_;
 	activeSet_ = sockData.activeSet_;
 	readSet_ = sockData.readSet_;
@@ -64,6 +63,26 @@ void	SockData::setSockListen(std::vector<int> sockListen)
 
 void	SockData::setReadToActive(void)
 	{ readSet_ = activeSet_; }
+
+void	SockData::setResponse(int fd)
+{
+	Request	*request = requestParser(clients_[fd].getRequest(), servers_);
+	std::vector<Server>::iterator	it = servers_.begin();
+	std::vector<Server>::iterator	ite = servers_.end();
+	for (; it != ite; ++it) {
+		if (vector_contains_str(it->getServerName(), request->getHost())) {
+			Response	response(*it);
+			response.makeAnswer(*request);
+			response_[fd] = response.getResponse();
+			break;
+		}
+	}
+	delete request;
+	clients_[fd].getTmpRequest().clear();
+	clients_[fd].getRequest().clear();
+	clients_[fd].setChunk(false);
+	FD_SET(fd, &writeSet_);
+}
 
 /* checkers */
 bool	SockData::isSockListen(int fd) const
@@ -121,15 +140,14 @@ void	SockData::addClient(int fd)
 	int			newSock;
 	sockaddr_in addrClient;
 	socklen_t	addrClientLen = sizeof(addrClient);
+	struct timeval	tv;
+	tv.tv_sec = 10; tv.tv_usec = 0;
 	if ((newSock = accept(fd, reinterpret_cast<sockaddr*>(&addrClient),
 	&addrClientLen)) == ERROR) {
 		cnxFailed();
 	}
 	else {
 		SockClient	sockClient;
-		// std::cout << "test\n";
-		// std::cout << inet_ntoa(addrClient.sin_addr);
-		// std::cout << "test\n";
 		sockClient.setIp(inet_ntoa(addrClient.sin_addr));
 		sockClient.setPort(ntohs(addrClient.sin_port));
 		if (newSock > FD_SETSIZE) {
@@ -137,6 +155,10 @@ void	SockData::addClient(int fd)
 			cnxRefused(sockClient);
 		}
 		else {
+			if (setsockopt(newSock, SOL_SOCKET, SO_RCVTIMEO,
+			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
+				cnxFailed();
+			}
 			FD_SET(newSock, &activeSet_);
 			clients_[newSock] = sockClient;
 			cnxAccepted(sockClient);
@@ -149,9 +171,7 @@ void	SockData::readClient(int fd)
 	char		buffer[BUF_SIZE];
 	int			ret = read(fd, buffer, BUF_SIZE - 1);
 	if (ret == ERROR || ret == 0) {
-		FD_CLR(fd, &activeSet_);
 		close(fd);
-		answer_.erase(fd);
 		if (ret == ERROR) {
 			cnxCloseRead(fd);
 		}
@@ -159,49 +179,46 @@ void	SockData::readClient(int fd)
 			cnxCloseRead2(fd);
 		}
 		clients_.erase(fd);
+		FD_CLR(fd, &activeSet_);
+		return ;
 	}
-	else {
-		buffer[ret] = '\0';
-		/* chunk requests management */
-		// if (isChunkFd(fd)) {
-		// }
-		// else if (isChunkRequest(requestStr_)) {
-		// }
-		clients_[fd].getRequest() += std::string(buffer);
-		if (ret != BUF_SIZE - 1) {
-			FD_SET(fd, &writeSet_);
-			Request	*request = requestParser(clients_[fd].getRequest(), servers_);
-			std::vector<Server>::iterator	it = servers_.begin();
-			std::vector<Server>::iterator	ite = servers_.end();
-			for (; it != ite; ++it) {
-				if (vector_contains_str(it->getServerName(), request->getHost())) {
-					Response	response(*it);
-					response.makeAnswer(*request);
-					answer_[fd] = response.getResponse();
-					break;
-				}
+	buffer[ret] = '\0';
+	clients_[fd].getTmpRequest() += std::string(buffer);
+	if (ret < BUF_SIZE - 1) {
+		clients_[fd].getRequest() += clients_[fd].getTmpRequest();
+		if (!clients_[fd].isChunk()) {
+			if (clients_[fd].isTmpRequestChunk()) {
+				clients_[fd].setChunk(true);
 			}
-			delete request;
-			msgRecv(fd);
-			clients_[fd].getRequest().clear();
+			else {
+				msgRecv(fd);
+				setResponse(fd);
+				return ;
+			}
 		}
+		if (clients_[fd].isChunkEof()) {
+			msgRecv(fd);
+			setResponse(fd);
+			return ;
+		}
+		clients_[fd].getTmpRequest().clear();
 	}
 }
 
 void	SockData::writeClient(int fd)
 {
-	if (write(fd, answer_[fd].c_str(), answer_[fd].size()) == ERROR) {
-		answer_.erase(fd);
+	if (write(fd, response_[fd].c_str(), response_[fd].size()) == ERROR) {
+		close(fd);
+		clients_.erase(fd);
 		FD_CLR(fd, &activeSet_);
 		FD_CLR(fd, &writeSet_);
-		close(fd);
 		cnxCloseWrite(fd);
 	}
 	else {
-		answer_.erase(fd);
 		FD_CLR(fd, &writeSet_);
 		msgSent(fd);
 	}
+	response_.erase(fd);
 }
 
 void	SockData::cnxFailed(void)

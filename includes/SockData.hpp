@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/03 12:09:25 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/04 20:35:37 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class SockData {
 	private:
 		std::vector<Server>			servers_;
 		std::vector<int>			sockListen_;
-		std::map<int, std::string>	answer_;
+		std::map<int, std::string>	response_;
 		std::map<int, SockClient>	clients_;
 		// std::vector<int>			chunk_;
 		fd_set						activeSet_;
@@ -57,6 +57,7 @@ class SockData {
 		void		addActiveSet(int fd);
 		void		setSockListen(std::vector<int> sockListen);
 		void		setReadToActive(void);
+		void		setResponse(int fd);
 		/* checkers */
 		bool		isSockListen(int fd) const;
 		bool		isReadSet(int fd) const;
