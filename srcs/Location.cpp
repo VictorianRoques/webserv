@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/04 14:23:27 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/04 14:43:04 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,7 +215,7 @@ size_t	Location::dirRedirection(vec_str::iterator it, vec_str::iterator vend) {
 	std::string	uri = *(it + 1);
 	size_t		pos = uri.find(";");
 
-	if (code < 300 || code > 308)
+	if (code != 308)
 		throw NonValidRedirectionException();
 	else if (it->find(";") != std::string::npos || ((*(it + 1)).find(";") == std::string::npos && *(it + 2) != ";"))
 		throw NonValidRedirectionException();

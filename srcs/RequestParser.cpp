@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Request_Parser.cpp                                 :+:      :+:    :+:   */
+/*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/04 14:24:43 by viroques         ###   ########.fr       */
+/*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
+/*   Updated: 2022/02/04 15:24:55 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Request_Parser.hpp"
+#include "RequestParser.hpp"
 #include "Server.hpp"
 #include "Location.hpp"
 
@@ -49,6 +49,7 @@ Request& Request::operator=(const Request &x) {
 		_tooBig = x._tooBig;
 		_fullPath = x._fullPath;
 		_queryString = x._queryString;
+		_redirCode = x._redirCode;
 	}
 	return *this;
 }
@@ -79,6 +80,8 @@ std::string	Request::getQueryString() { return _queryString; }
 
 std::string	Request::getGeneralRoot() { return _generalRoot; }
 
+size_t		Request::getRedirCode() { return _redirCode; }
+
 /**************************************/
 //              SETTERS               //
 /**************************************/
@@ -104,6 +107,8 @@ void	Request::setFullPath(std::string fullPath) { _fullPath = fullPath; }
 void	Request::setQueryString(std::string queryString) { _queryString = queryString; }
 
 void	Request::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoot; }
+
+void	Request::setRedirCode(size_t redirCode) { _redirCode = redirCode; }
 
 /**************************************/
 //              PARSING               //
@@ -146,7 +151,7 @@ void	Request::firstLine(std::string line) {
 	rl = ft_split(line, " ");
 	setMethod(rl[0]);
 	setPath(rl[1]);
-	std::cout << getPath() << std::endl;
+	std::cout << "PATH in firstLine() in RequestParser" << getPath() << std::endl;
 	setProtocolVersion(rl[2]);
 }
 
@@ -206,6 +211,7 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Host: " << NC << _host << std::endl;
 	std::cout << COLOR_REQ << "Sec-Fetch-Dest: " << NC << _secFetchDest << std::endl;
 	std::cout << COLOR_REQ << "Chunked: " << NC << (_chunked ? "Yes" : "No") << std::endl;
+	std::cout << COLOR_REQ << "Redir Code: " << NC << _redirCode << std::endl;
 	std::cout << std::endl;
 	std::cout << COLOR_REQ << "Body: " << NC << _body << std::endl;
 }
@@ -284,14 +290,23 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 	serv = findRightServer(servers_g, request);
 	loc = findRightLocation(serv.getLocation(), request);
 
+	// check if there is a body
 	if (rq.length() > 2)
 		request->bodyLine(rq.substr(2));
 	
+	// check if bodySize is too big
 	if (request->getBody().length() > loc->getMaxBodySize()) {
 		request->setTooBig(true);
 		return request;
 	}
 
+	// handle redirection
+	if (loc->getRedirection().first != 0) {
+		request->setPath(loc->getRedirection().second);
+		request->setRedirCode(loc->getRedirection().first);
+	}
+
+	// handle the rest
 	request->isChunked();
 	request->buildFullPath(loc);
 	request->queryString();

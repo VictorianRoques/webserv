@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Request_Parser.hpp                                 :+:      :+:    :+:   */
+/*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/04 12:28:16 by pnielly          ###   ########.fr       */
+/*   Created: 2022/02/04 14:44:58 by pnielly           #+#    #+#             */
+/*   Updated: 2022/02/04 14:53:32 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,8 @@ class Request {
 		// body (aka payload)
 		std::string	_body;
 
-		std::string	_generalRoot; // root of location / (without pwd)
+		std::string	_generalRoot; 	// root of location / (without pwd)
+		size_t		_redirCode;			// redirection
 
 	public:
 		void	requestParser(std::string rq);
@@ -87,6 +88,8 @@ class Request {
 		
 		std::string	getGeneralRoot();
 
+		size_t		getRedirCode();
+
 		//setters
 	public:
 		void	setMethod(std::string method);
@@ -110,6 +113,8 @@ class Request {
 		void	setQueryString(std::string queryString);
 		
 		void	setGeneralRoot(std::string generalRoot);
+
+		void	setRedirCode(size_t redirCode);
 
 		// parsing
 	public:

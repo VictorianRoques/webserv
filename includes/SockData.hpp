@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/03 12:09:25 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/04 15:22:14 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include <arpa/inet.h>
 
 # include "Server.hpp"
-# include "Request_Parser.hpp"
+# include "RequestParser.hpp"
 # include "Parser.hpp"
 # include "Response.hpp"
 # include "SockClient.hpp"
