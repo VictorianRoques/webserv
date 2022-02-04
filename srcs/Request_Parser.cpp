@@ -6,11 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2022/02/02 15:06:34 by pnielly          ###   ########.fr       */
-=======
-/*   Updated: 2022/02/04 12:33:36 by pnielly          ###   ########.fr       */
->>>>>>> 023d8b61fb6df7aa22c47eb361348f8d7113e465
+/*   Updated: 2022/02/04 14:24:43 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,15 +235,12 @@ Location *findRightLocation(std::vector<Location *> loc, Request* req) {
 				return *it;
 		}
 	}
-<<<<<<< HEAD
-=======
 	// no match found --> return "location /"
 	it = loc.begin();
 	for (; it != loc.end(); it++) {
 		if ((*it)->getLocationMatch() == "/")
 			return *it;
 	}
->>>>>>> 023d8b61fb6df7aa22c47eb361348f8d7113e465
 	return *it;
 }
 
