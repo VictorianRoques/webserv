@@ -20,7 +20,7 @@
     //   if (! in_array($fileExtension,$fileExtensionsAllowed)) {
     //     $errors[] = "This file extension is not allowed. Please upload a JPEG or PNG file";
     //   }
-      if ($fileSize > 10000000) {
+      if ($fileSize > 4000000) {
         $errors[] = "File exceeds maximum size (4MB)";
       }
 
