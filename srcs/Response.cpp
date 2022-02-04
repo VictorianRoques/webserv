@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/02 17:24:02 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/03 17:38:48 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,6 +229,7 @@ int      Response::initRequest(Request &req)
 {
      _req = req;
     _path = req.getFullPath();
+	_generalRoot = req.getGeneralRoot();
     if (_req.getPath().empty() || _req.getMethod().empty() || _req.getProtocolVersion() != "HTTP/1.1")
     {
         if (!readErrorPage(_errorPage["400"]))

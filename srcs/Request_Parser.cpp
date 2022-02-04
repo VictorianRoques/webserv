@@ -6,7 +6,11 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:56:34 by pnielly           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/02/02 15:06:34 by pnielly          ###   ########.fr       */
+=======
+/*   Updated: 2022/02/04 12:33:36 by pnielly          ###   ########.fr       */
+>>>>>>> 023d8b61fb6df7aa22c47eb361348f8d7113e465
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +28,7 @@ char const *Request::NoHostException::what() const throw() { return "Missing a '
 //           COPLIAN CLASS            //
 /**************************************/
 
-Request::Request(): _chunked(false) {}
+Request::Request(): _chunked(false), _tooBig(false) {}
 
 Request::~Request() {}
 
@@ -44,7 +48,9 @@ Request& Request::operator=(const Request &x) {
 		_host = x._host;
 		_secFetchDest = x._secFetchDest;
 		_body = x._body;
+		_generalRoot = x._generalRoot;
 		_chunked = x._chunked;
+		_tooBig = x._tooBig;
 		_fullPath = x._fullPath;
 		_queryString = x._queryString;
 	}
@@ -71,8 +77,11 @@ std::string Request::getSecFetchDest() { return _secFetchDest; }
 std::string	Request::getBody() { return _body; }
 
 bool		Request::getChunked() { return _chunked; }
+bool		Request::getTooBig() { return _tooBig; }
 std::string	Request::getFullPath() { return _fullPath; }
 std::string	Request::getQueryString() { return _queryString; }
+
+std::string	Request::getGeneralRoot() { return _generalRoot; }
 
 /**************************************/
 //              SETTERS               //
@@ -94,8 +103,11 @@ void	Request::setSecFetchDest(std::string secFetchDest) { _secFetchDest = secFet
 void	Request::setBody(std::string body) { _body = body; }
 
 void	Request::setChunked(bool chunked) { _chunked = chunked; }
+void	Request::setTooBig(bool tooBig) { _tooBig = tooBig; }
 void	Request::setFullPath(std::string fullPath) { _fullPath = fullPath; }
 void	Request::setQueryString(std::string queryString) { _queryString = queryString; }
+
+void	Request::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoot; }
 
 /**************************************/
 //              PARSING               //
@@ -227,6 +239,15 @@ Location *findRightLocation(std::vector<Location *> loc, Request* req) {
 				return *it;
 		}
 	}
+<<<<<<< HEAD
+=======
+	// no match found --> return "location /"
+	it = loc.begin();
+	for (; it != loc.end(); it++) {
+		if ((*it)->getLocationMatch() == "/")
+			return *it;
+	}
+>>>>>>> 023d8b61fb6df7aa22c47eb361348f8d7113e465
 	return *it;
 }
 
@@ -266,19 +287,23 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 		else
 			request->headerLine(line);
 	}
+	
 	serv = findRightServer(servers_g, request);
 	loc = findRightLocation(serv.getLocation(), request);
-	if (rq.length() > loc->getMaxBodySize()) {
-		std::cout << RED << "Error: " << NC << "Max Body Size for this Location is " << RED << loc->getMaxBodySize() << NC << std::endl;
-		return request;
-	}
+
 	if (rq.length() > 2)
 		request->bodyLine(rq.substr(2));
+	
+	if (request->getBody().length() > loc->getMaxBodySize()) {
+		request->setTooBig(true);
+		return request;
+	}
+
 	request->isChunked();
-			
 	request->buildFullPath(loc);
 	request->queryString();
-	
+	request->setGeneralRoot(serv.getGeneralRoot());
+
 	request->print_request();
 	return request;
 }

@@ -6,7 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/02/01 17:02:58 by pnielly          ###   ########.fr       */
+=======
+/*   Updated: 2022/02/03 19:50:35 by pnielly          ###   ########.fr       */
+>>>>>>> 023d8b61fb6df7aa22c47eb361348f8d7113e465
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +26,6 @@
 # include <map>
 # include <cstring>
 # include <algorithm> // find() (in Parser.cpp)
-
-/**
- * data folder path (path starting from project root)
-**/
-# define DATA_FOLDER "/test"
 
 /**
  * COLORS

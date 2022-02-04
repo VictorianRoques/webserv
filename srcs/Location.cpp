@@ -6,7 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/02/03 13:39:48 by viroques         ###   ########.fr       */
+=======
+/*   Updated: 2022/02/03 19:47:25 by pnielly          ###   ########.fr       */
+>>>>>>> 023d8b61fb6df7aa22c47eb361348f8d7113e465
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +61,7 @@ Location&	Location::operator=(const Location &x) {
 		_index = x.getIndex();
 		_cgiHandler = x.getCgiHandler();
 		_uploadDest = x.getUploadDest();
+		_generalRoot = x.getGeneralRoot();
 	}
 	return *this;
 }
@@ -75,6 +80,8 @@ bool								Location::getAutoIndex() const { return _autoIndex; }
 std::pair<std::string, std::string>	Location::getCgiHandler() const { return _cgiHandler; }
 std::string							Location::getUploadDest() const { return _uploadDest; }
 size_t								Location::getMaxBodySize() const { return _maxBodySize; }
+
+std::string							Location::getGeneralRoot() const { return _generalRoot; }
 
 /**************************************/
 //				SETTERS				  //
@@ -101,10 +108,10 @@ void	Location::setMaxBodySize(std::string maxBodySize) {
 			_maxBodySize *= 1048576;
 		else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
 			_maxBodySize *= 1073741824;
-		// if (_maxBodySize > (1048576 * 16))
-		// 	throw ExceededMaxBodySizeException();
 	}
 }
+
+void	Location::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoot; }
 
 /**************************************/
 //			PARSING HELPERS			  //
@@ -136,6 +143,9 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	root = removeBackwards(root);
 
 	setRoot(root);
+	if (getLocationMatch() == "/") {
+		_generalRoot = getRoot();
+	}
 
 	// turn relative path into absolute
 	if (getRoot()[0] != '/') {

@@ -6,7 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/02/01 14:47:23 by viroques         ###   ########.fr       */
+=======
+/*   Updated: 2022/02/03 19:47:28 by pnielly          ###   ########.fr       */
+>>>>>>> 023d8b61fb6df7aa22c47eb361348f8d7113e465
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,6 +288,10 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 			}
 			// meets a '}' == end of the location directive
 			if (it->find("}") != std::string::npos) {
+				if (location->getLocationMatch() == "/") {
+					_generalRoot = location->getGeneralRoot();
+				}
+
 				this->_location.push_back(location);
 				return ret;
 			}

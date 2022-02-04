@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 12:57:18 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/01 15:48:58 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/04 12:28:16 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,11 +51,14 @@ class Request {
 		std::string	_secFetchDest;
 
 		bool		_chunked;
+		bool		_tooBig;
 		std::string	_fullPath;
 		std::string	_queryString;
 
 		// body (aka payload)
 		std::string	_body;
+
+		std::string	_generalRoot; // root of location / (without pwd)
 
 	public:
 		void	requestParser(std::string rq);
@@ -78,8 +81,11 @@ class Request {
 		std::string	getBody();
 
 		bool		getChunked();
+		bool		getTooBig();
 		std::string	getFullPath();
 		std::string	getQueryString();
+		
+		std::string	getGeneralRoot();
 
 		//setters
 	public:
@@ -99,8 +105,11 @@ class Request {
 		void	setBody(std::string body);
 
 		void	setChunked(bool chunked);
+		void	setTooBig(bool tooBig);
 		void	setFullPath(std::string fullPath);
 		void	setQueryString(std::string queryString);
+		
+		void	setGeneralRoot(std::string generalRoot);
 
 		// parsing
 	public:
@@ -117,7 +126,6 @@ class Request {
 		Server		findRightServer(std::vector<Server> servers_g, Request *request);
 		Location	*findRightLocation(std::vector<Location *> loc, Request *request);
 		void		queryString();
-		void		solveContentType();
 
 
 		//EXCEPTIONS
