@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/04 15:24:55 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/05 11:07:50 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,9 +301,10 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 	}
 
 	// handle redirection
-	if (loc->getRedirection().first != 0) {
+	if (loc->getRedirection().first == 308) {
 		request->setPath(loc->getRedirection().second);
 		request->setRedirCode(loc->getRedirection().first);
+		loc = findRightLocation(serv.getLocation(), request);
 	}
 
 	// handle the rest
