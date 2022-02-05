@@ -6,14 +6,14 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:01 by viroques          #+#    #+#             */
-/*   Updated: 2022/01/28 14:23:10 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/04 15:22:06 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CGI_HANDLER_H
 # define CGI_HANDLER_H
 
-# include "Request_Parser.hpp"
+# include "RequestParser.hpp"
 # include <unistd.h>
 # include "utils.hpp"
 

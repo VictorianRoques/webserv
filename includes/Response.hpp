@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/03 17:39:35 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/04 15:21:47 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 # include <sys/stat.h>
 # include <unistd.h>
 
-# include "Request_Parser.hpp"
+# include "RequestParser.hpp"
 # include "cgiHandler.hpp"
 # include "Server.hpp"
 # include "autoIndex.hpp"

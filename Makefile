@@ -6,7 +6,7 @@
 #    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
-#    Updated: 2022/02/02 18:47:42 by fhamel           ###   ########.fr        #
+#    Updated: 2022/02/04 14:45:28 by pnielly          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ _SRC_		=	main.cpp \
 				cgiHandler.cpp \
 				Location.cpp \
 				Parser.cpp \
-				Request_Parser.cpp \
+				RequestParser.cpp \
 				Response.cpp \
 				Server.cpp \
 				SockData.cpp \

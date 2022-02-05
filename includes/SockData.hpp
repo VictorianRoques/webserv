@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/05 02:17:43 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/05 11:23:14 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include <sys/socket.h>
 
 # include "Server.hpp"
-# include "Request_Parser.hpp"
+# include "RequestParser.hpp"
 # include "Parser.hpp"
 # include "Response.hpp"
 # include "SockClient.hpp"
