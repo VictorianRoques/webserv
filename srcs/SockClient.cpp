@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/05 02:09:12 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/05 02:33:16 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,11 +64,6 @@ bool	SockClient::isChunkEof(void) const
 	std::istringstream	data(tmpRequest_);
 	std::string			line;
 	std::getline(data, line);
-	std::cout << "line content: " << std::endl;
-	std::string::const_iterator	it = line.begin(), ite = line.end();
-	for (; it != ite; ++it) {
-		std::cout << static_cast<int>(*it) << " | ";
-	}
 	std::cout << std::endl;
 	if (line == "0" || line == "0\r") {
 		return true;

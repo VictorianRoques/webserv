@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/05 02:22:21 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/05 02:39:35 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,9 +183,12 @@ void	SockData::recvClient(int fd)
 		return ;
 	}
 	buffer[ret] = '\0';
-	std::cout << "######################" << std::endl;
-	std::cout << "buffer: \n" << buffer << std::endl;
-	std::cout << "######################" << std::endl;
+	std::cout << red;
+	std::cout << "buffer: \n";
+	std::cout << white;
+	std::cout << "#################################" << std::endl;
+	std::cout << buffer << std::endl;
+	std::cout << "#################################" << std::endl;
 	clients_[fd].getTmpRequest() += std::string(buffer);
 	if (ret < BUF_SIZE - 1) {
 		clients_[fd].getRequest() += clients_[fd].getTmpRequest();
@@ -201,8 +204,6 @@ void	SockData::recvClient(int fd)
 		}
 		if (clients_[fd].isChunkEof()) {
 			msgRecv(fd);
-			std::cout << "request: " << std::endl;
-			std::cout << clients_[fd].getRequest() << std::endl;
 			setResponse(fd);
 			return ;
 		}
