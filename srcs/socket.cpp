@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 19:04:05 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/05 02:20:37 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/05 02:45:16 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,15 +60,6 @@ std::vector<int>	sockListen(std::vector<size_t>	ports)
 		sockArr.push_back(sockTmp);
 	}
 	return sockArr;
-}
-
-/*
-**
-*/
-bool	isChunkRequest(std::string request)
-{
-	request = (std::string)request;
-	return false;
 }
 
 /*
