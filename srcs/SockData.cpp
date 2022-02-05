@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/04 23:01:46 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/05 02:22:21 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 SockData::SockData(void)
 {
 	initActiveSet();
-	initReadSet();
-	initWriteSet();
+	initRecvSet();
+	initSendSet();
 	red = "\033[0;31m";
 	green = "\033[0;32m";
 	blue = "\033[0;34m";
@@ -37,8 +37,8 @@ SockData	&SockData::operator=(const SockData &sockData)
 	response_ = sockData.response_;
 	clients_ = sockData.clients_;
 	activeSet_ = sockData.activeSet_;
-	readSet_ = sockData.readSet_;
-	writeSet_ = sockData.writeSet_;
+	recvSet_ = sockData.recvSet_;
+	sendSet_ = sockData.sendSet_;
 	return *this;
 }
 
@@ -49,11 +49,11 @@ void	SockData::setServers(std::vector<Server> servers)
 void	SockData::initActiveSet(void)
 	{ FD_ZERO(&activeSet_); }
 
-void	SockData::initReadSet(void)
-	{ FD_ZERO(&readSet_); }
+void	SockData::initRecvSet(void)
+	{ FD_ZERO(&recvSet_); }
 
-void	SockData::initWriteSet(void)
-	{ FD_ZERO(&writeSet_); }
+void	SockData::initSendSet(void)
+	{ FD_ZERO(&sendSet_); }
 
 void	SockData::addActiveSet(int fd)
 	{ FD_SET(fd, &activeSet_); }
@@ -61,8 +61,8 @@ void	SockData::addActiveSet(int fd)
 void	SockData::setSockListen(std::vector<int> sockListen)
 	{ sockListen_ = sockListen; }
 
-void	SockData::setReadToActive(void)
-	{ readSet_ = activeSet_; }
+void	SockData::setRecvToActive(void)
+	{ recvSet_ = activeSet_; }
 
 void	SockData::setResponse(int fd)
 {
@@ -81,7 +81,7 @@ void	SockData::setResponse(int fd)
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
 	clients_[fd].setChunk(false);
-	FD_SET(fd, &writeSet_);
+	FD_SET(fd, &sendSet_);
 }
 
 /* checkers */
@@ -97,11 +97,11 @@ bool	SockData::isSockListen(int fd) const
 	return false;
 }
 
-bool	SockData::isReadSet(int fd) const
-	{ return FD_ISSET(fd, &readSet_); }
+bool	SockData::isRecvSet(int fd) const
+	{ return FD_ISSET(fd, &recvSet_); }
 
-bool	SockData::isWriteSet(int fd) const
-	{ return FD_ISSET(fd, &writeSet_); }
+bool	SockData::isSendSet(int fd) const
+	{ return FD_ISSET(fd, &sendSet_); }
 
 bool	SockData::isChunkFd(int fd) const
 {
@@ -116,11 +116,11 @@ bool	SockData::isChunkRequest(std::string request) const
 }
 
 /* getters */
-fd_set	*SockData::getReadSet(void)
-	{ return &readSet_; }
+fd_set	*SockData::getRecvSet(void)
+	{ return &recvSet_; }
 
-fd_set	*SockData::getWriteSet(void)
-	{ return &writeSet_; }
+fd_set	*SockData::getSendSet(void)
+	{ return &sendSet_; }
 
 size_t	SockData::getSizeListen(void) const
 	{ return sockListen_.size(); }
@@ -166,10 +166,10 @@ void	SockData::addClient(int fd)
 	}
 }
 
-void	SockData::readClient(int fd)
+void	SockData::recvClient(int fd)
 {
 	char		buffer[BUF_SIZE];
-	int			ret = read(fd, buffer, BUF_SIZE - 1);
+	int			ret = recv(fd, buffer, BUF_SIZE - 1, 0);
 	if (ret == ERROR || ret == 0) {
 		close(fd);
 		if (ret == ERROR) {
@@ -183,6 +183,9 @@ void	SockData::readClient(int fd)
 		return ;
 	}
 	buffer[ret] = '\0';
+	std::cout << "######################" << std::endl;
+	std::cout << "buffer: \n" << buffer << std::endl;
+	std::cout << "######################" << std::endl;
 	clients_[fd].getTmpRequest() += std::string(buffer);
 	if (ret < BUF_SIZE - 1) {
 		clients_[fd].getRequest() += clients_[fd].getTmpRequest();
@@ -198,6 +201,8 @@ void	SockData::readClient(int fd)
 		}
 		if (clients_[fd].isChunkEof()) {
 			msgRecv(fd);
+			std::cout << "request: " << std::endl;
+			std::cout << clients_[fd].getRequest() << std::endl;
 			setResponse(fd);
 			return ;
 		}
@@ -205,17 +210,17 @@ void	SockData::readClient(int fd)
 	}
 }
 
-void	SockData::writeClient(int fd)
+void	SockData::sendClient(int fd)
 {
-	if (write(fd, response_[fd].c_str(), response_[fd].size()) == ERROR) {
+	if (send(fd, response_[fd].c_str(), response_[fd].size(), 0) == ERROR) {
 		close(fd);
 		clients_.erase(fd);
 		FD_CLR(fd, &activeSet_);
-		FD_CLR(fd, &writeSet_);
+		FD_CLR(fd, &sendSet_);
 		cnxCloseWrite(fd);
 	}
 	else {
-		FD_CLR(fd, &writeSet_);
+		FD_CLR(fd, &sendSet_);
 		msgSent(fd);
 	}
 	response_.erase(fd);

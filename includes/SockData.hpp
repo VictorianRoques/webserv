@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/04 20:35:37 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/05 02:17:43 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <map>
 
 # include <arpa/inet.h>
+# include <sys/socket.h>
 
 # include "Server.hpp"
 # include "Request_Parser.hpp"
@@ -26,7 +27,7 @@
 # include "SockClient.hpp"
 
 # define ERROR -1
-# define BUF_SIZE 2048
+# define BUF_SIZE 1024
 
 class SockData {
 	private:
@@ -36,8 +37,8 @@ class SockData {
 		std::map<int, SockClient>	clients_;
 		// std::vector<int>			chunk_;
 		fd_set						activeSet_;
-		fd_set						readSet_;
-		fd_set						writeSet_;
+		fd_set						recvSet_;
+		fd_set						sendSet_;
 
 		std::string	red;
 		std::string	green;
@@ -52,27 +53,27 @@ class SockData {
 		/* setters */
 		void		setServers(std::vector<Server> servers);
 		void		initActiveSet(void);
-		void		initReadSet(void);
-		void		initWriteSet(void);
+		void		initRecvSet(void);
+		void		initSendSet(void);
 		void		addActiveSet(int fd);
 		void		setSockListen(std::vector<int> sockListen);
-		void		setReadToActive(void);
+		void		setRecvToActive(void);
 		void		setResponse(int fd);
 		/* checkers */
 		bool		isSockListen(int fd) const;
-		bool		isReadSet(int fd) const;
-		bool		isWriteSet(int fd) const;
+		bool		isRecvSet(int fd) const;
+		bool		isSendSet(int fd) const;
 		bool		isChunkFd(int fd) const;
 		bool		isChunkRequest(std::string request) const;
 		/* getters */
-		fd_set		*getReadSet(void);
-		fd_set		*getWriteSet(void);
+		fd_set		*getRecvSet(void);
+		fd_set		*getSendSet(void);
 		size_t		getSizeListen(void) const;
 		int			getSockListen(size_t index) const;
 		/* client manager */
 		void		addClient(int fd);
-		void		readClient(int fd);
-		void		writeClient(int fd);
+		void		recvClient(int fd);
+		void		sendClient(int fd);
 		/* connexion */
 		void		cnxFailed(void);
 		void		cnxRefused(SockClient sockClient);
