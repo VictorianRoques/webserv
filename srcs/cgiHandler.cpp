@@ -39,6 +39,33 @@ char**          cgiHandler::keyMapConvert(std::string key)
     argv[1] = NULL;
     return argv;
 }
+
+int    cgiHandler::upload(std::string uploadDest)
+{
+    size_t foundFileName = _body.find("filename=");
+    if (foundFileName == std::string::npos)
+        return (1);
+    
+    std::string fileName = _body.substr(foundFileName, _body.find("\n", foundFileName));
+    fileName = fileName.substr(0, fileName.find("\n"));
+    fileName = fileName.substr(10);
+    fileName.erase(fileName.length() - 2);
+    uploadDest = uploadDest + "/" + fileName;
+
+    std::string boundary = _env["CONTENT_TYPE"].substr(_env["CONTENT_TYPE"].find("boundary=") + 9);
+    _body = _body.substr(_body.find("\r\n\r\n") + 4);
+    _body = _body.substr(0, _body.find(boundary));
+    _body = _body.substr(0, _body.length() - 2);
+
+    std::ofstream myfile;
+    myfile.open(uploadDest.c_str(), std::ofstream::out | std::ofstream::binary);
+    if (myfile.is_open() == false)
+        return (1);
+    myfile << _body.c_str();
+    myfile.close();
+    return (0);
+}
+
 std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
 {
     char        **envp;
@@ -93,7 +120,6 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
             newBody += buffer;
         }
     }
-
     dup2(tmpStdIn, STDOUT_FILENO);
     dup2(tmpStdOut, STDOUT_FILENO);
     fclose(fileIn);
@@ -105,7 +131,6 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
     for (int i = 0; envp[i]; i++)
         delete [] envp[i];
     delete[] envp;
-
     return newBody;
 }
 

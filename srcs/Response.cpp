@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/03 17:38:48 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/06 22:20:32 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,40 @@
 //           FUNCTIONS                //
 /**************************************/
 
-Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()) {}
+Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()) 
+{
+    _methods["GET"] = &Response::getMethod;
+    _methods["POST"] = &Response::postMethod;
+    _methods["DELETE"] = &Response::deleteMethod;
+    _methods["PUT"] = &Response::putMethod;
+    _methods["HEAD"] = &Response::headMethod;
+    _methods["OPTIONS"] = &Response::optionMethod;
+}
+
+int      Response::initRequest(Request &req)
+{
+     _req = req;
+    _path = req.getFullPath();
+	_generalRoot = req.getGeneralRoot();
+    if (_req.getPath().empty() || _req.getMethod().empty() || _req.getProtocolVersion() != "HTTP/1.1")
+    {
+        if (!readErrorPage(_errorPage["400"]))
+            _header = writeHeader("400 Bad Request", "text/html", _body.length());
+        _response = _header + _body;
+        return (1);
+    }
+    _contentType = req.getContentType();
+    setCgiPath();
+    if (req.getPath() == "/")
+    {
+        if (_AutoIndex == true)
+            _path.erase(_path.size() - 1);
+        else
+            _path = _root + "/" + _index;
+        _contentType = "text/html";
+    }
+    return (0);
+}
 
 void        Response::setCgiPath()
 {
@@ -39,6 +72,7 @@ void        Response::setCgiPath()
                 _root = (*it)->getRoot();
                 _AutoIndex = (*it)->getAutoIndex();
                 _allowMethods = (*it)->getMethods();
+                _uploadDest = (*it)->getUploadDest();
             }
 		}
 	}
@@ -112,14 +146,13 @@ std::string     Response::writeHeader(std::string status, std::string contentTyp
     return header;
 }
 
-
 void    Response::setCgiHeader(std::string cgiHeader)
 {
-    size_t pos = cgiHeader.find("Status: ") + 8;
-    if (pos)
-        _status = cgiHeader.substr(pos, cgiHeader.find("\r\n", pos));
+    size_t pos = cgiHeader.find("Status: ");
+    if (pos != std::string::npos)
+        _status = cgiHeader.substr(pos + 8, cgiHeader.find("\n", pos));
     pos = cgiHeader.find("Content-type: ") + 14;
-    _contentType = cgiHeader.substr(pos, cgiHeader.find("\r\n", pos));
+    _contentType = cgiHeader.substr(pos, cgiHeader.find("\n", pos));
 }
 
 void        Response::getMethod()
@@ -154,17 +187,31 @@ void        Response::getMethod()
 void     Response::postMethod()
 {
     cgiHandler cgi(_req);
-    _body = cgi.execute(_pathCgi);
-    if (_body == "<html><body>FATAL ERROR CGI</body></html>")
+    if (_path.find(_extensionCgi) != std::string::npos) 
     {
-        if (!readErrorPage(_errorPage["500"]))
-            _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
-        _response = _header + _body;
-        return ;
+        _body = cgi.execute(_pathCgi);
+        if (_body == "<html><body>FATAL ERROR CGI</body></html>")
+        {
+            if (!readErrorPage(_errorPage["500"]))
+                _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+            _response = _header + _body;
+            return ;
+        }
+        setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
+        _body = _body.substr(_body.find("\r\n\r\n") + 4);
+        _header = writeHeader(_status, _contentType, _body.length());
     }
-    setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
-    _body = _body.substr(_body.find("\r\n\r\n") + 4);
-    _header = writeHeader(_status, _contentType, _body.length());
+    else
+    {
+        if (pathIsDirectory(_uploadDest)
+            && !cgi.upload(_uploadDest))
+            _header = writeHeader("204 No Content", "", 0);
+        else
+        {
+            if (!readErrorPage(_errorPage["400"]))
+                _header = writeHeader("400 Bad Request", "text/html", _body.length());
+        }
+    }
     _response = _header + _body;
 }
 
@@ -225,36 +272,6 @@ void    Response::putMethod()
     _response = _header + _body;
 }
 
-int      Response::initRequest(Request &req)
-{
-     _req = req;
-    _path = req.getFullPath();
-	_generalRoot = req.getGeneralRoot();
-    if (_req.getPath().empty() || _req.getMethod().empty() || _req.getProtocolVersion() != "HTTP/1.1")
-    {
-        if (!readErrorPage(_errorPage["400"]))
-            _header = writeHeader("400 Bad Request", "text/html", _body.length());
-        _response = _header + _body;
-        return (1);
-    }
-    _contentType = req.getContentType();
-    setCgiPath();
-    if (req.getPath() == "/")
-    {
-        if (_AutoIndex == true)
-            _path.erase(_path.size() - 1);
-        else
-            _path = _root + "/" + _index;
-        _contentType = "text/html";
-    }
-    return (0);
-}
-void    Response::headMethod()
-{
-    readContent(_path);
-    _response = _header;
-}
-
 void    Response::optionMethod()
 {
     std::string Allow = "Allow: ";
@@ -267,8 +284,14 @@ void    Response::optionMethod()
             Allow += ", ";
     }
     readContent(_path);
-    if (_header.find("40") == std::string::npos)
+    if (_header.find("403") == std::string::npos && _header.find("404") == std::string::npos)
         _header = _header.substr(0, _header.size() - 2) + Allow + "\r\n\r\n";
+    _response = _header;
+}
+
+void    Response::headMethod()
+{
+    readContent(_path);
     _response = _header;
 }
 
@@ -283,18 +306,8 @@ void     Response::makeAnswer(Request &req)
         _response = _header + _body;
         return;
     }
-    
-    typedef void (Response::*ptr)();
-    std::map<std::string, ptr> methods;
-    methods["GET"] = &Response::getMethod;
-    methods["POST"] = &Response::postMethod;
-    methods["DELETE"] = &Response::deleteMethod;
-    methods["PUT"] = &Response::putMethod;
-    methods["HEAD"] = &Response::headMethod;
-    methods["OPTIONS"] = &Response::optionMethod;
-
-    if (methods.find(_req.getMethod()) != methods.end() && isAllow(_req.getMethod()))
-        (this->*methods[_req.getMethod()])();
+    if (_methods.find(_req.getMethod()) != _methods.end() && isAllow(_req.getMethod()))
+        (this->*_methods[_req.getMethod()])();
     else
     {
         if (!readErrorPage(_errorPage["405"]))
@@ -305,7 +318,6 @@ void     Response::makeAnswer(Request &req)
 
 std::string&    Response::getResponse() { return _response;}
 
-// Utils
 
 bool             Response::isAllow(std::string method)
 {
