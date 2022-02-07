@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/04 14:22:29 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/07 16:51:55 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,8 @@ vec_str 							ft_split(std::string line, std::string delim);
 std::map<std::string, std::string>	ft_map_split(std::string line, std::string delim);
 bool								vector_contains_str(vec_str v, std::string str);
 std::string							removeBackwards(std::string path);
+std::string							cleanSlash(std::string path);
+std::string							getPWD();
 
 /**
  * prototype of testing

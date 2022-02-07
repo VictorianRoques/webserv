@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/01/31 15:57:33 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/07 16:50:02 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,4 +97,24 @@ std::string removeBackwards(std::string path) {
 		}
 	}
 	return path;
+}
+
+/**
+ * cleanSlash(): removes duplicate slashes in path
+**/
+std::string	cleanSlash(std::string path) {
+	size_t pos;
+
+	while ((pos = path.find("//")) != std::string::npos)
+		path.erase(pos, 1);
+	return path;
+}
+
+/**
+ * getPWD(): returns a string equivalent to the return of 'pwd' command
+**/
+std::string	getPWD() {
+	const char *env_pwd = std::getenv("PWD");
+	std::string	pwd(env_pwd);
+	return pwd;
 }
