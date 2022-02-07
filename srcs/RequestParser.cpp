@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/05 11:07:50 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/07 12:15:34 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ char const *Request::NoHostException::what() const throw() { return "Missing a '
 //           COPLIAN CLASS            //
 /**************************************/
 
-Request::Request(): _chunked(false), _tooBig(false) {}
+Request::Request(): _chunked(false), _tooBig(false), _redirCode(0) {}
 
 Request::~Request() {}
 
