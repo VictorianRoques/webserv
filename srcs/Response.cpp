@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/07 17:37:47 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/07 19:37:21 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,13 +49,26 @@ int      Response::initRequest(Request &req)
             _path = _root + "/" + _index;
         _contentType = "text/html";
     }
-     if (_request.getBody().size() > _serv.getMaxBodySize())
+	// Errors 
+    if (_request.getBody().size() > _serv.getMaxBodySize())
     {
         if (!readErrorPage(_errorPage["413"]))
             _header = writeHeader("413 Payload Too Large", "text/html", _body.length());
         _response = _header + _body;
         return (1);
     }
+	if (_request.getRedirCode() == 310)
+	{
+		if (!readErrorPage(_errorPage["310"]))
+			_header = writeHeader("310 Too many Redirects", "text/html", _body.length());
+		_response = _header + _body;
+		return (1);
+	}
+	if (_request.getRedirCode() == 308)
+	{
+		_response = writeHeader("308 Permanent Redirect", "", 0);
+		return (1);
+	}
     return (0);
 }
 
@@ -177,7 +190,7 @@ void    Response::createCgiHeader(std::string cgiHeader)
 
 void        Response::getMethod()
 {
-    if (_request.getFullPath().find(_extensionCgi) != std::string::npos)
+    if (_extensionCgi.empty() == false && _request.getFullPath().find(_extensionCgi) != std::string::npos)
     {
         cgiHandler cgi(_request);
         _body = cgi.execute(_pathCgi);
@@ -223,9 +236,11 @@ void     Response::postMethod()
     }
     else
     {
-        if (pathIsDirectory(_uploadDest) && !cgi.upload(_uploadDest))
+        if (pathIsDirectory(_uploadDest) && !this->upload())
         {
             _header = writeHeader("204 No Content", "", 0);
+			_body = "";
+
         }
         else
         {
@@ -370,4 +385,31 @@ int     Response::pathIsDirectory(std::string &path)
 		if (s.st_mode & S_IFDIR)
 			return 1;
 	return 0;
+}
+
+int			Response::upload()
+{
+	std::string body = _request.getBody();
+	size_t foundFileName = body.find("filename=");
+    if (foundFileName == std::string::npos)
+        return (1);
+    
+    std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
+    fileName = fileName.substr(0, fileName.find("\n"));
+    fileName = fileName.substr(10);
+    fileName.erase(fileName.length() - 2);
+    _uploadDest = _uploadDest + "/" + fileName;
+
+    std::string boundary = _contentType.substr(_contentType.find("boundary=") + 9);
+    body = body.substr(body.find("\r\n\r\n") + 4);
+    body = body.substr(0, body.find(boundary));
+    body = body.substr(0, body.length() - 2);
+
+    std::ofstream myfile;
+    myfile.open(_uploadDest.c_str(), std::ofstream::out | std::ofstream::binary);
+    if (myfile.is_open() == false)
+        return (1);
+    myfile << body.c_str();
+    myfile.close();
+    return (0);
 }
