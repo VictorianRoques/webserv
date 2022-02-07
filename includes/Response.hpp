@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/04 15:21:47 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/07 14:02:57 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,6 @@ public:
     std::string     sizeToString(size_t size);
 	std::string		autoIndexBuilder(std::string path);
 
-
 private:
 
     Request                     _req;
@@ -78,6 +77,9 @@ private:
     std::string                 _generalRoot;
     bool                        _AutoIndex;
     vec_str                     _allowMethods;
+    std::string                 _uploadDest;
+
+    std::map<std::string, void (Response::*)()> _methods;  
 };
 
 #endif

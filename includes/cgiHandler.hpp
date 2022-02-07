@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:01 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/04 15:22:06 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/07 14:02:34 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ public:
     char            **envToString();
     char            **keyMapConvert(std::string key);
     std::string     execute(std::string pathToBinaryCgi);
+    int             upload(std::string uploadDest);     
 };
 
 #endif
