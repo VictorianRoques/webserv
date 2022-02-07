@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/05 11:22:50 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/07 02:30:35 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,27 @@ void	SockData::setResponse(int fd)
 	FD_SET(fd, &sendSet_);
 }
 
+void	SockData::setInternalError(int fd)
+{
+	std::string			response, body, size;
+	std::stringstream	ss;
+	body += "<!DOCTYPE html>\n<html><title>500</title><body>\
+<h1>500 Internal Server Error</h1>\
+<h3>Sorry, server is under pressure at the moment...</h3></body></html>\n";
+	ss << body.size();
+	ss >> size;
+	response += "HTTP/1.1 500 Internal Server Error\r\n";
+	response += "Content-Type: text/html\r\n";
+	response += "Content-Length: "; response += size; response += "\r\n";
+	response += "Connection: keep-alive\r\n";
+	response += "\r\n";
+	response += body;
+	response_[fd] = response;
+	clients_[fd].getTmpRequest().clear();
+	clients_[fd].getRequest().clear();
+	FD_SET(fd, &sendSet_);
+}
+
 /* checkers */
 bool	SockData::isSockListen(int fd) const
 {
@@ -128,9 +149,20 @@ size_t	SockData::getSizeListen(void) const
 int		SockData::getSockListen(size_t index) const
 	{ return sockListen_[index]; }
 
+size_t	SockData::clientsAlloc(void)
+{
+	std::map<int, SockClient>::iterator	it = clients_.begin();
+	std::map<int, SockClient>::iterator	ite = clients_.end();
+	size_t	totalSize = 0;
+	for (; it != ite; ++it) {
+		totalSize += it->second.getTmpRequest().size();
+		totalSize += it->second.getRequest().size();
+	}
+	return totalSize;
+}
+
+/* client manager */
 /*
-** client manager
-**
 ** After finding there was some activity on a listening fd
 ** a new socket is created in order to create a connexion with the client.
 ** This fd is then added to the active set of fds to be monitored
@@ -150,18 +182,24 @@ void	SockData::addClient(int fd)
 		SockClient	sockClient;
 		sockClient.setIp(inet_ntoa(addrClient.sin_addr));
 		sockClient.setPort(ntohs(addrClient.sin_port));
-		if (newSock > FD_SETSIZE) {
-			close(newSock);
-			cnxRefused(sockClient);
-		}
-		else {
-			if (setsockopt(newSock, SOL_SOCKET, SO_RCVTIMEO,
-			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
-				cnxFailed();
-			}
-			FD_SET(newSock, &activeSet_);
+		try {
 			clients_[newSock] = sockClient;
-			cnxAccepted(sockClient);
+			if (newSock > FD_SETSIZE) {
+				close(newSock);
+				cnxRefused(sockClient);
+			}
+			else {
+				if (setsockopt(newSock, SOL_SOCKET, SO_RCVTIMEO,
+				reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
+					cnxFailed();
+				}
+				FD_SET(newSock, &activeSet_);
+				cnxAccepted(sockClient);
+			}
+		}
+		catch (std::exception &e) {
+			setInternalError(fd);
+			exceptionError(newSock, e);
 		}
 	}
 }
@@ -171,43 +209,38 @@ void	SockData::recvClient(int fd)
 	char		buffer[BUF_SIZE];
 	int			ret = recv(fd, buffer, BUF_SIZE - 1, 0);
 	if (ret == ERROR || ret == 0) {
-		close(fd);
-		if (ret == ERROR) {
-			cnxCloseRead(fd);
-		}
-		else {
-			cnxCloseRead2(fd);
-		}
-		clients_.erase(fd);
-		FD_CLR(fd, &activeSet_);
+		recvClientClose(fd, ret);
 		return ;
 	}
 	buffer[ret] = '\0';
-	std::cout << red;
-	std::cout << "buffer: \n";
-	std::cout << white;
-	std::cout << "#################################" << std::endl;
-	std::cout << buffer << std::endl;
-	std::cout << "#################################" << std::endl;
-	clients_[fd].getTmpRequest() += std::string(buffer);
-	if (ret < BUF_SIZE - 1) {
-		clients_[fd].getRequest() += clients_[fd].getTmpRequest();
-		if (!clients_[fd].isChunk()) {
-			if (clients_[fd].isTmpRequestChunk()) {
-				clients_[fd].setChunk(true);
+	try {
+		clients_[fd].getTmpRequest() += std::string(buffer);
+		if (ret < BUF_SIZE - 1) {
+			clients_[fd].getRequest() += clients_[fd].getTmpRequest();
+			if (clients_[fd].getRequest().size() > 4000000) {
+				throw SockData::badAllocException();
 			}
-			else {
+			if (!clients_[fd].isChunk()) {
+				if (clients_[fd].isTmpRequestChunk()) {
+					clients_[fd].setChunk(true);
+				}
+				else {
+					msgRecv(fd);
+					setResponse(fd);
+					return ;
+				}
+			}
+			if (clients_[fd].isChunkEof()) {
 				msgRecv(fd);
 				setResponse(fd);
 				return ;
 			}
+			clients_[fd].getTmpRequest().clear();
 		}
-		if (clients_[fd].isChunkEof()) {
-			msgRecv(fd);
-			setResponse(fd);
-			return ;
-		}
-		clients_[fd].getTmpRequest().clear();
+	}
+	catch (std::exception &e) {
+		setInternalError(fd);
+		exceptionError(fd, e);
 	}
 }
 
@@ -218,7 +251,7 @@ void	SockData::sendClient(int fd)
 		clients_.erase(fd);
 		FD_CLR(fd, &activeSet_);
 		FD_CLR(fd, &sendSet_);
-		cnxCloseWrite(fd);
+		cnxCloseSend(fd);
 	}
 	else {
 		FD_CLR(fd, &sendSet_);
@@ -227,6 +260,21 @@ void	SockData::sendClient(int fd)
 	response_.erase(fd);
 }
 
+/* client manager utils */
+void	SockData::recvClientClose(int fd, int ret)
+{
+	close(fd);
+	if (ret == ERROR) {
+		cnxCloseRecv(fd);
+	}
+	else {
+		cnxCloseRecv2(fd);
+	}
+	clients_.erase(fd);
+	FD_CLR(fd, &activeSet_);
+}
+
+/* msg connection */
 void	SockData::cnxFailed(void)
 {
 	std::cout << "-----------------------------" << std::endl;
@@ -257,11 +305,12 @@ void	SockData::cnxAccepted(SockClient sockClient)
 	std::cout << "-----------------------------" << std::endl;
 }
 
-void	SockData::cnxCloseRead(int fd)
+/* msg close recv */
+void	SockData::cnxCloseRecv(int fd)
 {
 	std::cout << "-----------------------------" << std::endl;
 	std::cout << red;
-	std::cout << "Server: couldn't read request from " << clients_[fd].getIp();
+	std::cout << "Server: couldn't receive request from " << clients_[fd].getIp();
 	std::cout << " on port " << clients_[fd].getPort();
 	std::cout << " | socket fd: " << fd;
 	std::cout << " | closing connection";
@@ -270,7 +319,7 @@ void	SockData::cnxCloseRead(int fd)
 	std::cout << "-----------------------------" << std::endl;
 }
 
-void	SockData::cnxCloseRead2(int fd)
+void	SockData::cnxCloseRecv2(int fd)
 {
 	std::cout << "-----------------------------" << std::endl;
 	std::cout << red;
@@ -283,11 +332,12 @@ void	SockData::cnxCloseRead2(int fd)
 	std::cout << "-----------------------------" << std::endl;
 }
 
-void	SockData::cnxCloseWrite(int fd)
+/* msg close send */
+void	SockData::cnxCloseSend(int fd)
 {
 	std::cout << "-----------------------------" << std::endl;
 	std::cout << red;
-	std::cout << "Server: couldn't write response to " << clients_[fd].getIp();
+	std::cout << "Server: couldn't send response to " << clients_[fd].getIp();
 	std::cout << " on port " << clients_[fd].getPort();
 	std::cout << " | socket fd: " << fd;
 	std::cout << " | closing connection";
@@ -296,6 +346,7 @@ void	SockData::cnxCloseWrite(int fd)
 	std::cout << "-----------------------------" << std::endl;
 }
 
+/* msg recv/send */
 void	SockData::msgRecv(int fd)
 {
 	std::cout << "-----------------------------" << std::endl;
@@ -323,4 +374,28 @@ void	SockData::msgSent(int fd)
 	std::cout << std::endl;
 	std::cout << white;
 	std::cout << "-----------------------------" << std::endl;
+}
+
+/* msg exception */
+void	SockData::exceptionError(int fd, std::exception &e)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: " << e.what() << ": " << clients_[fd].getIp();
+	std::cout << " on port " << clients_[fd].getPort();
+	std::cout << " | socket fd: " << fd;
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+/* utils */
+void	SockData::printBuffer(char buffer[BUF_SIZE]) const
+{
+	std::cout << red;
+	std::cout << "buffer: \n";
+	std::cout << white;
+	std::cout << "#################################" << std::endl;
+	std::cout << buffer << std::endl;
+	std::cout << "#################################" << std::endl;
 }

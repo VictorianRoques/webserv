@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/05 11:23:14 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/07 02:25:33 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <vector>
 # include <string>
 # include <map>
+# include <new>
+# include <fstream>
 
 # include <arpa/inet.h>
 # include <sys/socket.h>
@@ -35,7 +37,6 @@ class SockData {
 		std::vector<int>			sockListen_;
 		std::map<int, std::string>	response_;
 		std::map<int, SockClient>	clients_;
-		// std::vector<int>			chunk_;
 		fd_set						activeSet_;
 		fd_set						recvSet_;
 		fd_set						sendSet_;
@@ -59,6 +60,7 @@ class SockData {
 		void		setSockListen(std::vector<int> sockListen);
 		void		setRecvToActive(void);
 		void		setResponse(int fd);
+		void		setInternalError(int fd);
 		/* checkers */
 		bool		isSockListen(int fd) const;
 		bool		isRecvSet(int fd) const;
@@ -70,21 +72,32 @@ class SockData {
 		fd_set		*getSendSet(void);
 		size_t		getSizeListen(void) const;
 		int			getSockListen(size_t index) const;
+		size_t		clientsAlloc(void);
 		/* client manager */
 		void		addClient(int fd);
 		void		recvClient(int fd);
 		void		sendClient(int fd);
-		/* connexion */
+		/* client manager utils */
+		void		recvClientClose(int fd, int ret);
+		/* msg connection */
 		void		cnxFailed(void);
 		void		cnxRefused(SockClient sockClient);
 		void		cnxAccepted(SockClient sockClient);
-		/* read */
-		void		cnxCloseRead(int fd);
-		void		cnxCloseRead2(int fd);
-		void		cnxCloseWrite(int fd);
-		/* write */
+		/* msg recv */
+		void		cnxCloseRecv(int fd);
+		void		cnxCloseRecv2(int fd);
+		void		cnxCloseSend(int fd);
+		/* msg send */
 		void		msgRecv(int fd);
 		void		msgSent(int fd);
+		/* msg exception */
+		void		exceptionError(int fd, std::exception &e);
+		/* utils */
+		void		printBuffer(char buffer[BUF_SIZE]) const;
+		/* bad alloc exception */
+		struct badAllocException : public std::exception {
+			const char	*what(void) const throw() { return "bad alloc"; }
+		};
 };
 
 #endif
