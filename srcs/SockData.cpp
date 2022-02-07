@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/07 14:03:51 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/07 15:45:54 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,7 +173,7 @@ void	SockData::addClient(int fd)
 	sockaddr_in addrClient;
 	socklen_t	addrClientLen = sizeof(addrClient);
 	struct timeval	tv;
-	tv.tv_sec = 10; tv.tv_usec = 0;
+	tv.tv_sec = 5; tv.tv_usec = 0;
 	if ((newSock = accept(fd, reinterpret_cast<sockaddr*>(&addrClient),
 	&addrClientLen)) == ERROR) {
 		cnxFailed();
@@ -217,7 +217,7 @@ void	SockData::recvClient(int fd)
 		clients_[fd].getTmpRequest() += std::string(buffer);
 		if (ret < BUF_SIZE - 1) {
 			clients_[fd].getRequest() += clients_[fd].getTmpRequest();
-			if (clients_[fd].getRequest().size() > 4000000) {
+			if (clients_[fd].getRequest().size() > 32000000) {
 				throw SockData::badAllocException();
 			}
 			if (!clients_[fd].isChunk()) {
@@ -272,6 +272,7 @@ void	SockData::recvClientClose(int fd, int ret)
 	}
 	clients_.erase(fd);
 	FD_CLR(fd, &activeSet_);
+	FD_CLR(fd, &sendSet_);
 }
 
 /* msg connection */
