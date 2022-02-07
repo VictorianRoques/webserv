@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/07 14:02:57 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/07 16:32:21 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,9 @@ public:
     void            deleteMethod();
     void            putMethod();
     void            optionMethod();
-    void            setCgiHeader(std::string cgiHeader);
-    void            setCgiPath();
+    int             upload();
+    void            createCgiHeader(std::string cgiHeader);
+    void            setLocationConf();
     std::string&    getResponse();
     
     // Utils
@@ -60,11 +61,12 @@ public:
 
 private:
 
-    Request                     _req;
+    Request                     _request;
     std::string                 _status;
     std::string                 _contentType;
     std::string                 _bodyLength;
     std::string                 _path;
+    std::string                 _location;
     std::string                 _body;
     std::string                 _header;
     std::string                 _response;

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/07 13:05:50 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/07 17:32:13 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ void	Request::setRedirCode(size_t redirCode) { _redirCode = redirCode; }
  * isChunked(): sets chunked = true/false
 **/
 void	Request::isChunked() {
-	if (_contentLength.size() || _transferEncoding.size())
+	if (_transferEncoding.size())
 		setChunked(true);
 }
 
@@ -127,7 +127,12 @@ void	Request::isChunked() {
 **/
 void	Request::buildFullPath(Location *loc) {
 		size_t	start = loc->getLocationMatch().length();
-		_fullPath = loc->getRoot() + _path.substr(start - 1, _path.find("?"));
+		std::cout << "BUILD FULL PAT GETROOT: " << loc->getRoot() << std::endl;
+		if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) // check if this is an upload
+			_fullPath = loc->getRoot() + "/" + loc->getUploadDest() + "/" + _path.substr(start - 1, _path.find("?"));
+		else
+			_fullPath = loc->getRoot() + "/" + _path.substr(start - 1, _path.find("?"));
+		_fullPath = cleanSlash(_fullPath);
 		return ;
 }
 
@@ -289,6 +294,8 @@ Request *requestParser(std::string rq, std::vector<Server> servers_g) {
 	
 	serv = findRightServer(servers_g, request);
 	loc = findRightLocation(serv.getLocation(), request);
+
+	std::cout << "FIND RIGHT LOCATION: " << loc->getLocationMatch() << std::endl;
 
 	// check if there is a body
 	if (rq.length() > 2)

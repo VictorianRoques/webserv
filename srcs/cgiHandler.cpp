@@ -92,7 +92,6 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
 
     write(fdIn, _body.c_str(), _body.size());
     lseek(fdIn, 0, SEEK_SET);
-
     pid = fork();
     if (pid == -1)
     {
