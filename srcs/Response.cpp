@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/07 17:24:48 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/07 17:37:47 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,16 +63,15 @@ void        Response::setLocationConf()
 {
 	std::vector<Location *> loc = _serv.getLocation();
 	std::vector<Location *>::iterator it = loc.begin();
-	size_t pos = _path.length();
+	std::string short_path = _request.getPath();
+	size_t pos = short_path.length();
 
 	while (pos != 0) {
-		pos = _path.rfind("/", pos - 1);
+		pos = short_path.rfind("/", pos - 1);
 		for (; it != loc.end(); it++) {
-			if (!strncmp(_path.c_str(), (*it)->getLocationMatch().c_str(), pos)) {
+			if (!strncmp(short_path.c_str(), (*it)->getLocationMatch().c_str(), pos)) {
 				break ;
 			}
-			std::cout << "SET CGI PAT : _path = " << _path << std::endl;
-			std::cout << "SET CGI PAT : locmatch = " << (*it)->getLocationMatch() << std::endl;
 			if ((*it)->getLocationMatch() == "/")
 			{
 				_pathCgi = (*it)->getCgiHandler().second;
