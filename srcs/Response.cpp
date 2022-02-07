@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/07 14:02:19 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/07 17:01:44 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,10 @@ Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage())
 
 int      Response::initRequest(Request &req)
 {
-     _req = req;
+     _request = req;
     _path = req.getFullPath();
 	_generalRoot = req.getGeneralRoot();
-    if (_req.getPath().empty() || _req.getMethod().empty() || _req.getProtocolVersion() != "HTTP/1.1")
+    if (_request.getPath().empty() || _request.getMethod().empty() || _request.getProtocolVersion() != "HTTP/1.1")
     {
         if (!readErrorPage(_errorPage["400"]))
             _header = writeHeader("400 Bad Request", "text/html", _body.length());
@@ -40,7 +40,7 @@ int      Response::initRequest(Request &req)
         return (1);
     }
     _contentType = req.getContentType();
-    setCgiPath();
+    setLocationConf();
     if (req.getPath() == "/")
     {
         if (_AutoIndex == true)
@@ -49,10 +49,17 @@ int      Response::initRequest(Request &req)
             _path = _root + "/" + _index;
         _contentType = "text/html";
     }
+     if (_request.getBody().size() > _serv.getMaxBodySize())
+    {
+        if (!readErrorPage(_errorPage["413"]))
+            _header = writeHeader("413 Payload Too Large", "text/html", _body.length());
+        _response = _header + _body;
+        return (1);
+    }
     return (0);
 }
 
-void        Response::setCgiPath()
+void        Response::setLocationConf()
 {
     std::vector<Location *> loc = _serv.getLocation();
     std::vector<Location *>::iterator it = loc.begin();
@@ -77,6 +84,7 @@ void        Response::setCgiPath()
 		}
 	}
 }
+
 
 int      Response::readErrorPage(std::string &path)
 {
@@ -142,11 +150,13 @@ std::string     Response::writeHeader(std::string status, std::string contentTyp
         header += "Content-Type: " + contentType + "\r\n";
     if (bodyLength > 0)
         header += "Content-Length: " + sizeToString(bodyLength) + "\r\n";
+    if (_location.empty() == false)
+        header += "Location: " + _location + "\r\n";
     header += "\r\n";
     return header;
 }
 
-void    Response::setCgiHeader(std::string cgiHeader)
+void    Response::createCgiHeader(std::string cgiHeader)
 {
     size_t pos = cgiHeader.find("Status: ");
     if (pos != std::string::npos)
@@ -157,9 +167,9 @@ void    Response::setCgiHeader(std::string cgiHeader)
 
 void        Response::getMethod()
 {
-    if (_req.getFullPath().find(_extensionCgi) != std::string::npos)
+    if (_request.getFullPath().find(_extensionCgi) != std::string::npos)
     {
-        cgiHandler cgi(_req);
+        cgiHandler cgi(_request);
         _body = cgi.execute(_pathCgi);
         if (_body == "<html><body>FATAL ERROR CGI</body></html>")
         {
@@ -168,7 +178,7 @@ void        Response::getMethod()
             _response = _header + _body;
             return ;
         }
-        setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
+        createCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
         _body = _body.substr(_body.find("\r\n\r\n") + 4);
         _header = writeHeader(_status, _contentType, _body.length());
     }
@@ -186,8 +196,8 @@ void        Response::getMethod()
 
 void     Response::postMethod()
 {
-    cgiHandler cgi(_req);
-    if (_path.find(_extensionCgi) != std::string::npos) 
+    cgiHandler cgi(_request);
+    if (_extensionCgi.empty() == false && _path.find(_extensionCgi) != std::string::npos) 
     {
         _body = cgi.execute(_pathCgi);
         if (_body == "<html><body>FATAL ERROR CGI</body></html>")
@@ -197,15 +207,16 @@ void     Response::postMethod()
             _response = _header + _body;
             return ;
         }
-        setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
+        createCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));
         _body = _body.substr(_body.find("\r\n\r\n") + 4);
         _header = writeHeader(_status, _contentType, _body.length());
     }
     else
     {
-        if (pathIsDirectory(_uploadDest)
-            && !cgi.upload(_uploadDest))
+        if (pathIsDirectory(_uploadDest) && !cgi.upload(_uploadDest))
+        {
             _header = writeHeader("204 No Content", "", 0);
+        }
         else
         {
             if (!readErrorPage(_errorPage["400"]))
@@ -251,7 +262,7 @@ void    Response::putMethod()
             _response = _header + _body;
             return ;
         }
-        fd << _req.getBody();
+        fd << _request.getBody();
         fd.close();
         _header = "HTTP/1.1 204 No Content\r\n\r\n";
     }
@@ -265,7 +276,7 @@ void    Response::putMethod()
             _response = _header + _body;
             return ;
         }
-        fd << _req.getBody();
+        fd << _request.getBody();
         fd.close();
         _header = "HTTP/1.1 201 Created\r\n\r\n";
     }
@@ -299,15 +310,8 @@ void     Response::makeAnswer(Request &req)
 {
     if (initRequest(req))
         return ;
-    if (_req.getBody().size() > _serv.getMaxBodySize())
-    {
-        if (!readErrorPage(_errorPage["413"]))
-            _header = writeHeader("413 Payload Too Large", "text/html", _body.length());
-        _response = _header + _body;
-        return;
-    }
-    if (_methods.find(_req.getMethod()) != _methods.end() && isAllow(_req.getMethod()))
-        (this->*_methods[_req.getMethod()])();
+    if (_methods.find(_request.getMethod()) != _methods.end() && isAllow(_request.getMethod()))
+        (this->*_methods[_request.getMethod()])();
     else
     {
         if (!readErrorPage(_errorPage["405"]))
