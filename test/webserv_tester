@@ -21,8 +21,10 @@ def is_server_up(hostname, port):
 	sock.settimeout(3)
 	try:
 		sock.connect((hostname, port))
-		sock.send(b'Bad Request: checking if server is up')
-		sock.recv(2048)
+		# sock.send(b'Bad Request: checking if server is up')
+		sock.send(b'GET / HTTP/1.1\r\n\
+Host: localhost:8080\r\n')
+		print(sock.recv(2048))
 		sock.close()
 		return True
 	except:
@@ -119,32 +121,32 @@ print('[ port: ' + '\033[0;32m' + str(port) + '\033[0m ]')
 time.sleep(1)
 
 
-print('\033[0;34m\n------------------------------------------')
-print('          STRESS_TESTER_1 starting...')
-print('------------------------------------------\033[0m')
-time.sleep(1.5)
-stress_tester1()
-print()
-print('\nSTRESS_TESTER_1...', end='\r')
-ret = is_server_up(hostname, port)
-time.sleep(0.5)
-if ret:
-	print('STRESS_TESTER_1 [ \033[0;32mOK\033[0m ]')
-else:
-	print('STRESS_TESTER_1 [ \033[0;31mKO\033[0m ]')
+# print('\033[0;34m\n------------------------------------------')
+# print('          STRESS_TESTER_1 starting...')
+# print('------------------------------------------\033[0m')
+# time.sleep(1.5)
+# stress_tester1()
+# print()
+# print('\nSTRESS_TESTER_1...', end='\r')
+# ret = is_server_up(hostname, port)
+# time.sleep(0.5)
+# if ret:
+# 	print('STRESS_TESTER_1 [ \033[0;32mOK\033[0m ]')
+# else:
+# 	print('STRESS_TESTER_1 [ \033[0;31mKO\033[0m ]')
 
-print('\033[0;34m\n------------------------------------------')
-print('          STRESS_TESTER _2 starting...')
-print('------------------------------------------\033[0m')
-time.sleep(1.5)
-stress_tester2()
-print('\nSTRESS_TESTER_2...', end='\r')
-ret = is_server_up(hostname, port)
-time.sleep(0.5)
-if ret:
-	print('STRESS_TESTER_2 [ \033[0;32mOK\033[0m ]')
-else:
-	print('STRESS_TESTER_2 [ \033[0;31mKO\033[0m ]')
+# print('\033[0;34m\n------------------------------------------')
+# print('          STRESS_TESTER _2 starting...')
+# print('------------------------------------------\033[0m')
+# time.sleep(1.5)
+# stress_tester2()
+# print('\nSTRESS_TESTER_2...', end='\r')
+# ret = is_server_up(hostname, port)
+# time.sleep(0.5)
+# if ret:
+# 	print('STRESS_TESTER_2 [ \033[0;32mOK\033[0m ]')
+# else:
+# 	print('STRESS_TESTER_2 [ \033[0;31mKO\033[0m ]')
 
 
 print('\033[0;34m\n------------------------------------------')
@@ -160,15 +162,15 @@ if ret:
 else:
 	print('CHUNK_TESTER [ \033[0;31mKO\033[0m ]')
 
-print('\033[0;34m\n------------------------------------------')
-print('          MEMORY_TESTER starting...')
-print('------------------------------------------\033[0m')
-time.sleep(1.5)
-memory_tester()
-print('\nMEMORY_TESTER...', end='\r')
-ret = is_server_up(hostname, port)
-time.sleep(0.5)
-if ret:
-	print('MEMORY_TESTER [ \033[0;32mOK\033[0m ]')
-else:
-	print('MEMORY_TESTER [ \033[0;31mKO\033[0m ]')
+# print('\033[0;34m\n------------------------------------------')
+# print('          MEMORY_TESTER starting...')
+# print('------------------------------------------\033[0m')
+# time.sleep(1.5)
+# memory_tester()
+# print('\nMEMORY_TESTER...', end='\r')
+# ret = is_server_up(hostname, port)
+# time.sleep(0.5)
+# if ret:
+# 	print('MEMORY_TESTER [ \033[0;32mOK\033[0m ]')
+# else:
+# 	print('MEMORY_TESTER [ \033[0;31mKO\033[0m ]')

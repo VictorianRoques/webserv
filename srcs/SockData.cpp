@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/08 00:48:04 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/08 16:07:55 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,28 +66,25 @@ void	SockData::setRecvToActive(void)
 
 void	SockData::setResponse(int fd)
 {
-	if (clients_[fd].isBadRequest()) {
-		setBadRequest(fd);
-	}
-	else {
+	if (!clients_[fd].isBadRequest()) {
 		Request	*request = requestParser(clients_[fd].getRequest(), servers_);
 		std::vector<Server>::iterator	it = servers_.begin();
 		std::vector<Server>::iterator	ite = servers_.end();
 		for (; it != ite; ++it) {
-			// std::cout << "request->getHost(): " << request->getHost() << std::endl;
 			if (vector_contains_str(it->getServerName(), request->getHost())) {
 				Response	response(*it);
 				response.makeAnswer(*request);
 				response_[fd] = response.getResponse();
-				break;
+				delete request;
+				clients_[fd].getTmpRequest().clear();
+				clients_[fd].getRequest().clear();
+				clients_[fd].setChunk(false);
+				FD_SET(fd, &sendSet_);
+				return ;
 			}
 		}
-		delete request;
 	}
-	clients_[fd].getTmpRequest().clear();
-	clients_[fd].getRequest().clear();
-	clients_[fd].setChunk(false);
-	FD_SET(fd, &sendSet_);
+	setBadRequest(fd);
 }
 
 void	SockData::setInternalError(int fd)
@@ -108,6 +105,7 @@ void	SockData::setInternalError(int fd)
 	response_[fd] = response;
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
+	clients_[fd].setChunk(false);
 	FD_SET(fd, &sendSet_);
 }
 
@@ -129,6 +127,7 @@ void	SockData::setBadRequest(int fd)
 	response_[fd] = response;
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
+	clients_[fd].setChunk(false);
 	FD_SET(fd, &sendSet_);
 }
 
