@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 23:23:34 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 00:05:09 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ char const *Location::NonValidRedirectionException::what() const throw() {
 char const *Location::WrongPathException::what() const throw() { return "Invalid path for location in config_file. Probably missing a '/' in the beginning."; }
 char const *Location::MissingBracketException::what() const throw() { return "Missing a bracket after 'server' or 'location' directive."; }
 //char const *Location::WrongPathException::what() const throw() { return "Invalid path for root in config_file. Probably missing a '/' in the beginning."; }
+char const *Location::RootAndAbsolutePathException::what() const throw() { return "You can't have a root and redirection with ABSOLUTE path (starting with a /) in the same location context."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -37,13 +38,15 @@ char const *Location::MissingBracketException::what() const throw() { return "Mi
 
 Location::Location():
 	_root("/"),
-	_autoIndex(true)
+	_autoIndex(true),
+	_rootSpecified(false)
 {}
 
 Location::Location(size_t maxBodySize):
 	_root("/"),
 	_autoIndex(true),
-	_maxBodySize(maxBodySize)
+	_maxBodySize(maxBodySize),
+	_rootSpecified(false)
 {}
 
 Location::~Location() {}
@@ -62,6 +65,7 @@ Location&	Location::operator=(const Location &x) {
 		_generalRoot = x.getGeneralRoot();
 		_matchModifier = x.getMatchModifier();
 		_locationMatch = x.getLocationMatch();
+		_rootSpecified = x._rootSpecified;
 	}
 	return *this;
 }
@@ -133,6 +137,8 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	std::string	root;
 	size_t		pos;
 	size_t		posend;
+
+	_rootSpecified = true;
 
 	//remove the trailing ';'
 	pos = (*it).find_first_not_of(";");
@@ -222,7 +228,6 @@ size_t	Location::dirRedirection(vec_str::iterator it, vec_str::iterator vend) {
 		throw NonValidRedirectionException();
 	_redirection.first = code;
 	_redirection.second = uri.substr(0, pos);
-	std::cout << "REDICRECITON SECOND IN LOCATION = " << _redirection.second << std::endl;
 	(void)vend;
 	return 3;
 }
@@ -285,6 +290,11 @@ size_t Location::locationContext(vec_str::iterator it) {
 	if (getLocationMatch()[0] != '/')
 		throw Location::WrongPathException();
 	return ret;
+}
+
+void	Location::locationChecker() {
+	if (_rootSpecified == true && getRedirection().second[0] == '/')
+		throw RootAndAbsolutePathException();
 }
 
 /**************************************/

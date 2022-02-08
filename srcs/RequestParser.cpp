@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 23:35:30 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 23:45:39 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ void	Request::buildFullPath(Location loc) {
 		if (loc.getRedirection().second[0] == '/') //absolute
 			_fullPath = loc.getRedirection().second;
 		else //relative
-			_fullPath = loc.getRoot() + "/" + loc.getRedirection().second;
+			_fullPath = loc.getRoot() + "/" + _path;
 	}
 	else { 
 		if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) { // check if this is an upload
@@ -241,14 +241,10 @@ Location findRightLocation(std::vector<Location> loc, Request req) {
 	std::vector<Location>::iterator it = loc.begin();
 	// looking for exact match
 	for (; it != loc.end(); it++) {
-		std::cout << "Lcoation Mathc -=================== " << it->getLocationMatch() << std::endl;
-		std::cout << "getPath  -=================== " << req.getPath() << std::endl;
 		if (it->getLocationMatch() == req.getPath()) {
-			std::cout << "EEEEEEEEEEEEXacti match fouuuuuuuuummd" << std::endl;
 			return *it;
 		}
 	}
-	std::cout << "=================== No exactmatch found ====================" << std::endl;
 	// no exact match found: looking for the longest match	
 	it = loc.begin();
 	size_t pos = req.getPath().length();
@@ -262,7 +258,6 @@ Location findRightLocation(std::vector<Location> loc, Request req) {
 				return *it;
 		}
 	}
-	std::cout << "=================== Longuest match is / ====================" << std::endl;
 	return *it;
 }
 
@@ -331,7 +326,6 @@ Request requestParser(std::string rq, std::vector<Server> servers_g) {
 			break ;
 		loc = findRightLocation(serv.getLocation(), request);
 	}
-	std::cout << "I m out of the reidreciton loop " << std::endl;
 	
 	// handle the rest
 	request.isChunked();
