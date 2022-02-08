@@ -4,17 +4,30 @@ import socket
 import time
 import threading
 import sys
-import os
 
 lock = threading.Lock()
 
+########################################
+#               VARIABLES              #
+########################################
+
 hostname = 'localhost'
 port = 8080
-if len(sys.argv) == 2:
+test = ""
+if len(sys.argv) < 2:
+	print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory')
+	exit(1)
+elif len(sys.argv) == 2:
 	port = int(sys.argv[1])
-elif len(sys.argv) > 2:
-	print("error: too many arguments")
-	exit()
+elif len(sys.argv) == 3:
+	test = str(sys.argv[2])
+elif len(sys.argv) > 3:
+	print('error: too many arguments')
+	exit(1)
+
+########################################
+#               FUNCTIONS              #
+########################################
 
 def is_server_up(hostname, port):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,15 +35,60 @@ def is_server_up(hostname, port):
 	try:
 		sock.connect((hostname, port))
 		# sock.send(b'Bad Request: checking if server is up')
-		sock.send(b'GET / HTTP/1.1\r\n\
-Host: localhost:8080\r\n')
-		print(sock.recv(2048))
-		sock.close()
+		sock.send(b'Check if up request')
+		sock.recv(4096)
 		return True
 	except:
 		return False
 
-def stress_tester1():
+def get_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'GET / HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Connection: keep-alive\r\n\r\n')
+	try:
+		ret = sock.recv(4096)
+		print(ret)
+	except:
+		print('error: request GET failed')
+		exit(2)
+
+def post_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'POST / HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Content-Type: text/plain\r\n\
+Content-Length: 12\r\n\
+Connection: keep-alive\r\n\
+\r\n\
+Hello World!\r\n\
+\r\n')
+	try:
+		ret = sock.recv(4096)
+		print(ret)
+	except:
+		print('error: request POST failed')
+		exit(2)
+
+def delete_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'DELETE /hihi.txt HTTP/1.1\r\n\r\n')
+	try:
+		ret = sock.recv(4096)
+		print(ret)
+	except:
+		print('error: request DELETE failed')
+		exit(2)
+
+def stress_tester_1():
 	socks = []
 	for i in range(1500):
 		time.sleep(0.005)
@@ -38,13 +96,13 @@ def stress_tester1():
 		socks[i].connect((hostname, port))
 		socks[i].settimeout(3)
 		socks[i].send(b'GET / HTTP/1.1\r\n\
-Host: localhost:8080\r\n\
-User-Agent: python-requests/2.27.1\r\n\
-Accept-Encoding: gzip, deflate\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\r\n')
 		try:
-			socks[i].recv(2048)
+			socks[i].recv(4096)
 			strg = 'socket ' + str(i) + ': data received from server'
 			lock.acquire()
 			print("                                                  ", end='\r')
@@ -55,10 +113,10 @@ Connection: keep-alive\r\n\r\n')
 			print("                                                  ", end='\r')
 			print(strg, end='\r')
 
-def stress_tester2():
+def stress_tester_2():
 	try:
-		thread1 = threading.Thread(target=stress_tester1)
-		thread2 = threading.Thread(target=stress_tester1)
+		thread1 = threading.Thread(target=stress_tester_1)
+		thread2 = threading.Thread(target=stress_tester_1)
 		print('Thread 1 starting...')
 		thread1.start()
 		time.sleep(3)
@@ -71,15 +129,15 @@ def stress_tester2():
 		thread2.join()
 	except:
 		print('error: thread failure')
-		exit()
+		exit(1)
 
 def chunk_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
 	sock.send(b'POST / HTTP/1.1\r\n\
-Host: localhost:8080\r\n\
-User-Agent: python-requests/2.27.1\r\n\
-Accept-Encoding: gzip, deflate\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\
 Transfer-Encoding: chunked\r\n\r\n')
@@ -101,7 +159,7 @@ def memory_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
 	sock.send(b'POST / HTTP/1.1\r\n\
-Host: localhost:8080\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
 User-Agent: python-requests/2.27.1\r\n\
 Accept-Encoding: gzip, deflate\r\n\
 Accept: */*\r\n\
@@ -112,65 +170,136 @@ Transfer-Encoding: chunked\r\n\r\n')
 		sock.send(b'3E8\r\n\
 Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egestas non risus et vehicula. Nam ac mauris odio. Maecenas convallis mi vel justo vehicula, a interdum leo porta. Mauris consequat nec urna sed aliquet. Aliquam aliquet, dui id hendrerit auctor, turpis ante facilisis sapien, sit amet interdum nibh ipsum et ex. Etiam vulputate in libero quis viverra. Nunc sit amet ipsum id ipsum scelerisque efficitur. Vivamus in sapien id tortor dapibus accumsan. Cras eleifend, est et vestibulum efficitur, lorem velit pulvinar mi, nec vehicula ligula nisl quis tortor. In sagittis sapien sit amet enim rutrum varius. Maecenas cursus justo a sapien blandit, sit amet tincidunt sem lacinia. Suspendisse bibendum tristique orci, et ornare massa mollis sit amet. Aenean dictum, turpis vitae varius auctor, arcu mi malesuada libero, et ullamcorper dolor justo in turpis. Pellentesque vestibulum porttitor porta. Phasellus consequat placerat tristique. Phasellus consequat placerat tristique...\r\n\r\n')
 	sock.send(b'0\r\n\r\n')
-	ret = sock.recv(2048)
+	ret = sock.recv(4096)
 	print(ret)
 
+########################################
+#               EXEC_FCTS              #
+########################################
+
+def get():
+	print('\033[0;34m\n------------------------------------------')
+	print('          GET_TESTER starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(1.5)
+	get_tester()
+	print('\nGET_TESTER...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('GET_TESTER [ \033[0;32mOK\033[0m ]')
+	else:
+		print('GET_TESTER [ \033[0;31mKO\033[0m ]')
+
+def post():
+	print('\033[0;34m\n------------------------------------------')
+	print('          POST_TESTER starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(1.5)
+	post_tester()
+	print('\nPOST_TESTER...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('POST_TESTER [ \033[0;32mOK\033[0m ]')
+	else:
+		print('POST_TESTER [ \033[0;31mKO\033[0m ]')
+
+def delete():
+	print('\033[0;34m\n------------------------------------------')
+	print('          DELETE_TESTER starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(1.5)
+	delete_tester()
+	print('\nDELETE_TESTER...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('DELETE_TESTER [ \033[0;32mOK\033[0m ]')
+	else:
+		print('DELETE_TESTER [ \033[0;31mKO\033[0m ]')
+
+def stress1():
+	print('\033[0;34m\n------------------------------------------')
+	print('          STRESS_TESTER_1 starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(1.5)
+	stress_tester_1()
+	print()
+	print('\nSTRESS_TESTER_1...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('STRESS_TESTER_1 [ \033[0;32mOK\033[0m ]')
+	else:
+		print('STRESS_TESTER_1 [ \033[0;31mKO\033[0m ]')
+
+def stress2():
+	print('\033[0;34m\n------------------------------------------')
+	print('          STRESS_TESTER _2 starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(1.5)
+	stress_tester_2()
+	print('\nSTRESS_TESTER_2...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('STRESS_TESTER_2 [ \033[0;32mOK\033[0m ]')
+	else:
+		print('STRESS_TESTER_2 [ \033[0;31mKO\033[0m ]')
+
+def chunk():
+	print('\033[0;34m\n------------------------------------------')
+	print('          CHUNK_TESTER starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(1.5)
+	chunk_tester()
+	print('\nCHUNK_TESTER...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('CHUNK_TESTER [ \033[0;32mOK\033[0m ]')
+	else:
+		print('CHUNK_TESTER [ \033[0;31mKO\033[0m ]')
+
+def memory():
+	print('\033[0;34m\n------------------------------------------')
+	print('          MEMORY_TESTER starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(1.5)
+	memory_tester()
+	print('\nMEMORY_TESTER...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('MEMORY_TESTER [ \033[0;32mOK\033[0m ]')
+	else:
+		print('MEMORY_TESTER [ \033[0;31mKO\033[0m ]')
+
+########################################
+#                  RUN                 #
+########################################
 
 print('[ hostname: ' + '\033[0;32m' + hostname + '\033[0m ]')
 print('[ port: ' + '\033[0;32m' + str(port) + '\033[0m ]')
+test_ = '[ test: ' + '\033[0;32m' + test + '\033[0m ]'
+print(test_)
+single_test = dict()
+single_test['get'] = get
+single_test['post'] = post
+single_test['delete'] = delete
+single_test['stress1'] = stress1
+single_test['stress2'] = stress2
+single_test['chunk'] = chunk
+single_test['memory'] = memory
+
 time.sleep(1)
 
-
-# print('\033[0;34m\n------------------------------------------')
-# print('          STRESS_TESTER_1 starting...')
-# print('------------------------------------------\033[0m')
-# time.sleep(1.5)
-# stress_tester1()
-# print()
-# print('\nSTRESS_TESTER_1...', end='\r')
-# ret = is_server_up(hostname, port)
-# time.sleep(0.5)
-# if ret:
-# 	print('STRESS_TESTER_1 [ \033[0;32mOK\033[0m ]')
-# else:
-# 	print('STRESS_TESTER_1 [ \033[0;31mKO\033[0m ]')
-
-# print('\033[0;34m\n------------------------------------------')
-# print('          STRESS_TESTER _2 starting...')
-# print('------------------------------------------\033[0m')
-# time.sleep(1.5)
-# stress_tester2()
-# print('\nSTRESS_TESTER_2...', end='\r')
-# ret = is_server_up(hostname, port)
-# time.sleep(0.5)
-# if ret:
-# 	print('STRESS_TESTER_2 [ \033[0;32mOK\033[0m ]')
-# else:
-# 	print('STRESS_TESTER_2 [ \033[0;31mKO\033[0m ]')
-
-
-print('\033[0;34m\n------------------------------------------')
-print('          CHUNK_TESTER starting...')
-print('------------------------------------------\033[0m')
-time.sleep(1.5)
-chunk_tester()
-print('\nCHUNK_TESTER...', end='\r')
-ret = is_server_up(hostname, port)
-time.sleep(0.5)
-if ret:
-	print('CHUNK_TESTER [ \033[0;32mOK\033[0m ]')
+if (test != ''):
+	try:
+		single_test[test]()
+	except:
+		print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory')
 else:
-	print('CHUNK_TESTER [ \033[0;31mKO\033[0m ]')
-
-# print('\033[0;34m\n------------------------------------------')
-# print('          MEMORY_TESTER starting...')
-# print('------------------------------------------\033[0m')
-# time.sleep(1.5)
-# memory_tester()
-# print('\nMEMORY_TESTER...', end='\r')
-# ret = is_server_up(hostname, port)
-# time.sleep(0.5)
-# if ret:
-# 	print('MEMORY_TESTER [ \033[0;32mOK\033[0m ]')
-# else:
-# 	print('MEMORY_TESTER [ \033[0;31mKO\033[0m ]')
+	for key in single_test:
+		single_test[key]()
