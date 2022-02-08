@@ -34,7 +34,6 @@ def is_server_up(hostname, port):
 	sock.settimeout(3)
 	try:
 		sock.connect((hostname, port))
-		# sock.send(b'Bad Request: checking if server is up')
 		sock.send(b'Check if up request')
 		sock.recv(4096)
 		return True
@@ -299,7 +298,7 @@ if (test != ''):
 	try:
 		single_test[test]()
 	except:
-		print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory')
+		print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory]')
 else:
 	for key in single_test:
 		single_test[key]()
