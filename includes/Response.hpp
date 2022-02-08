@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/07 16:32:21 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 20:08:54 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,16 @@
 
 # include <map>
 
-
-// PathIsfile Include
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <unistd.h>
 
+# include "ResponseHeader.hpp"  
 # include "RequestParser.hpp"
 # include "cgiHandler.hpp"
 # include "Server.hpp"
 # include "autoIndex.hpp"
+# include "utils.hpp"
 
 class Response {
 
@@ -40,35 +40,24 @@ public:
     int             initRequest(Request &req);
     int             readErrorPage(std::string &path);
     void            readContent(std::string &path);
-    std::string     writeHeader(std::string status, std::string contentType, size_t bodyLength);
     void            getMethod();
     void            headMethod();
     void            postMethod();
     void            deleteMethod();
-    void            putMethod();
-    void            optionMethod();
     int             upload();
-    void            createCgiHeader(std::string cgiHeader);
     void            setLocationConf();
+    void            sendPage(int code);
     std::string&    getResponse();
     
     // Utils
     bool            isAllow(std::string method);
-    int             pathIsFile(std::string &path);
-    int             pathIsDirectory(std::string &path);
-    std::string     sizeToString(size_t size);
 	std::string		autoIndexBuilder(std::string path);
 
 private:
 
     Request                     _request;
-    std::string                 _status;
-    std::string                 _contentType;
-    std::string                 _bodyLength;
     std::string                 _path;
-    std::string                 _location;
     std::string                 _body;
-    std::string                 _header;
     std::string                 _response;
     Server                      _serv;
     map_str                     _errorPage;
@@ -80,6 +69,9 @@ private:
     bool                        _AutoIndex;
     vec_str                     _allowMethods;
     std::string                 _uploadDest;
+    ResponseHeader              _header;
+    std::string                 _location;
+    std::string                 _date;
 
     std::map<std::string, void (Response::*)()> _methods;  
 };

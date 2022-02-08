@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 09:26:02 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 21:02:18 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 # include <map>
 # include <cstring>
 # include <algorithm> // find() (in Parser.cpp)
+# include <time.h>
+# include <sstream>
 
 // PathIsfile Include
 # include <sys/types.h>
@@ -78,6 +80,7 @@ void	ft_putmap(std::map<T, U> m, std::string separator) {
 /**
  * prototypes of utils
 **/
+
 vec_str 							ft_split(std::string line, std::string delim);
 std::map<std::string, std::string>	ft_map_split(std::string line, std::string delim);
 bool								vector_contains_str(vec_str v, std::string str);
@@ -85,6 +88,9 @@ std::string							removeBackwards(std::string path);
 std::string							cleanSlash(std::string path);
 std::string							getPWD();
 int     							pathIsDirectory(std::string &path);
+int									pathIsFile(std::string &path);
+std::string							getTime();
+std::string							sizeToString(size_t size);
 
 /**
  * prototype of testing

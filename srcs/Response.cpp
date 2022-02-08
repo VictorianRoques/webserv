@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/07 19:37:21 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 21:01:54 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,19 @@ Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage())
 	_methods["GET"] = &Response::getMethod;
 	_methods["POST"] = &Response::postMethod;
 	_methods["DELETE"] = &Response::deleteMethod;
-	_methods["PUT"] = &Response::putMethod;
 	_methods["HEAD"] = &Response::headMethod;
-	_methods["OPTIONS"] = &Response::optionMethod;
+}
+
+void	Response::sendPage(int code)
+{
+	std::string foundCode = std::to_string(code);
+	if (!readErrorPage(_errorPage[foundCode]))
+	{
+		if (code == 308 || code == 310)
+			_header.setStatusRedirect(foundCode, _body.length());
+		else
+			_header.setStatusError(foundCode, _body.length());
+	}
 }
 
 int      Response::initRequest(Request &req)
@@ -32,14 +42,12 @@ int      Response::initRequest(Request &req)
     _request = req;
     _path = req.getFullPath();
 	_generalRoot = req.getGeneralRoot();
-    if (_request.getPath().empty() || _request.getMethod().empty() || _request.getProtocolVersion() != "HTTP/1.1")
+    if (_request.getPath().empty() || _request.getMethod().empty() ||
+		_request.getProtocolVersion() != "HTTP/1.1" || _request.getHost().empty())
     {
-		if (!readErrorPage(_errorPage["400"]))
-            _header = writeHeader("400 Bad Request", "text/html", _body.length());
-        _response = _header + _body;
-        return (1);
+		sendPage(400);
+		return (1);
     }
-    _contentType = req.getContentType();
     setLocationConf();
     if (req.getPath() == "/")
     {
@@ -47,26 +55,20 @@ int      Response::initRequest(Request &req)
             _path.erase(_path.size() - 1);
         else
             _path = _root + "/" + _index;
-        _contentType = "text/html";
     }
-	// Errors 
     if (_request.getBody().size() > _serv.getMaxBodySize())
     {
-		if (!readErrorPage(_errorPage["413"]))
-            _header = writeHeader("413 Payload Too Large", "text/html", _body.length());
-        _response = _header + _body;
+		sendPage(413);
         return (1);
     }
 	if (_request.getRedirCode() == 310)
 	{
-		if (!readErrorPage(_errorPage["310"]))
-			_header = writeHeader("310 Too many Redirects", "text/html", _body.length());
-		_response = _header + _body;
+		sendPage(310);
 		return (1);
 	}
 	if (_request.getRedirCode() == 308)
 	{
-		_response = writeHeader("308 Permanent Redirect", "text/html", _body.length()) + _body;
+		sendPage(308);
 		return (1);
 	}
     return (0);
@@ -108,20 +110,18 @@ void        Response::setLocationConf()
 	}
 }
 
-
 int      Response::readErrorPage(std::string &path)
 {
 	std::ifstream       ofs;
 	std::stringstream   buffer;
 
-	_header = "";
 	if (pathIsFile(path))
 	{
 		ofs.open(path.c_str(), std::ifstream::in);
 		if (ofs.is_open() == false)
 		{
 			_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-			_header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+			_header.setStatusError("500", _body.length());
 			return (1);
 		}
 		buffer << ofs.rdbuf();
@@ -132,7 +132,7 @@ int      Response::readErrorPage(std::string &path)
 	else
 	{
 		_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-		_header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
+		_header.setStatusError("500", _body.length());
 		return (1);
 	}
 }
@@ -142,51 +142,25 @@ void     Response::readContent(std::string &path)
 	std::ifstream       fd;
 	std::stringstream   buffer;
 
-	if (pathIsFile(path))
+	if (pathIsFile(path) || pathIsDirectory(path))
 	{
 		fd.open(path.c_str(), std::ifstream::in);
-		if (fd.is_open() == false)
+		if (fd.is_open() == false || pathIsDirectory(path))
 		{
-			if (!readErrorPage(_errorPage["403"]))
-				_header = writeHeader("403 Forbidden", "text/html", _body.length());
+			sendPage(403);
 			return ;
 		}
 		buffer << fd.rdbuf();
 		fd.close();
-		_header =  writeHeader("200 OK", _contentType, buffer.str().length());
 		_body = buffer.str();
-		return ;
+		_header.setHeader("200 OK", _request.getContentType(), _body.length());
 	}
 	else
 	{
-		if (!readErrorPage(_errorPage["404"]))
-			_header = writeHeader("404 Not Found", "text/html", _body.length());
+		sendPage(404);
 	}
 }
 
-std::string     Response::writeHeader(std::string status, std::string contentType, size_t bodyLength)
-{
-	std::string header;
-
-    header = "HTTP/1.1 " + status + "\r\n";
-    if (contentType.empty() == false)
-        header += "Content-Type: " + contentType + "\r\n";
-    if (bodyLength > 0)
-        header += "Content-Length: " + sizeToString(bodyLength) + "\r\n";
-    if (_location.empty() == false)
-        header += "Location: " + _location + "\r\n";
-    header += "\r\n";
-    return header;
-}
-
-void    Response::createCgiHeader(std::string cgiHeader)
-{
-	size_t pos = cgiHeader.find("Status: ");
-	if (pos != std::string::npos)
-		_status = cgiHeader.substr(pos + 8, cgiHeader.find("\n", pos));
-	pos = cgiHeader.find("Content-type: ") + 14;
-	_contentType = cgiHeader.substr(pos, cgiHeader.find("\n", pos));
-}
 
 void        Response::getMethod()
 {
@@ -195,23 +169,21 @@ void        Response::getMethod()
         _body = cgi.execute(_pathCgi);
         if (_body == "<html><body>FATAL ERROR CGI</body></html>")
         {
-            if (!readErrorPage(_errorPage["500"]))
-                _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
-            _response = _header + _body;
+			sendPage(500);
             return ;
         }
-        createCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));      
+		_header.setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));
         _body = _body.substr(_body.find("\r\n\r\n") + 4);
-        _header = writeHeader(_status, _contentType, _body.length());
+		_header.setBodyLength(_body.length());
     }
-    else if (_AutoIndex == true && pathIsDirectory(_path)) {
-		_body = autoIndexBuilder(_path);
-        _header = writeHeader("200 OK", "text/html", _body.length());
+    else if (_AutoIndex == true && pathIsDirectory(_path))
+    {
+        _body = autoIndexBuilder(_path);
+		_header.setHeader("200 OK", "text/html", _body.length());
     }
     else {
 		readContent(_path);
     }
-    _response = _header + _body;
 }
 
 void     Response::postMethod()
@@ -222,30 +194,34 @@ void     Response::postMethod()
         _body = cgi.execute(_pathCgi);
         if (_body == "<html><body>FATAL ERROR CGI</body></html>")
         {
-            if (!readErrorPage(_errorPage["500"]))
-                _header = writeHeader("500 Internal Servor Error", "text/html", _body.length());
-            _response = _header + _body;
+			sendPage(500);
             return ;
         }
-        createCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));
+		_header.setCgiHeader(_body.substr(0, _body.find("\r\n\r\n")));
         _body = _body.substr(_body.find("\r\n\r\n") + 4);
-        _header = writeHeader(_status, _contentType, _body.length());
+		_header.setBodyLength(_body.length());
     }
-    else
+    else if (_uploadDest.empty() == false) 
     {
-        if (pathIsDirectory(_uploadDest) && !this->upload())
-        {
-            _header = writeHeader("204 No Content", "", 0);
-			_body = "";
-
-        }
-        else
-        {
-            if (!readErrorPage(_errorPage["400"]))
-                _header = writeHeader("400 Bad Request", "text/html", _body.length());
-        }
+		int ret = upload();
+		if (ret == 1)
+		{
+			sendPage(400);
+			return ;
+		}
+		if (ret == 2)
+		{
+			sendPage(403);
+			return ;
+		}
+		_body = "<html><body>Your file has been upload!</body></html>";
+		_header.setHeader("201 Created", "text/html", _body.length());
     }
-    _response = _header + _body;
+	else
+	{
+		_header.setStatus("204 No Content");
+	 	_body = "";
+	}
 }
 
 void        Response::deleteMethod()
@@ -255,92 +231,36 @@ void        Response::deleteMethod()
 	{
 		if (remove(_path.c_str()))
 		{
-			if (!readErrorPage(_errorPage["403"]))
-				_header = writeHeader("403 Forbidden", "text/html", _body.length());
+			sendPage(403);
+			return ;
 		}
-		_header = "HTTP/1.1 204 No Content\r\n\r\n";
+		_body = "<html><body><h1>File deleted.</h1></body></html>";
+		_header.setStatus("204 No Content");
 	}
 	else
 	{
-		if (!readErrorPage(_errorPage["404"]))
-			_header = writeHeader("404 Not Found", "text/html", _body.length());
+		sendPage(404);
 	}
-	_response = _header + _body;
-}
-
-void    Response::putMethod()
-{
-	std::ofstream fd;
-	std::stringstream buffer;
-
-    _body = "";
-    if (pathIsFile(_path))
-    {
-        fd.open(_path.c_str());
-         if (fd.is_open() == false)
-        {
-            if (!readErrorPage(_errorPage["403"]))
-                _header = writeHeader("403 Forbidden", "text/html", _body.length());
-            _response = _header + _body;
-            return ;
-        }
-        fd << _request.getBody();
-        fd.close();
-        _header = "HTTP/1.1 204 No Content\r\n\r\n";
-    }
-    else
-    {
-        fd.open(_path.c_str(), std::ofstream::out | std::ofstream::trunc);
-        if (fd.is_open() == false)
-        {
-            if (!readErrorPage(_errorPage["403"]))
-                _header = writeHeader("403 Forbidden", "text/html", _body.length());
-            _response = _header + _body;
-            return ;
-        }
-        fd << _request.getBody();
-        fd.close();
-        _header = "HTTP/1.1 201 Created\r\n\r\n";
-    }
-    _response = _header + _body;
-}
-
-void    Response::optionMethod()
-{
-	std::string Allow = "Allow: ";
-	vec_str::iterator it = _allowMethods.begin();
-	vec_str::iterator ite = _allowMethods.end();
-	for (; it != ite; it++)
-	{
-		Allow += *it;
-		if (it != ite - 1)
-			Allow += ", ";
-	}
-	readContent(_path);
-	if (_header.find("403") == std::string::npos && _header.find("404") == std::string::npos)
-		_header = _header.substr(0, _header.size() - 2) + Allow + "\r\n\r\n";
-	_response = _header;
 }
 
 void    Response::headMethod()
 {
 	readContent(_path);
-	_response = _header;
+	_response = _header.getHeader();
 }
 
 void     Response::makeAnswer(Request &req)
 {
-	if (initRequest(req))
-        return ;
-    if (_methods.find(_request.getMethod()) != _methods.end() && isAllow(_request.getMethod()))
+    if (initRequest(req) == 0
+		&& _methods.find(_request.getMethod()) != _methods.end() 
+		&& isAllow(_request.getMethod()))
+	{
 		(this->*_methods[_request.getMethod()])();
+	}
     else
-    {
-		if (!readErrorPage(_errorPage["405"]))
-            _header = writeHeader("405 Method Not Allowed", "text/html", _body.length());
-        _response = _header + _body;
-    }
-	std::cout << "RESPONSE =========== " << _response << std::endl;
+		sendPage(405);
+	_header.writeHeader();
+	_response = _header.getHeader() + _body;
 }
 
 std::string&    Response::getResponse() { return _response;}
@@ -358,56 +278,35 @@ bool             Response::isAllow(std::string method)
 	return false;
 }
 
-std::string Response::sizeToString(size_t size)
-{
-	std::ostringstream convert;
-	convert << size;
-	return convert.str();
-}
-
-int     Response::pathIsFile(std::string &path)
-{
-	struct stat s;
-
-	if (stat(path.c_str(), &s) == 0)
-		if (s.st_mode & S_IFREG)
-			return 1;
-	return 0;
-}
-
-int     Response::pathIsDirectory(std::string &path)
-{
-	struct stat s;
-
-	if (stat(path.c_str(), &s) == 0)
-		if (s.st_mode & S_IFDIR)
-			return 1;
-	return 0;
-}
-
 int			Response::upload()
 {
+	std::string contentType = _request.getContentType();
 	std::string body = _request.getBody();
 	size_t foundFileName = body.find("filename=");
-    if (foundFileName == std::string::npos)
+    if (foundFileName == std::string::npos || 
+		contentType.find("multipart/form-data") == std::string::npos) 
         return (1);
     
     std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
     fileName = fileName.substr(0, fileName.find("\n"));
     fileName = fileName.substr(10);
     fileName.erase(fileName.length() - 2);
+	if (fileName.empty())
+		return (1);
     _uploadDest = _uploadDest + "/" + fileName;
-
-    std::string boundary = _contentType.substr(_contentType.find("boundary=") + 9);
+    std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
     body = body.substr(body.find("\r\n\r\n") + 4);
     body = body.substr(0, body.find(boundary));
     body = body.substr(0, body.length() - 2);
-
+		
     std::ofstream myfile;
-    myfile.open(_uploadDest.c_str(), std::ofstream::out | std::ofstream::binary);
+    myfile.open(_uploadDest.c_str());
     if (myfile.is_open() == false)
-        return (1);
+        return (2);
     myfile << body.c_str();
     myfile.close();
+	_location = "http://" + _request.getHost() + "/" + _uploadDest;
+	std::cout << "LOCATION: " << _location << std::endl;
+	_date = getTime();
     return (0);
 }

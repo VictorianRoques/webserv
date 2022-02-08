@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
+#    By: viroques <viroques@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
-#    Updated: 2022/02/04 14:45:28 by pnielly          ###   ########.fr        #
+#    Updated: 2022/02/08 20:01:27 by viroques         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,6 +27,7 @@ _SRC_		=	main.cpp \
 				Parser.cpp \
 				RequestParser.cpp \
 				Response.cpp \
+				ResponseHeader.cpp \
 				Server.cpp \
 				SockData.cpp \
 				SockClient.cpp \
