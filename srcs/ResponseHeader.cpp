@@ -1,13 +1,26 @@
 #include "ResponseHeader.hpp"
 
 ResponseHeader::ResponseHeader() {}
+ResponseHeader::ResponseHeader(const ResponseHeader &resHeader) { *this = resHeader; }
+ResponseHeader::~ResponseHeader() {}
 
-std::string     ResponseHeader::getStatus() { return _status; }
-std::string     ResponseHeader::getContentType() { return _contentType; }
-size_t          ResponseHeader::getBodyLength() { return _bodyLength; }
-std::string     ResponseHeader::getDate() { return _date; }
-std::string     ResponseHeader::getLocation() { return _location; }
-std::string     ResponseHeader::getHeader() { return _header; }
+ResponseHeader&     ResponseHeader::operator=(const ResponseHeader &resHeader)
+{
+    _status = resHeader._status;
+    _contentType = resHeader._contentType;
+    _bodyLength = resHeader._bodyLength;
+    _date = resHeader._date;
+    _location = resHeader._location;
+    _header = resHeader._header;
+    return *this;
+}
+
+std::string     ResponseHeader::getStatus() const       { return _status; }
+std::string     ResponseHeader::getContentType() const  { return _contentType; }
+size_t          ResponseHeader::getBodyLength() const   { return _bodyLength; }
+std::string     ResponseHeader::getDate() const         { return _date; }
+std::string     ResponseHeader::getLocation() const     { return _location; }
+std::string     ResponseHeader::getHeader() const       { return _header; }
 
 void            ResponseHeader::setStatusError(std::string code, size_t length) 
 {
@@ -25,6 +38,18 @@ void            ResponseHeader::setStatusError(std::string code, size_t length)
     _bodyLength = length;
 }
 
+void            ResponseHeader::setStatus(std::string status)           {_status = status; }
+void            ResponseHeader::setContentType(std::string contentType) {_contentType = contentType; }
+void            ResponseHeader::setBodyLength(size_t length)            {_bodyLength = length; }
+void            ResponseHeader::setDate()                               { _date = getTime(); }
+void            ResponseHeader::setLocation(std::string location)       { _location = location; }
+void            ResponseHeader::setHeader(std::string status, std::string contentType, size_t length)
+{
+    _status = status;
+    _contentType = contentType;
+    _bodyLength = length;
+}
+
 void            ResponseHeader::setStatusRedirect(std::string code, size_t length)
 {
     if (code == "310")
@@ -39,16 +64,6 @@ void            ResponseHeader::setStatusRedirect(std::string code, size_t lengt
         _contentType = "";
         _bodyLength = 0;
     }
-}
-
-void            ResponseHeader::setStatus(std::string status) {_status = status; }
-void            ResponseHeader::setContentType(std::string contentType) {_contentType = contentType; }
-void            ResponseHeader::setBodyLength(size_t length) {_bodyLength = length; }
-void            ResponseHeader::setHeader(std::string status, std::string contentType, size_t length)
-{
-    _status = status;
-    _contentType = contentType;
-    _bodyLength = length;
 }
 
 void               ResponseHeader::setCgiHeader(std::string cgiHeader)

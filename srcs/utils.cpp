@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 21:02:09 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 22:40:22 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ std::string	getPWD() {
 /**
  * pathIsDirectory(): returns 1 if path is directory, else 0
 **/
+
 int     pathIsDirectory(std::string &path)
 {
 	struct stat s;
@@ -157,4 +158,14 @@ std::string		sizeToString(size_t size)
 	std::ostringstream convert;
 	convert << size;
 	return convert.str();
+}
+
+std::string		hrefLocation(std::string location)
+{
+	std::string ret = "<html><body>Your file has been upload!";
+	ret += "<a href=\"";
+	ret += location;
+	ret += "\"> Check Here </a>";
+	ret += "</body></html>";
+	return ret;
 }
