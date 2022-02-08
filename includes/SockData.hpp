@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/07 02:25:33 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/07 23:34:18 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,12 +61,11 @@ class SockData {
 		void		setRecvToActive(void);
 		void		setResponse(int fd);
 		void		setInternalError(int fd);
+		void		setBadRequest(int fd);
 		/* checkers */
 		bool		isSockListen(int fd) const;
 		bool		isRecvSet(int fd) const;
 		bool		isSendSet(int fd) const;
-		bool		isChunkFd(int fd) const;
-		bool		isChunkRequest(std::string request) const;
 		/* getters */
 		fd_set		*getRecvSet(void);
 		fd_set		*getSendSet(void);
@@ -96,7 +95,7 @@ class SockData {
 		void		printBuffer(char buffer[BUF_SIZE]) const;
 		/* bad alloc exception */
 		struct badAllocException : public std::exception {
-			const char	*what(void) const throw() { return "bad alloc"; }
+			const char	*what(void) const throw() { return "memory overload"; }
 		};
 };
 

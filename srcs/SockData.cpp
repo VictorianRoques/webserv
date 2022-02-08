@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/07 19:38:22 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/08 00:48:04 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,18 +66,24 @@ void	SockData::setRecvToActive(void)
 
 void	SockData::setResponse(int fd)
 {
-	Request	*request = requestParser(clients_[fd].getRequest(), servers_);
-	std::vector<Server>::iterator	it = servers_.begin();
-	std::vector<Server>::iterator	ite = servers_.end();
-	for (; it != ite; ++it) {
-		if (vector_contains_str(it->getServerName(), request->getHost())) {
-			Response	response(*it);
-			response.makeAnswer(*request);
-			response_[fd] = response.getResponse();
-			break;
-		}
+	if (clients_[fd].isBadRequest()) {
+		setBadRequest(fd);
 	}
-	delete request;
+	else {
+		Request	*request = requestParser(clients_[fd].getRequest(), servers_);
+		std::vector<Server>::iterator	it = servers_.begin();
+		std::vector<Server>::iterator	ite = servers_.end();
+		for (; it != ite; ++it) {
+			// std::cout << "request->getHost(): " << request->getHost() << std::endl;
+			if (vector_contains_str(it->getServerName(), request->getHost())) {
+				Response	response(*it);
+				response.makeAnswer(*request);
+				response_[fd] = response.getResponse();
+				break;
+			}
+		}
+		delete request;
+	}
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
 	clients_[fd].setChunk(false);
@@ -94,6 +100,27 @@ void	SockData::setInternalError(int fd)
 	ss << body.size();
 	ss >> size;
 	response += "HTTP/1.1 500 Internal Server Error\r\n";
+	response += "Content-Type: text/html\r\n";
+	response += "Content-Length: "; response += size; response += "\r\n";
+	response += "Connection: keep-alive\r\n";
+	response += "\r\n";
+	response += body;
+	response_[fd] = response;
+	clients_[fd].getTmpRequest().clear();
+	clients_[fd].getRequest().clear();
+	FD_SET(fd, &sendSet_);
+}
+
+void	SockData::setBadRequest(int fd)
+{
+	std::string			response, body, size;
+	std::stringstream	ss;
+	body += "<!DOCTYPE html>\n<html><title>400</title><body>\
+<h1>400 Bad Request</h1>\
+<h3>Sorry, server couldn't process the request</h3></body></html>\n";
+	ss << body.size();
+	ss >> size;
+	response += "HTTP/1.1 400 Bad Request\r\n";
 	response += "Content-Type: text/html\r\n";
 	response += "Content-Length: "; response += size; response += "\r\n";
 	response += "Connection: keep-alive\r\n";
@@ -123,18 +150,6 @@ bool	SockData::isRecvSet(int fd) const
 
 bool	SockData::isSendSet(int fd) const
 	{ return FD_ISSET(fd, &sendSet_); }
-
-bool	SockData::isChunkFd(int fd) const
-{
-	fd = (int)fd;
-	return false;
-}
-
-bool	SockData::isChunkRequest(std::string request) const
-{
-	request = (std::string)request;
-	return false;
-}
 
 /* getters */
 fd_set	*SockData::getRecvSet(void)
@@ -184,7 +199,7 @@ void	SockData::addClient(int fd)
 		sockClient.setPort(ntohs(addrClient.sin_port));
 		try {
 			clients_[newSock] = sockClient;
-			if (newSock > FD_SETSIZE) {
+			if (newSock >= FD_SETSIZE) {
 				close(newSock);
 				cnxRefused(sockClient);
 			}

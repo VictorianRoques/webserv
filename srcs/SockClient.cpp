@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/06 23:54:40 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/08 00:54:00 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,23 @@ bool	SockClient::isChunkEof(void) const
 		return true;
 	}
 	return false;
+}
+
+bool	SockClient::isBadRequest(void) const
+{
+	std::istringstream	data(request_);
+	std::string			line;
+	std::getline(data, line);
+	if (line.find("GET") != 0 && line.find("POST") != 0 &&
+	line.find("HEAD") != 0 && line.find("DELETE") != 0) {
+		return true;
+	}
+	while (std::getline(data, line)) {
+		if (line.find("Host: ") == 0 && (line != "Host: \r")) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /* getters */

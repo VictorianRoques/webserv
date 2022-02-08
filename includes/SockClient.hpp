@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/06 23:54:44 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/07 23:35:05 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class SockClient {
 		bool		isChunk(void) const;
 		bool		isTmpRequestChunk(void) const;
 		bool		isChunkEof(void) const;
+		bool		isBadRequest(void) const;
 		/* getters */
 		char		*getIp(void) const;
 		size_t		getPort(void) const;
