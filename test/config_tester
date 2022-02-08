@@ -1,0 +1,68 @@
+#!/usr/local/bin/python3
+
+import time
+import subprocess
+
+
+print('[ \033[0;34mno config file\033[0m ]')
+subprocess.run(['../webserv'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+print('[ \033[0;34mwrong config file: fake_file_lol\033[0m ]')
+subprocess.run(['../webserv', '../conf/fake_file_lol'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+print('[ \033[0;34mconfig_embedded_servers.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_embedded_servers.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+print('[ \033[0;34mconfig_lonely_bracket.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_lonely_bracket.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+print('[ \033[0;34mconfig_missing_bracket.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_missing_bracket.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+print('[ \033[0;34mconfig_no_such_directive.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_no_such_directive.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+time.sleep(0.5)
+print('[ \033[0;34mconfig_outside_server_directive.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_outside_server_directive.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+time.sleep(0.5)
+print('[ \033[0;34mconfig_random_data.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_outside_server_directive.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+time.sleep(0.5)
+print('[ \033[0;34mconfig_empty.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_empty.conf'])
+print('[ \033[0;32mOK\033[0m ]')
