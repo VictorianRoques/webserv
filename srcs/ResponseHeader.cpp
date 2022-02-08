@@ -44,7 +44,6 @@ void            ResponseHeader::setStatusRedirect(std::string code, size_t lengt
 void            ResponseHeader::setStatus(std::string status) {_status = status; }
 void            ResponseHeader::setContentType(std::string contentType) {_contentType = contentType; }
 void            ResponseHeader::setBodyLength(size_t length) {_bodyLength = length; }
-
 void            ResponseHeader::setHeader(std::string status, std::string contentType, size_t length)
 {
     _status = status;

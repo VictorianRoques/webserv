@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/08 21:01:54 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 21:20:35 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,11 +64,6 @@ int      Response::initRequest(Request &req)
 	if (_request.getRedirCode() == 310)
 	{
 		sendPage(310);
-		return (1);
-	}
-	if (_request.getRedirCode() == 308)
-	{
-		sendPage(308);
 		return (1);
 	}
     return (0);
@@ -184,6 +179,8 @@ void        Response::getMethod()
     else {
 		readContent(_path);
     }
+	if (_request.getRedirCode() == 308)
+		_header.setStatus("308 Permanent Redirect");
 }
 
 void     Response::postMethod()
@@ -293,6 +290,7 @@ int			Response::upload()
     fileName.erase(fileName.length() - 2);
 	if (fileName.empty())
 		return (1);
+	
     _uploadDest = _uploadDest + "/" + fileName;
     std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
     body = body.substr(body.find("\r\n\r\n") + 4);
@@ -306,6 +304,7 @@ int			Response::upload()
     myfile << body.c_str();
     myfile.close();
 	_location = "http://" + _request.getHost() + "/" + _uploadDest;
+	_location = cleanSlash(_location);
 	std::cout << "LOCATION: " << _location << std::endl;
 	_date = getTime();
     return (0);
