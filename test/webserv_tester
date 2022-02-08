@@ -15,7 +15,7 @@ hostname = 'localhost'
 port = 8080
 test = ""
 if len(sys.argv) < 2:
-	print('error: usage: ./webserv port [get, stress1, stress2, chunk, memory')
+	print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory')
 	exit(1)
 elif len(sys.argv) == 2:
 	port = int(sys.argv[1])
@@ -35,8 +35,7 @@ def is_server_up(hostname, port):
 	try:
 		sock.connect((hostname, port))
 		# sock.send(b'Bad Request: checking if server is up')
-		sock.send(b'GET / HTTP/1.1\r\n\
-Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n')
+		sock.send(b'Check if up request')
 		sock.recv(4096)
 		return True
 	except:
@@ -47,7 +46,8 @@ def get_tester():
 	sock.connect((hostname, port))
 	sock.settimeout(3)
 	sock.send(b'GET / HTTP/1.1\r\n\
-Host: localhost:8080\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
 Connection: keep-alive\r\n\r\n')
 	try:
 		ret = sock.recv(4096)
@@ -62,10 +62,12 @@ def post_tester():
 	sock.settimeout(3)
 	sock.send(b'POST / HTTP/1.1\r\n\
 Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
-Content-Type: text/plain\
+User-Agent: webserv_tester\r\n\
+Content-Type: text/plain\r\n\
 Content-Length: 12\r\n\
-Connection: keep-alive\r\n\r\n\
-Body: Hello World!\r\n\
+Connection: keep-alive\r\n\
+\r\n\
+Hello World!\r\n\
 \r\n')
 	try:
 		ret = sock.recv(4096)
@@ -73,19 +75,21 @@ Body: Hello World!\r\n\
 	except:
 		print('error: request POST failed')
 		exit(2)
-	sock.send(b'POST / HTTP/1.1\r\n\
-Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
-Content-Type: text/plain\
-Content-Length: 12\r\n\
-Connection: keep-alive\r\n\r\n\
-Body: Hello World!\r\n\
-\r\n')
-	try:
-		ret = sock.recv(4096)
-		print(ret)
-	except:
-		print('error: request POST failed')
-		exit(2)
+
+# def delete_tester():
+# 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# 	sock.connect((hostname, port))
+# 	sock.settimeout(3)
+# 	sock.send(b'DELETE /test/ HTTP/1.1\r\n\
+# Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+# User-Agent: webserv_tester\r\n\
+# Connection: keep-alive\r\n\r\n')
+# 	try:
+# 		ret = sock.recv(4096)
+# 		print(ret)
+# 	except:
+# 		print('error: request DELETE failed')
+# 		exit(2)
 
 def stress_tester_1():
 	socks = []
@@ -195,7 +199,7 @@ def post():
 	print('          POST_TESTER starting...')
 	print('------------------------------------------\033[0m')
 	time.sleep(1.5)
-	get_tester()
+	post_tester()
 	print('\nPOST_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
 	time.sleep(0.5)
@@ -204,19 +208,19 @@ def post():
 	else:
 		print('POST_TESTER [ \033[0;31mKO\033[0m ]')
 
-def post():
+def delete():
 	print('\033[0;34m\n------------------------------------------')
-	print('          POST_TESTER starting...')
+	print('          DELETE_TESTER starting...')
 	print('------------------------------------------\033[0m')
 	time.sleep(1.5)
-	get_tester()
-	print('\nPOST_TESTER...', end='\r')
+	# delete_tester()
+	print('\nDELETE_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
 	time.sleep(0.5)
 	if ret:
-		print('POST_TESTER [ \033[0;32mOK\033[0m ]')
+		print('DELETE_TESTER [ \033[0;32mOK\033[0m ]')
 	else:
-		print('POST_TESTER [ \033[0;31mKO\033[0m ]')
+		print('DELETE_TESTER [ \033[0;31mKO\033[0m ]')
 
 def stress1():
 	print('\033[0;34m\n------------------------------------------')
@@ -285,6 +289,8 @@ test_ = '[ test: ' + '\033[0;32m' + test + '\033[0m ]'
 print(test_)
 single_test = dict()
 single_test['get'] = get
+single_test['post'] = post
+single_test['delete'] = delete
 single_test['stress1'] = stress1
 single_test['stress2'] = stress2
 single_test['chunk'] = chunk
@@ -296,7 +302,7 @@ if (test != ''):
 	try:
 		single_test[test]()
 	except:
-		print('error: usage: ./webserv port [get, stress1, stress2, chunk, memory')
+		print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory')
 else:
 	for key in single_test:
 		single_test[key]()
