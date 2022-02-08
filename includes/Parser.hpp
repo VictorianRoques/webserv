@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 09:22:46 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 15:56:28 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ class Parser: public Server {
 		// parsing helper functions
 		void	addPort(std::string port);
 		void	clear();
+		bool	serverNameChecker();
 		size_t	dirListen(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirRoot(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend);
@@ -144,6 +145,11 @@ class Parser: public Server {
 		};
 		
 		class ConfigFileIsDirectoryException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class WrongServerNameException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};

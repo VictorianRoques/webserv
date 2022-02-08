@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 09:23:02 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 16:14:20 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ char const *Parser::ErrorPageException::what() const throw() { return "Need at l
 char const *Parser::NeedOnePortException::what() const throw() { return "Need one and only one port per listen directive."; }
 char const *Parser::UnaccessiblePortException::what() const throw() { return "Ports below 1024 are considered \"privileged\".\n Only privileged users (e.g. root) can access them."; }
 char const *Parser::ConfigFileIsDirectoryException::what() const throw() { return "Your configuration file is a directory..."; }
+char const *Parser::WrongServerNameException::what() const throw() { return "For this project, you'll need localhost as a server name."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -324,6 +325,23 @@ void	Parser::clear() {
 }
 
 /**
+ * serverNameChecker(): returns true is serverName contains a correct server name : localhost:<server_port>
+**/
+bool	Parser::serverNameChecker() {
+	std::string			correct;
+	std::stringstream	out;
+
+	if (!vector_contains_str(getServerName(), "localhost") && !vector_contains_str(getServerName(), "www.localhost"))
+		return false;
+	correct = "localhost:";
+	out << *getPort().begin();
+	correct += out.str();
+	_serverName.push_back(correct);
+	_serverName.push_back("www." + correct);
+	return true;
+}
+
+/**
  * dirServer(): add the new server to '_servers_g' vector (called by interpret())
 **/
 size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
@@ -344,6 +362,10 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 		// update list of all ports
 		if (find(_ports_g.begin(), _ports_g.end(), *_port.begin()) == _ports_g.end())
 			_ports_g.push_back(*_port.begin());
+
+		// check server name
+		if (!serverNameChecker())
+			throw WrongServerNameException();
 
 		// add Server to servers_g
 		Server& server = dynamic_cast<Server&>(*this);

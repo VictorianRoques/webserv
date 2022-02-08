@@ -11,6 +11,10 @@ Victorian:
 Padoue:
 
 - ajout de la methode HEAD: si body dans request avec methode HEAD, ignorer requete
+- gerer leak
+- gerer new Location (remnove new)
+- gerer excpetion server name (localhost:<port>)
+- gerer path
 
 Florian:
 
