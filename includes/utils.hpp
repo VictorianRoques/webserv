@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 21:02:18 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 23:15:09 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,8 @@ int     							pathIsDirectory(std::string &path);
 int									pathIsFile(std::string &path);
 std::string							getTime();
 std::string							sizeToString(size_t size);
+std::string							findRightPath(std::string path, std::string root, std::string locationMatch);
+std::string							makePathAbsolute(std::string);
 
 /**
  * prototype of testing

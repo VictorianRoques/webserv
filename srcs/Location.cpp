@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 16:25:41 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 23:23:34 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	root = (*it).substr(pos, posend - pos);
 
 	//remove useless backwards (would puzzle the cgi)
-	root = removeBackwards(root);
+//	root = removeBackwards(root);
 
 	setRoot(root);
 	if (getLocationMatch() == "/") {
@@ -222,6 +222,7 @@ size_t	Location::dirRedirection(vec_str::iterator it, vec_str::iterator vend) {
 		throw NonValidRedirectionException();
 	_redirection.first = code;
 	_redirection.second = uri.substr(0, pos);
+	std::cout << "REDICRECITON SECOND IN LOCATION = " << _redirection.second << std::endl;
 	(void)vend;
 	return 3;
 }

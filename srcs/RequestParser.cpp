@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 16:25:22 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 23:35:30 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ void	Request::setRedirCode(size_t redirCode) { _redirCode = redirCode; }
 
 /**
  * isChunked(): sets chunked = true/false
-**/
+ **/
 void	Request::isChunked() {
 	if (_transferEncoding.size())
 		setChunked(true);
@@ -124,21 +124,33 @@ void	Request::isChunked() {
 
 /**
  * buildFullPath(): append correct root to path without query string (symbol: '?')
-**/
+ **/
 void	Request::buildFullPath(Location loc) {
-		size_t	start = loc.getLocationMatch().length();
 
-		if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) // check if this is an upload
-			_fullPath = loc.getRoot() + "/" + loc.getUploadDest() + "/" + _path.substr(start - 1, _path.find("?"));
-		else
-			_fullPath = loc.getRoot() + "/" + _path.substr(start - 1, _path.find("?"));
-		_fullPath = cleanSlash(_fullPath);
-		return ;
+	if (getRedirCode() == 308) { // if redirection 
+		if (loc.getRedirection().second[0] == '/') //absolute
+			_fullPath = loc.getRedirection().second;
+		else //relative
+			_fullPath = loc.getRoot() + "/" + loc.getRedirection().second;
+	}
+	else { 
+		if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) { // check if this is an upload
+			if (loc.getUploadDest()[0] == '/') //absolute
+				_fullPath = loc.getUploadDest();
+			else //relative
+				_fullPath = loc.getRoot() + "/" + loc.getUploadDest();
+		}
+		else {
+			_fullPath = findRightPath(_path, loc.getRoot(), loc.getLocationMatch());
+		}
+	}
+	_fullPath = cleanSlash(_fullPath);
+	return ;
 }
 
 /**
  * queryString(): parse the path and store query string if any.
-**/
+ **/
 void	Request::queryString() {
 	size_t	pos;
 
@@ -149,7 +161,7 @@ void	Request::queryString() {
 
 /**
  * firstLine(): parse the first line, for ex.: "GET /index.html HTTP/1.1"
-**/
+ **/
 void	Request::firstLine(std::string line) {
 	vec_str	rl;
 
@@ -161,7 +173,7 @@ void	Request::firstLine(std::string line) {
 
 /**
  * headerLine(): parse the rest of the header
-**/
+ **/
 void	Request::headerLine(std::string line) {
 
 	std::vector<std::pair<std::string, methodPointer> > vars;
@@ -191,14 +203,14 @@ void	Request::headerLine(std::string line) {
 
 /**
  * bodyLine(): parse the body.
-**/
+ **/
 void	Request::bodyLine(std::string line) {
 	setBody(line);
 }
 
 /**
  *  print_request(): self-explanatory
-**/
+ **/
 void	Request::print_request() {
 	std::cout << COLOR_REQ << "Method: " << NC << _method << std::endl;
 	std::cout << COLOR_REQ << "Path: " << NC << _path << std::endl;
@@ -222,19 +234,25 @@ void	Request::print_request() {
 
 /**
  * findRightLocation(): find the relevant Location {}
-**/
+ **/
 Location findRightLocation(std::vector<Location> loc, Request req) {
+	if (req.getPath()[0] != '/')
+		req.setPath("/" + req.getPath());
 	std::vector<Location>::iterator it = loc.begin();
 	// looking for exact match
 	for (; it != loc.end(); it++) {
+		std::cout << "Lcoation Mathc -=================== " << it->getLocationMatch() << std::endl;
+		std::cout << "getPath  -=================== " << req.getPath() << std::endl;
 		if (it->getLocationMatch() == req.getPath()) {
+			std::cout << "EEEEEEEEEEEEXacti match fouuuuuuuuummd" << std::endl;
 			return *it;
 		}
 	}
+	std::cout << "=================== No exactmatch found ====================" << std::endl;
 	// no exact match found: looking for the longest match	
 	it = loc.begin();
 	size_t pos = req.getPath().length();
-	
+
 	while (pos != 0) {
 		pos = req.getPath().rfind("/", pos - 1);
 		for (; it != loc.end(); it++) {
@@ -244,18 +262,13 @@ Location findRightLocation(std::vector<Location> loc, Request req) {
 				return *it;
 		}
 	}
-	// no match found -. return "location /"
-	it = loc.begin();
-	for (; it != loc.end(); it++) {
-		if (it->getLocationMatch() == "/")
-			return *it;
-	}
+	std::cout << "=================== Longuest match is / ====================" << std::endl;
 	return *it;
 }
 
 /**
  * findRightServer(): finds correct server
-**/
+ **/
 Server findRightServer(std::vector<Server> servers_g, Request request) {
 	std::vector<Server>::iterator it = servers_g.begin();
 	for (; it != servers_g.end(); it++) {
@@ -265,12 +278,12 @@ Server findRightServer(std::vector<Server> servers_g, Request request) {
 	}
 	// if no exact match found: first server is default server
 	return *(servers_g.begin());
-	
+
 }
 
 /**
  * requestParser(): rq is the 'request.Header' string and servers_g is the parsed config
-**/
+ **/
 Request requestParser(std::string rq, std::vector<Server> servers_g) {
 	Server	serv;
 	Location	loc;
@@ -302,12 +315,24 @@ Request requestParser(std::string rq, std::vector<Server> servers_g) {
 		request.setTooBig(true);
 		return request;
 	}
+
 	// handle redirection
-	if (loc.getRedirection().first == 308) {
+	i = 0; // i = nb of redirecitons
+	while (loc.getRedirection().first == 308) {
+		i++;
+		// If i >= 10: status code 310
+		if (i >= 10) {
+			request.setRedirCode(310);
+			return request;
+		}
 		request.setPath(loc.getRedirection().second);
 		request.setRedirCode(loc.getRedirection().first);
+		if (request.getPath()[0] == '/') // if absolute path, no further redirection possible
+			break ;
 		loc = findRightLocation(serv.getLocation(), request);
 	}
+	std::cout << "I m out of the reidreciton loop " << std::endl;
+	
 	// handle the rest
 	request.isChunked();
 	request.buildFullPath(loc);

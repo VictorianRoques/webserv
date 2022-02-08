@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/04 14:23:06 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 23:00:04 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,12 +46,16 @@ std::string	autoIndexDrawnLine() {
 **/
 std::string	autoIndexVarName(std::string path, std::string name, struct stat buf, std::string generalRoot) {
 	std::string content;
-	size_t	pos;
-	std::string	data_folder("/" + generalRoot);
+//	size_t	pos;
+//	std::string	data_folder("/" + generalRoot);
+
+	std::cout << "AUTOINDEX ; GENERAL ROOT = " << generalRoot << std::endl;
+	std::cout << "AUTOINDEX ; PATH = " << path << std::endl;
+	std::cout << "AUTOINDEX ; NAME = " << name << std::endl;
 
 	content = "<div style=\"float: left; width: 32%;\"><a href=\"";
-	pos = path.rfind(data_folder) + data_folder.size();
-	content += path.substr(pos, path.length()) + "/" + name;
+//	pos = path.rfind(data_folder) + data_folder.size();
+	content += makePathAbsolute(path + "/" + name);
 	content += "\">";
 	content += name;
 	if (S_ISDIR(buf.st_mode))
