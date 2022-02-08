@@ -8,18 +8,20 @@ import os
 
 lock = threading.Lock()
 
+hostname = 'localhost'
+port = 8080
+if len(sys.argv) == 2:
+	port = int(sys.argv[1])
+elif len(sys.argv) > 2:
+	print("error: too many arguments")
+	exit()
+
 def is_server_up(hostname, port):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.settimeout(6)
+	sock.settimeout(3)
 	try:
 		sock.connect((hostname, port))
-# 		sock.send(b'GET / HTTP/1.1\r\n\
-# Host: localhost:8080\r\n\
-# User-Agent: python-requests/2.27.1\r\n\
-# Accept-Encoding: gzip, deflate\r\n\
-# Accept: */*\r\n\
-# Connection: keep-alive\r\n\r\n')
-		sock.send(b'Hello World!')
+		sock.send(b'Bad Request: checking if server is up')
 		sock.recv(2048)
 		sock.close()
 		return True
@@ -31,7 +33,7 @@ def stress_tester1():
 	for i in range(1500):
 		time.sleep(0.005)
 		socks.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
-		socks[i].connect(('localhost', 8080))
+		socks[i].connect((hostname, port))
 		socks[i].settimeout(3)
 		socks[i].send(b'GET / HTTP/1.1\r\n\
 Host: localhost:8080\r\n\
@@ -71,7 +73,7 @@ def stress_tester2():
 
 def chunk_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.connect(('localhost', 8080))
+	sock.connect((hostname, port))
 	sock.send(b'POST / HTTP/1.1\r\n\
 Host: localhost:8080\r\n\
 User-Agent: python-requests/2.27.1\r\n\
@@ -90,12 +92,12 @@ This is another part of a very boring chunk request\r\n\r\n')
 And finally the last third part of a chunk dummy request\r\n\r\n')
 	time.sleep(0.1)
 	sock.send(b'0\r\n\r\n')
-	tmp = sock.recv(2048)
-	print(tmp)
+	ret = sock.recv(2048)
+	print(ret)
 
 def memory_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.connect(('localhost', 8080))
+	sock.connect((hostname, port))
 	sock.send(b'POST / HTTP/1.1\r\n\
 Host: localhost:8080\r\n\
 User-Agent: python-requests/2.27.1\r\n\
@@ -112,44 +114,37 @@ Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egesta
 	print(ret)
 
 
-hostname = 'localhost'
-port = 8080
-if len(sys.argv) == 2:
-	port = int(sys.argv[1])
-elif len(sys.argv) > 2:
-	print("error: too many arguments")
-	exit()
 print('[ hostname: ' + '\033[0;32m' + hostname + '\033[0m ]')
 print('[ port: ' + '\033[0;32m' + str(port) + '\033[0m ]')
 time.sleep(1)
 
 
-# print('\033[0;34m\n------------------------------------------')
-# print('          STRESS_TESTER_1 starting...')
-# print('------------------------------------------\033[0m')
-# time.sleep(1.5)
-# stress_tester1()
-# print()
-# print('\nSTRESS_TESTER_1...', end='\r')
-# ret = is_server_up(hostname, port)
-# time.sleep(0.5)
-# if ret:
-# 	print('\nSTRESS_TESTER_1 [ \033[0;32mOK\033[0m ]')
-# else:
-# 	print('\nSTRESS_TESTER_1 [ \033[0;31mKO\033[0m ]')
+print('\033[0;34m\n------------------------------------------')
+print('          STRESS_TESTER_1 starting...')
+print('------------------------------------------\033[0m')
+time.sleep(1.5)
+stress_tester1()
+print()
+print('\nSTRESS_TESTER_1...', end='\r')
+ret = is_server_up(hostname, port)
+time.sleep(0.5)
+if ret:
+	print('STRESS_TESTER_1 [ \033[0;32mOK\033[0m ]')
+else:
+	print('STRESS_TESTER_1 [ \033[0;31mKO\033[0m ]')
 
-# print('\033[0;34m\n------------------------------------------')
-# print('          STRESS_TESTER _2 starting...')
-# print('------------------------------------------\033[0m')
-# time.sleep(1.5)
-# stress_tester2()
-# print('\nSTRESS_TESTER_2...', end='\r')
-# ret = is_server_up(hostname, port)
-# time.sleep(0.5)
-# if ret:
-# 	print('\nSTRESS_TESTER_2 [ \033[0;32mOK\033[0m ]')
-# else:
-# 	print('\nSTRESS_TESTER_2 [ \033[0;31mKO\033[0m ]')
+print('\033[0;34m\n------------------------------------------')
+print('          STRESS_TESTER _2 starting...')
+print('------------------------------------------\033[0m')
+time.sleep(1.5)
+stress_tester2()
+print('\nSTRESS_TESTER_2...', end='\r')
+ret = is_server_up(hostname, port)
+time.sleep(0.5)
+if ret:
+	print('STRESS_TESTER_2 [ \033[0;32mOK\033[0m ]')
+else:
+	print('STRESS_TESTER_2 [ \033[0;31mKO\033[0m ]')
 
 
 print('\033[0;34m\n------------------------------------------')
@@ -159,21 +154,21 @@ time.sleep(1.5)
 chunk_tester()
 print('\nCHUNK_TESTER...', end='\r')
 ret = is_server_up(hostname, port)
-time.sleep(1)
+time.sleep(0.5)
 if ret:
 	print('CHUNK_TESTER [ \033[0;32mOK\033[0m ]')
 else:
 	print('CHUNK_TESTER [ \033[0;31mKO\033[0m ]')
 
-# print('\033[0;34m\n------------------------------------------')
-# print('          MEMORY_TESTER starting...')
-# print('------------------------------------------\033[0m')
-# time.sleep(1.5)
-# memory_tester()
-# print('\nMEMORY_TESTER...', end='\r')
-# ret = is_server_up(hostname, port)
-# time.sleep(0.5)
-# if ret:
-# 	print('\nMEMORY_TESTER [ \033[0;32mOK\033[0m ]')
-# else:
-# 	print('\nMEMORY_TESTER [ \033[0;31mKO\033[0m ]')
+print('\033[0;34m\n------------------------------------------')
+print('          MEMORY_TESTER starting...')
+print('------------------------------------------\033[0m')
+time.sleep(1.5)
+memory_tester()
+print('\nMEMORY_TESTER...', end='\r')
+ret = is_server_up(hostname, port)
+time.sleep(0.5)
+if ret:
+	print('MEMORY_TESTER [ \033[0;32mOK\033[0m ]')
+else:
+	print('MEMORY_TESTER [ \033[0;31mKO\033[0m ]')
