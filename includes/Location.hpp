@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/07 16:25:28 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 00:06:31 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class Location {
 		size_t								_maxBodySize;
 	
 		std::string							_generalRoot;
+		bool								_rootSpecified; // true if found a root directive in the location
 
 		// getters
 	public:
@@ -93,6 +94,7 @@ class Location {
 		size_t	dirUploadDest(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend);
 		size_t	locationContext(vec_str::iterator it);
+		void	locationChecker();
 
 		// utils
 	public:
@@ -136,6 +138,11 @@ class Location {
 		};
 
 		class MissingBracketException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class RootAndAbsolutePathException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};

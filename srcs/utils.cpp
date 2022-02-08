@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 22:40:22 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/09 00:12:37 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,6 @@ std::string	getPWD() {
 /**
  * pathIsDirectory(): returns 1 if path is directory, else 0
 **/
-
 int     pathIsDirectory(std::string &path)
 {
 	struct stat s;
@@ -168,4 +167,40 @@ std::string		hrefLocation(std::string location)
 	ret += "\"> Check Here </a>";
 	ret += "</body></html>";
 	return ret;
+}
+
+/**
+ * findRightPath():
+ * if relative path exists --> relative path
+ * else if absolute path exists --> absolute path
+ * else --> relative path (which will lead to error code 404)
+**/
+std::string	findRightPath(std::string path, std::string root, std::string locationMatch) {
+	size_t start = locationMatch.length();
+	std::string relative = cleanSlash(root + "/" + path.substr(start - 1, path.find("?")));
+	if (pathIsFile(relative) || pathIsDirectory(relative))
+		return relative;
+
+	std::string relative2 = cleanSlash(root + "/" + path.substr(0, path.find("?")));
+	if (pathIsFile(relative2) || pathIsDirectory(relative2))
+		return relative2;
+
+	if (pathIsFile(path) || pathIsDirectory(path))
+		return path;
+
+	return relative;
+}
+
+/**
+ * makePathAbsolute(): relative path becomes absolute
+**/
+std::string	makePathAbsolute(std::string path) {
+	std::string pwd = getPWD();
+	size_t pos = std::min(path.find("/", 1), path.length());
+	std::string start_path = path.substr(0, pos);
+	
+	pos = std::min(pwd.find(start_path), pwd.length());
+	path = pwd.substr(0, pos) + "/" + path;
+
+	return cleanSlash(path);
 }
