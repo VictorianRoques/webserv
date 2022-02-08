@@ -127,9 +127,9 @@ class Request {
 	public:
 		void		print_request();
 		void		isChunked();
-		void		buildFullPath(Location *loc);
+		void		buildFullPath(Location loc);
 		Server		findRightServer(std::vector<Server> servers_g, Request *request);
-		Location	*findRightLocation(std::vector<Location *> loc, Request *request);
+		Location	findRightLocation(std::vector<Location> loc, Request *request);
 		void		queryString();
 
 

@@ -66,7 +66,7 @@ std::vector<size_t>				Server::getPort() const { return _port; }
 vec_str							Server::getServerName() const { return _serverName; }
 map_str							Server::getErrorPage() const { return _errorPage; }
 size_t							Server::getMaxBodySize() const { return _maxBodySize; }
-std::vector<Location *>			Server::getLocation() const { return _location; }
+std::vector<Location>			Server::getLocation() const { return _location; }
 size_t							Server::getServerNb() const { return _serverNb; }
 
 std::string						Server::getGeneralRoot() const { return _generalRoot; }
@@ -93,7 +93,7 @@ void	Server::setMaxBodySize(std::string maxBodySize) {
 			_maxBodySize *= 1073741824;
 	}
 }
-void	Server::setLocation(std::vector<Location *> location) { _location = location; }
+void	Server::setLocation(std::vector<Location> location) { _location = location; }
 void	Server::setServerNb(size_t serverNb) { _serverNb = serverNb; }
 
 void	Server::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoot; }
@@ -113,9 +113,9 @@ void	Server::print_serv() {
 	std::cout << COLOR_SERV << "Client_Max_Body_Size: " << NC << _maxBodySize << std::endl;
 
 	std::cout << std::endl;
-	std::vector<Location *>::iterator	it = _location.begin();
+	std::vector<Location>::iterator	it = _location.begin();
 	for (; it != _location.end(); it++) {
 		std::cout << COLOR_SERV << "Location: " << NC; 
-		(*it)->print_loc();
+		it->print_loc();
 	}
 }

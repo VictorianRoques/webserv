@@ -67,15 +67,14 @@ void	SockData::setRecvToActive(void)
 void	SockData::setResponse(int fd)
 {
 	if (!clients_[fd].isBadRequest()) {
-		Request	*request = requestParser(clients_[fd].getRequest(), servers_);
+		Request	request = requestParser(clients_[fd].getRequest(), servers_);
 		std::vector<Server>::iterator	it = servers_.begin();
 		std::vector<Server>::iterator	ite = servers_.end();
 		for (; it != ite; ++it) {
-			if (vector_contains_str(it->getServerName(), request->getHost())) {
+			if (vector_contains_str(it->getServerName(), request.getHost())) {
 				Response	response(*it);
-				response.makeAnswer(*request);
+				response.makeAnswer(request);
 				response_[fd] = response.getResponse();
-				delete request;
 				clients_[fd].getTmpRequest().clear();
 				clients_[fd].getRequest().clear();
 				clients_[fd].setChunk(false);

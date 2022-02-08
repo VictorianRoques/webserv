@@ -18,7 +18,6 @@ int     main(int ac , char **av)
             parser.tokenizer(av);
             // TESTING
             parser.print_test();
-            //			requestParser(request_header, servers_g);
         }
         catch (std::exception &e)
         {

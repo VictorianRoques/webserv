@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 16:14:20 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 16:19:55 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,41 +213,16 @@ size_t	Parser::dirClose(vec_str::iterator it, vec_str::iterator vend) {
 }
 
 /**
- * locationContext(): sets MatchModifier and LocationMatch variables (called by dirLocation())
-**/
-size_t locationContext(vec_str::iterator it, Location *location) {
-	size_t ret = 0;
-
-	location->setMatchModifier(*it);
-	location->setLocationMatch(*it);
-	it++;
-	ret++;
-	if (*it != "{" && *(it + 1) != "{")
-		throw Parser::MissingBracketException();
-	else if (*it == "{") {
-		location->setMatchModifier("");
-		ret += 1;
-	}
-	else {
-		location->setLocationMatch(*it);
-		ret += 2;
-	}
-	if (location->getLocationMatch()[0] != '/')
-		throw Parser::WrongPathException();
-	return ret;
-}
-
-/**
  * dirLocation(): sets location from parsing (called by interpret())
 **/
 size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 	size_t ret = 1;
 	size_t iter;
 	
-	Location *location = new Location(_maxBodySize);
+	Location location(_maxBodySize);
 	_in_location = true;
 
-	iter = locationContext(it, location);
+	iter = location.locationContext(it);
 	it += iter;
 	ret += iter;
 
@@ -274,7 +249,7 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 			for (; idir < dir.end(); idir++) {
 				if (*it == idir->first) {
 					mp = idir->second;
-					iter = (location->*mp)(it + 1, vend);
+					iter = (location.*mp)(it + 1, vend);
 					ret += iter;
 					it += iter;
 					break ;
@@ -283,13 +258,12 @@ size_t	Parser::dirLocation(vec_str::iterator it, vec_str::iterator vend) {
 
 			// meets a '}' == end of the location directive
 			if (it->find("}") != std::string::npos) {
-				if (location->getRoot() == "/")
-					location->setRoot(cleanSlash(getPWD() + "/"));
+				if (location.getRoot() == "/")
+					location.setRoot(cleanSlash(getPWD() + "/"));
 				
-				if (location->getLocationMatch() == "/") {
-					_generalRoot = location->getGeneralRoot();
+				if (location.getLocationMatch() == "/") {
+					_generalRoot = location.getGeneralRoot();
 				}
-
 				this->_location.push_back(location);
 				return ret;
 			}

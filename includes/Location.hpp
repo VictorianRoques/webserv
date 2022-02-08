@@ -92,6 +92,7 @@ class Location {
 		size_t	dirCgiHandler(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirUploadDest(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend);
+		size_t	locationContext(vec_str::iterator it);
 
 		// utils
 	public:
@@ -130,6 +131,11 @@ class Location {
 		};
 
 		class WrongPathException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class MissingBracketException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/07 17:45:47 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 16:25:41 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ char const *Location::NonValidCgiHandlerException::what() const throw() {
 char const *Location::NonValidRedirectionException::what() const throw() {
 	return "Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;).";
 }
+char const *Location::WrongPathException::what() const throw() { return "Invalid path for location in config_file. Probably missing a '/' in the beginning."; }
+char const *Location::MissingBracketException::what() const throw() { return "Missing a bracket after 'server' or 'location' directive."; }
 //char const *Location::WrongPathException::what() const throw() { return "Invalid path for root in config_file. Probably missing a '/' in the beginning."; }
 
 /**************************************/
@@ -58,6 +60,8 @@ Location&	Location::operator=(const Location &x) {
 		_cgiHandler = x.getCgiHandler();
 		_uploadDest = x.getUploadDest();
 		_generalRoot = x.getGeneralRoot();
+		_matchModifier = x.getMatchModifier();
+		_locationMatch = x.getLocationMatch();
 	}
 	return *this;
 }
@@ -254,6 +258,31 @@ size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
 			break ;
 		}
 	}
+	return ret;
+}
+
+/**
+ * locationContext(): sets MatchModifier and LocationMatch variables (called by dirLocation())
+**/
+size_t Location::locationContext(vec_str::iterator it) {
+	size_t ret = 0;
+
+	setMatchModifier(*it);
+	setLocationMatch(*it);
+	it++;
+	ret++;
+	if (*it != "{" && *(it + 1) != "{")
+		throw Location::MissingBracketException();
+	else if (*it == "{") {
+		setMatchModifier("");
+		ret += 1;
+	}
+	else {
+		setLocationMatch(*it);
+		ret += 2;
+	}
+	if (getLocationMatch()[0] != '/')
+		throw Location::WrongPathException();
 	return ret;
 }
 

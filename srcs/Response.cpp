@@ -74,37 +74,37 @@ int      Response::initRequest(Request &req)
 
 void        Response::setLocationConf()
 {
-	std::vector<Location *> loc = _serv.getLocation();
-	std::vector<Location *>::iterator it = loc.begin();
+	std::vector<Location> loc = _serv.getLocation();
+	std::vector<Location>::iterator it = loc.begin();
 	std::string short_path = _request.getPath();
 	size_t pos = short_path.length();
 
 	while (pos != 0) {
 		pos = short_path.rfind("/", pos - 1);
 		for (; it != loc.end(); it++) {
-			if (!strncmp(short_path.c_str(), (*it)->getLocationMatch().c_str(), pos)) {
+			if (!strncmp(short_path.c_str(), it->getLocationMatch().c_str(), pos)) {
 				break ;
 			}
-			if ((*it)->getLocationMatch() == "/")
+			if (it->getLocationMatch() == "/")
 			{
-				_pathCgi = (*it)->getCgiHandler().second;
-				_extensionCgi = (*it)->getCgiHandler().first;
-				_index = (*it)->getIndex();
-				_root = (*it)->getRoot();
-				_AutoIndex = (*it)->getAutoIndex();
-				_allowMethods = (*it)->getMethods();
-				_uploadDest = (*it)->getUploadDest();
+				_pathCgi = it->getCgiHandler().second;
+				_extensionCgi = it->getCgiHandler().first;
+				_index = it->getIndex();
+				_root = it->getRoot();
+				_AutoIndex = it->getAutoIndex();
+				_allowMethods = it->getMethods();
+				_uploadDest = it->getUploadDest();
 			}
 		}
 	}
 	if (it != loc.end()) {
-	_pathCgi = (*it)->getCgiHandler().second;
-	_extensionCgi = (*it)->getCgiHandler().first;
-	_index = (*it)->getIndex();
-	_root = (*it)->getRoot();
-	_AutoIndex = (*it)->getAutoIndex();
-	_allowMethods = (*it)->getMethods();
-	_uploadDest = (*it)->getUploadDest();
+	_pathCgi = it->getCgiHandler().second;
+	_extensionCgi = it->getCgiHandler().first;
+	_index = it->getIndex();
+	_root = it->getRoot();
+	_AutoIndex = it->getAutoIndex();
+	_allowMethods = it->getMethods();
+	_uploadDest = it->getUploadDest();
 	}
 }
 

@@ -30,7 +30,7 @@ class Server;
  * global variable: vector containing all servers in parsed config file.
 **/
 
-Request	*requestParser(std::string request_header, std::vector<Server> _servers_g);
+Request	requestParser(std::string request_header, std::vector<Server> _servers_g);
 
 /**
  * class Parser: holds the server directives while parsing

@@ -38,7 +38,7 @@ class Server {
 		std::string						_root;
 		map_str							_errorPage;
 		size_t							_maxBodySize;
-		std::vector<Location *>			_location;
+		std::vector<Location>			_location;
 		int								_serverNb;
 		std::vector<Server>				_servers_g;
 
@@ -51,7 +51,7 @@ class Server {
 		vec_str							getServerName() const;
 		map_str							getErrorPage() const;
 		size_t							getMaxBodySize() const;
-		std::vector<Location *>			getLocation() const;
+		std::vector<Location>			getLocation() const;
 		size_t							getServerNb() const;
 
 		std::string							getGeneralRoot() const;
@@ -64,7 +64,7 @@ class Server {
 		void	setErrorPage(map_str errorPage);
 		void	setMaxBodySize(size_t maxBodySize);
 		void	setMaxBodySize(std::string maxBodySize);
-		void	setLocation(std::vector<Location *> location);
+		void	setLocation(std::vector<Location> location);
 		void	setServerNb(size_t serverNb);
 
 		void	setGeneralRoot(std::string generalRoot);
