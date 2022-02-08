@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/08 17:20:29 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/08 22:39:39 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,24 +66,34 @@ void	SockData::setRecvToActive(void)
 
 void	SockData::setResponse(int fd)
 {
-	if (!clients_[fd].isBadRequest()) {
-		Request	request = requestParser(clients_[fd].getRequest(), servers_);
-		std::vector<Server>::iterator	it = servers_.begin();
-		std::vector<Server>::iterator	ite = servers_.end();
-		for (; it != ite; ++it) {
-			if (vector_contains_str(it->getServerName(), request.getHost())) {
-				Response	response(*it);
-				response.makeAnswer(request);
-				response_[fd] = response.getResponse();
-				clients_[fd].getTmpRequest().clear();
-				clients_[fd].getRequest().clear();
-				clients_[fd].setChunk(false);
-				FD_SET(fd, &sendSet_);
-				return ;
-			}
+	Request	request = requestParser(clients_[fd].getRequest(), servers_);
+	std::vector<Server>::iterator	it = servers_.begin();
+	std::vector<Server>::iterator	ite = servers_.end();
+	for (; it != ite; ++it) {
+		if (vector_contains_str(it->getServerName(), request.getHost())) {
+			Response	response(*it);
+			response.makeAnswer(request);
+			response_[fd] = response.getResponse();
+			clients_[fd].getTmpRequest().clear();
+			clients_[fd].getRequest().clear();
+			clients_[fd].setChunk(false);
+			FD_SET(fd, &sendSet_);
+			return ;
 		}
 	}
-	setBadRequest(fd);
+	if (clients_[fd].isDeleteRequest()) {
+		std::cout << "|| isDeleteRequest ||" << std::endl;
+		Response	response(*servers_.begin());
+		response.makeAnswer(request);
+		response_[fd] = response.getResponse();
+		clients_[fd].getTmpRequest().clear();
+		clients_[fd].getRequest().clear();
+		clients_[fd].setChunk(false);
+		FD_SET(fd, &sendSet_);
+	}
+	else {
+		setBadRequest(fd);
+	}
 }
 
 void	SockData::setInternalError(int fd)

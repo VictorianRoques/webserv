@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/07 23:35:05 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/08 22:15:06 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define SOCK_CLIENT_HPP
 
 # include <string>
+# include <vector>
 # include <sstream>
 
 class SockClient {
@@ -38,6 +39,7 @@ class SockClient {
 		bool		isChunk(void) const;
 		bool		isTmpRequestChunk(void) const;
 		bool		isChunkEof(void) const;
+		bool		isDeleteRequest(void) const;
 		bool		isBadRequest(void) const;
 		/* getters */
 		char		*getIp(void) const;

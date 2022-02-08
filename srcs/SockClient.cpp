@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/08 00:54:00 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/08 22:39:49 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,6 @@ void	SockClient::setChunk(bool chunk)
 bool	SockClient::isChunk(void) const
 	{ return chunk_; }
 
-#include <iostream>
-
 bool	SockClient::isTmpRequestChunk(void) const
 {
 	std::istringstream	data(tmpRequest_);
@@ -64,10 +62,33 @@ bool	SockClient::isChunkEof(void) const
 	std::istringstream	data(tmpRequest_);
 	std::string			line;
 	std::getline(data, line);
-	if (line == "0" || line == "0\r") {
+	if (line == "0\r") {
 		return true;
 	}
 	return false;
+}
+
+#include <iostream>
+
+bool	SockClient::isDeleteRequest(void) const
+{
+	std::istringstream	data(request_);
+	std::vector<std::string>	arr;
+	std::string					line;
+	size_t						pos = 0;
+	std::getline(data, line);
+	while ((pos = line.find(" ")) != std::string::npos) {
+		arr.push_back(line.substr(0, pos));
+		line.erase(0, pos + 1);
+	}
+	arr.push_back(line);
+	if (arr.size() != 3) {
+		return false;
+	}
+	if (arr[0] != "DELETE" || arr[1].find("/") != 0 || arr[2] != "HTTP/1.1\r") {
+		return false;
+	}
+	return true;
 }
 
 bool	SockClient::isBadRequest(void) const
@@ -78,6 +99,12 @@ bool	SockClient::isBadRequest(void) const
 	if (line.find("GET") != 0 && line.find("POST") != 0 &&
 	line.find("HEAD") != 0 && line.find("DELETE") != 0) {
 		return true;
+	}
+	if (line.find(" HTTP/1.1\r") != line.size() - 11) {
+		return true;
+	}
+	if (line.find("DELETE") == 0) {
+		return false;
 	}
 	while (std::getline(data, line)) {
 		if (line.find("Host: ") == 0 && (line != "Host: \r")) {
