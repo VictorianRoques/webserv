@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/08 20:08:54 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 23:54:16 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,24 +34,51 @@ class Response {
 
 public:
 
+    Response();
     Response(Server &serv);
+    Response(const Response &res);
+    ~Response();
+    Response    &operator=(const Response &res);
 
-    void            makeAnswer(Request &req);
+    /* Init Function for make Response */
     int             initRequest(Request &req);
+    void            setLocationConf();
+    void            makeAnswer(Request &req);
+
+    /* Reading/send Data */
     int             readErrorPage(std::string &path);
     void            readContent(std::string &path);
+    void            sendPage(int code);
+
+    /* HTTP Methods */
     void            getMethod();
     void            headMethod();
     void            postMethod();
     void            deleteMethod();
-    int             upload();
-    void            setLocationConf();
-    void            sendPage(int code);
-    std::string&    getResponse();
     
-    // Utils
+    /* Helper Functions */
+    int             upload();
     bool            isAllow(std::string method);
 	std::string		autoIndexBuilder(std::string path);
+
+    /* Getters */
+
+    Request&        getRequest();
+    std::string&    getPath();
+    std::string&    getBody();
+    std::string&    getResponse();
+    Server&         getServ();
+    map_str&        getErrorPage();
+    std::string&    getPathCgi();
+    std::string&    getExtensionCgi();
+    std::string&    getIndex();
+    std::string&    getRoot();
+    std::string&    getGeneralRoot();
+    bool            getAutoIndex();
+    vec_str&        getAllowMethods();
+    std::string&    getUploadDest();
+    ResponseHeader& getHeader();
+    std::string&    getLocation();
 
 private:
 
@@ -71,7 +98,6 @@ private:
     std::string                 _uploadDest;
     ResponseHeader              _header;
     std::string                 _location;
-    std::string                 _date;
 
     std::map<std::string, void (Response::*)()> _methods;  
 };

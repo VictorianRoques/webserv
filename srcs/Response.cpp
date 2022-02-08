@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/08 21:20:35 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/08 23:55:18 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,57 @@
 //           FUNCTIONS                //
 /**************************************/
 
-Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()) 
-{
+Response::Response() {}
+
+Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()) {
+	
 	_methods["GET"] = &Response::getMethod;
 	_methods["POST"] = &Response::postMethod;
 	_methods["DELETE"] = &Response::deleteMethod;
 	_methods["HEAD"] = &Response::headMethod;
 }
+Response::~Response() {}
+
+Response::Response(const Response &res) { *this = res; }
+
+Response	&Response::operator=(const Response &res)
+{
+	_request = res._request;
+	_path = res._path;
+	_body = res._body;
+	_response = res._response;
+	_serv = res._serv;
+	_errorPage = res._errorPage;
+	_pathCgi = res._pathCgi;
+	_extensionCgi = res._extensionCgi;
+	_index = res._index;
+	_root = res._root;
+	_generalRoot = res._generalRoot;
+	_AutoIndex = res._AutoIndex;
+	_allowMethods = res._allowMethods;
+	_uploadDest = res._uploadDest;
+	_header = res._header;
+	_location = res._location;
+	return *this;
+}
+
+
+Request&		Response::getRequest()		{ return _request; }
+std::string&	Response::getPath()			{ return _path; }
+std::string&	Response::getBody()			{ return _body; }
+std::string&	Response::getResponse()		{ return _response; }
+Server&			Response::getServ()			{ return _serv; }
+map_str&		Response::getErrorPage()	{ return _errorPage; }
+std::string&	Response::getPathCgi()		{ return _pathCgi; }
+std::string&	Response::getExtensionCgi()	{ return _extensionCgi; }
+std::string&	Response::getIndex()		{ return _index; }
+std::string&	Response::getRoot()			{ return _root; }
+std::string&	Response::getGeneralRoot()	{ return _generalRoot; }
+bool			Response::getAutoIndex()	{ return _AutoIndex; }
+vec_str&		Response::getAllowMethods()	{ return _allowMethods; }
+std::string&	Response::getUploadDest()	{ return _uploadDest; }
+ResponseHeader&	Response::getHeader() 		{ return _header; }
+std::string&	Response::getLocation()		{ return _location; }
 
 void	Response::sendPage(int code)
 {
@@ -211,7 +255,7 @@ void     Response::postMethod()
 			sendPage(403);
 			return ;
 		}
-		_body = "<html><body>Your file has been upload!</body></html>";
+		_body = hrefLocation(_uploadDest);
 		_header.setHeader("201 Created", "text/html", _body.length());
     }
 	else
@@ -231,7 +275,6 @@ void        Response::deleteMethod()
 			sendPage(403);
 			return ;
 		}
-		_body = "<html><body><h1>File deleted.</h1></body></html>";
 		_header.setStatus("204 No Content");
 	}
 	else
@@ -243,7 +286,7 @@ void        Response::deleteMethod()
 void    Response::headMethod()
 {
 	readContent(_path);
-	_response = _header.getHeader();
+	_body = "";
 }
 
 void     Response::makeAnswer(Request &req)
@@ -259,9 +302,6 @@ void     Response::makeAnswer(Request &req)
 	_header.writeHeader();
 	_response = _header.getHeader() + _body;
 }
-
-std::string&    Response::getResponse() { return _response;}
-
 
 bool             Response::isAllow(std::string method)
 {
@@ -305,7 +345,6 @@ int			Response::upload()
     myfile.close();
 	_location = "http://" + _request.getHost() + "/" + _uploadDest;
 	_location = cleanSlash(_location);
-	std::cout << "LOCATION: " << _location << std::endl;
-	_date = getTime();
+	_header.setDate();
     return (0);
 }
