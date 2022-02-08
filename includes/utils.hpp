@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/07 16:51:55 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 09:23:11 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,11 @@
 # include <map>
 # include <cstring>
 # include <algorithm> // find() (in Parser.cpp)
+
+// PathIsfile Include
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <unistd.h>
 
 /**
  * COLORS
@@ -79,6 +84,7 @@ bool								vector_contains_str(vec_str v, std::string str);
 std::string							removeBackwards(std::string path);
 std::string							cleanSlash(std::string path);
 std::string							getPWD();
+int     							pathIsDirectory(std::string &path);
 
 /**
  * prototype of testing

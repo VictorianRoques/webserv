@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/07 16:50:33 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 09:23:02 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,6 @@
 #include "Parser.hpp"
 
 const std::string WHITESPACE = "\f\t\n\r\v ";
-
-//testing (see main(): bottom of the file)
-//std::string request_header = "GET / HTTP/2\r\nHost: fr.wikipedia.org\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:96.0) Gecko/20100101 Firefox/96.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate, br\r\nReferer: https://www.google.com/\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nCache-Control: max-age=0\r\n\r\nThis is the body";
-//std::string request_header = "GET /get.php?say=hello&to=me HTTP/2\r\nHost: localhost\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:96.0) Gecko/20100101 Firefox/96.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate, br\r\nReferer: https://www.google.com/\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nCache-Control: max-age=0\r\n\r\nThis is the body";
 
 /**************************************/
 //           EXCEPTIONS               //
@@ -32,6 +28,7 @@ char const *Parser::WrongPathException::what() const throw() { return "Invalid p
 char const *Parser::ErrorPageException::what() const throw() { return "Need at least two arguments to the error_page directive."; }
 char const *Parser::NeedOnePortException::what() const throw() { return "Need one and only one port per listen directive."; }
 char const *Parser::UnaccessiblePortException::what() const throw() { return "Ports below 1024 are considered \"privileged\".\n Only privileged users (e.g. root) can access them."; }
+char const *Parser::ConfigFileIsDirectoryException::what() const throw() { return "Your configuration file is a directory..."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -423,6 +420,9 @@ void	Parser::tokenizer(char **av) {
 	size_t	pos;
 	size_t	posend;
 
+	if (pathIsDirectory(fileName))
+		throw ConfigFileIsDirectoryException();
+
 	file.open(fileName.c_str());
 	if (!file.is_open())
 		throw FailedToOpenException();
@@ -445,7 +445,7 @@ void	Parser::tokenizer(char **av) {
 			line.erase(0, posend);
 		}
 	}
-	// DELETE FOLLOWING LINE WHEN DONE (used for testing)
+	// (used for testing)
 	//ft_putvec(tok, "\n");
 	interpreter(tok);
 }

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/03 19:17:58 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 09:22:46 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,12 @@ class Parser: public Server {
 			public:
 				virtual char const *what() const throw();
 		};
+		
+		class ConfigFileIsDirectoryException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
 
 
 };

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/07 16:50:02 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 09:22:15 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,4 +117,17 @@ std::string	getPWD() {
 	const char *env_pwd = std::getenv("PWD");
 	std::string	pwd(env_pwd);
 	return pwd;
+}
+
+/**
+ * pathIsDirectory(): returns 1 if path is directory, else 0
+**/
+int     pathIsDirectory(std::string &path)
+{
+	struct stat s;
+
+	if (stat(path.c_str(), &s) == 0)
+		if (s.st_mode & S_IFDIR)
+			return 1;
+	return 0;
 }
