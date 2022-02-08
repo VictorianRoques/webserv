@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 09:22:15 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/08 18:04:30 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,4 +130,31 @@ int     pathIsDirectory(std::string &path)
 		if (s.st_mode & S_IFDIR)
 			return 1;
 	return 0;
+}
+
+int			pathIsFile(std::string &path)
+{
+	struct stat s;
+
+	if (stat(path.c_str(), &s) == 0)
+		if (s.st_mode & S_IFREG)
+			return 1;
+	return 0;
+}
+
+std::string		getTime()
+{
+	char buf[100];
+  	time_t now = time(0);
+  	struct tm tm = *gmtime(&now);
+  	strftime(buf, 100, "%a, %d %b %Y %H:%M:%S %Z", &tm);
+	std::string date(buf);
+	return date;
+}
+
+std::string		sizeToString(size_t size)
+{
+	std::ostringstream convert;
+	convert << size;
+	return convert.str();
 }
