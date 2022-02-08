@@ -32,6 +32,7 @@ int      Response::initRequest(Request &req)
      _request = req;
     _path = req.getFullPath();
 	_generalRoot = req.getGeneralRoot();
+	 _contentType = req.getContentType();
     if (_request.getPath().empty() || _request.getMethod().empty() || _request.getProtocolVersion() != "HTTP/1.1")
     {
         if (!readErrorPage(_errorPage["400"]))
@@ -39,7 +40,6 @@ int      Response::initRequest(Request &req)
         _response = _header + _body;
         return (1);
     }
-    _contentType = req.getContentType();
     setLocationConf();
     if (req.getPath() == "/")
     {
@@ -142,10 +142,10 @@ void     Response::readContent(std::string &path)
 	std::ifstream       fd;
 	std::stringstream   buffer;
 
-	if (pathIsFile(path))
+	if (pathIsFile(path) || pathIsDirectory(path))
 	{
 		fd.open(path.c_str(), std::ifstream::in);
-		if (fd.is_open() == false)
+		if (fd.is_open() == false || pathIsDirectory(path))
 		{
 			if (!readErrorPage(_errorPage["403"]))
 				_header = writeHeader("403 Forbidden", "text/html", _body.length());
@@ -236,17 +236,8 @@ void     Response::postMethod()
     }
     else
     {
-        if (pathIsDirectory(_uploadDest) && !this->upload())
-        {
-            _header = writeHeader("204 No Content", "", 0);
-			_body = "";
-
-        }
-        else
-        {
-            if (!readErrorPage(_errorPage["400"]))
-                _header = writeHeader("400 Bad Request", "text/html", _body.length());
-        }
+		_header = writeHeader("204 No Content", "", 0);
+		_body = "";
     }
     _response = _header + _body;
 }
@@ -261,7 +252,7 @@ void        Response::deleteMethod()
 			if (!readErrorPage(_errorPage["403"]))
 				_header = writeHeader("403 Forbidden", "text/html", _body.length());
 		}
-		_header = "HTTP/1.1 204 No Content\r\n\r\n";
+		_header = writeHeader("204 No Content", "", 0);
 	}
 	else
 	{
@@ -277,7 +268,7 @@ void    Response::putMethod()
 	std::stringstream buffer;
 
     _body = "";
-    if (pathIsFile(_path))
+    if (pathIsFile(_path) || pathIsDirectory(_path))
     {
         fd.open(_path.c_str());
          if (fd.is_open() == false)
@@ -289,7 +280,7 @@ void    Response::putMethod()
         }
         fd << _request.getBody();
         fd.close();
-        _header = "HTTP/1.1 204 No Content\r\n\r\n";
+		_header = writeHeader("204 No Content", "", 0);
     }
     else
     {
@@ -303,7 +294,8 @@ void    Response::putMethod()
         }
         fd << _request.getBody();
         fd.close();
-        _header = "HTTP/1.1 201 Created\r\n\r\n";
+		_location = _uploadDest;
+		_header = writeHeader("201 Created", "", 0);
     }
     _response = _header + _body;
 }
