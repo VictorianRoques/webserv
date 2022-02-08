@@ -29,12 +29,12 @@ Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage())
 
 int      Response::initRequest(Request &req)
 {
-     _request = req;
+    _request = req;
     _path = req.getFullPath();
 	_generalRoot = req.getGeneralRoot();
     if (_request.getPath().empty() || _request.getMethod().empty() || _request.getProtocolVersion() != "HTTP/1.1")
     {
-        if (!readErrorPage(_errorPage["400"]))
+		if (!readErrorPage(_errorPage["400"]))
             _header = writeHeader("400 Bad Request", "text/html", _body.length());
         _response = _header + _body;
         return (1);
@@ -43,7 +43,7 @@ int      Response::initRequest(Request &req)
     setLocationConf();
     if (req.getPath() == "/")
     {
-        if (_AutoIndex == true)
+		if (_AutoIndex == true)
             _path.erase(_path.size() - 1);
         else
             _path = _root + "/" + _index;
@@ -52,7 +52,7 @@ int      Response::initRequest(Request &req)
 	// Errors 
     if (_request.getBody().size() > _serv.getMaxBodySize())
     {
-        if (!readErrorPage(_errorPage["413"]))
+		if (!readErrorPage(_errorPage["413"]))
             _header = writeHeader("413 Payload Too Large", "text/html", _body.length());
         _response = _header + _body;
         return (1);
@@ -66,7 +66,7 @@ int      Response::initRequest(Request &req)
 	}
 	if (_request.getRedirCode() == 308)
 	{
-		_response = writeHeader("308 Permanent Redirect", "", 0);
+		_response = writeHeader("308 Permanent Redirect", "text/html", _body.length()) + _body;
 		return (1);
 	}
     return (0);
@@ -190,9 +190,8 @@ void    Response::createCgiHeader(std::string cgiHeader)
 
 void        Response::getMethod()
 {
-    if (_extensionCgi.empty() == false && _request.getFullPath().find(_extensionCgi) != std::string::npos)
-    {
-        cgiHandler cgi(_request);
+    if (_extensionCgi.empty() == false && _request.getFullPath().find(_extensionCgi) != std::string::npos) {
+		cgiHandler cgi(_request);
         _body = cgi.execute(_pathCgi);
         if (_body == "<html><body>FATAL ERROR CGI</body></html>")
         {
@@ -205,14 +204,12 @@ void        Response::getMethod()
         _body = _body.substr(_body.find("\r\n\r\n") + 4);
         _header = writeHeader(_status, _contentType, _body.length());
     }
-    else if (_AutoIndex == true && pathIsDirectory(_path))
-    {
-        _body = autoIndexBuilder(_path);
+    else if (_AutoIndex == true && pathIsDirectory(_path)) {
+		_body = autoIndexBuilder(_path);
         _header = writeHeader("200 OK", "text/html", _body.length());
     }
-    else
-    {
-        readContent(_path);
+    else {
+		readContent(_path);
     }
     _response = _header + _body;
 }
@@ -333,16 +330,17 @@ void    Response::headMethod()
 
 void     Response::makeAnswer(Request &req)
 {
-    if (initRequest(req))
+	if (initRequest(req))
         return ;
     if (_methods.find(_request.getMethod()) != _methods.end() && isAllow(_request.getMethod()))
-        (this->*_methods[_request.getMethod()])();
+		(this->*_methods[_request.getMethod()])();
     else
     {
-        if (!readErrorPage(_errorPage["405"]))
+		if (!readErrorPage(_errorPage["405"]))
             _header = writeHeader("405 Method Not Allowed", "text/html", _body.length());
         _response = _header + _body;
     }
+	std::cout << "RESPONSE =========== " << _response << std::endl;
 }
 
 std::string&    Response::getResponse() { return _response;}
