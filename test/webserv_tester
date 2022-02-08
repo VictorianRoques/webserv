@@ -76,20 +76,17 @@ Hello World!\r\n\
 		print('error: request POST failed')
 		exit(2)
 
-# def delete_tester():
-# 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# 	sock.connect((hostname, port))
-# 	sock.settimeout(3)
-# 	sock.send(b'DELETE /test/ HTTP/1.1\r\n\
-# Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
-# User-Agent: webserv_tester\r\n\
-# Connection: keep-alive\r\n\r\n')
-# 	try:
-# 		ret = sock.recv(4096)
-# 		print(ret)
-# 	except:
-# 		print('error: request DELETE failed')
-# 		exit(2)
+def delete_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'DELETE /hihi.txt HTTP/1.1\r\n\r\n')
+	try:
+		ret = sock.recv(4096)
+		print(ret)
+	except:
+		print('error: request DELETE failed')
+		exit(2)
 
 def stress_tester_1():
 	socks = []
@@ -213,7 +210,7 @@ def delete():
 	print('          DELETE_TESTER starting...')
 	print('------------------------------------------\033[0m')
 	time.sleep(1.5)
-	# delete_tester()
+	delete_tester()
 	print('\nDELETE_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
 	time.sleep(0.5)
