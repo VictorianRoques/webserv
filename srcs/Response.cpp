@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/09 10:37:38 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/09 10:59:08 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,8 @@ void     Response::readContent(std::string &path)
 		buffer << fd.rdbuf();
 		fd.close();
 		_body = buffer.str();
+		if (_body.empty())
+			_body = "[Empty File]";
 		_header.setHeader("200 OK", _request.getContentType(), _body.length());
 	}
 	else
