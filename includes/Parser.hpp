@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 15:56:28 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 09:45:08 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,65 +94,31 @@ class Parser: public Server {
 		
 		//EXCEPTION
 
-		class MissingBracketException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class MissingBracketException: public std::exception { public: virtual char const *what() const throw(); };
 		
-		class OutsideServerException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class OutsideServerException: public std::exception { public: virtual char const *what() const throw(); };
 
-		class LonelyBracketException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class LonelyBracketException: public std::exception { public: virtual char const *what() const throw(); };
 
-		class EmbeddedServersException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class EmbeddedServersException: public std::exception { public: virtual char const *what() const throw(); };
 		
-		class NoSuchDirectiveException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class NoSuchDirectiveException: public std::exception { public: virtual char const *what() const throw(); };
 
-		class FailedToOpenException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class FailedToOpenException: public std::exception { public: virtual char const *what() const throw(); };
 		
-		class WrongPathException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class WrongPathException: public std::exception { public: virtual char const *what() const throw(); };
 
-		class ErrorPageException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class ErrorPageException: public std::exception { public: virtual char const *what() const throw(); };
 
-		class UnaccessiblePortException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class UnaccessiblePortException: public std::exception { public: virtual char const *what() const throw(); };
 
-		class NeedOnePortException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class NeedOnePortException: public std::exception { public: virtual char const *what() const throw(); };
 		
-		class ConfigFileIsDirectoryException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class ConfigFileIsDirectoryException: public std::exception { public: virtual char const *what() const throw(); };
 
-		class WrongServerNameException: public std::exception {
-			public:
-				virtual char const *what() const throw();
-		};
+		class WrongServerNameException: public std::exception { public: virtual char const *what() const throw(); };
+
+		class EmptyConfigException: public std::exception { public: virtual char const *what() const throw(); };
 
 
 

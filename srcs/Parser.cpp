@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 23:54:38 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 09:45:06 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ char const *Parser::NeedOnePortException::what() const throw() { return "Need on
 char const *Parser::UnaccessiblePortException::what() const throw() { return "Ports below 1024 are considered \"privileged\".\n Only privileged users (e.g. root) can access them."; }
 char const *Parser::ConfigFileIsDirectoryException::what() const throw() { return "Your configuration file is a directory..."; }
 char const *Parser::WrongServerNameException::what() const throw() { return "For this project, you'll need localhost as a server name."; }
+char const *Parser::EmptyConfigException::what() const throw() { return "Your config file should have at least a server {} context."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -408,6 +409,8 @@ void	Parser::interpreter(vec_str tok) {
 		}
 	}
 	dirServer(itok, itok);
+	if (_serverNb < 1)
+		throw EmptyConfigException();
 }
 
 /**
