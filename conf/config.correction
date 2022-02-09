@@ -8,14 +8,8 @@ server
 	{
 		root www;
 		index index.html;
-		autoindex off;
 		methods GET DELETE;
 	}
-
-    location /autoindex
-    {
-        methods GET;
-    }
 
     location /redirect
     {

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/09 14:41:30 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/09 16:14:30 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,8 @@ int      Response::initRequest(Request &req)
     }
 	if (_request.getRedirCode() == 310)
 	{
-		sendPage(310);
+		_body = "<html><body>Too many Redirects, infinite loop</body></html>";
+		_header.setStatusRedirect("310", _body.length());
 		return (1);
 	}
     return (0);
@@ -279,7 +280,7 @@ void     Response::makeAnswer(Request &req)
 	{
 		(this->*_methods[_request.getMethod()])();
 	}
-    else
+    else if (_body.empty())
 		sendPage(405);
 	_header.writeHeader();
 	_response = _header.getHeader() + _body;
