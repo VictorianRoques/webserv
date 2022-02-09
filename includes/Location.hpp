@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:01:55 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 14:04:08 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 16:10:06 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,11 @@ class Location {
 		};
 
 		class AutoIndexWithoutIndexException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
+		class WrongLocationMatchException: public std::exception {
 			public:
 				virtual char const *what() const throw();
 		};

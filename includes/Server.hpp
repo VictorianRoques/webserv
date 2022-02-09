@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/03 19:19:43 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 16:03:16 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,10 +69,6 @@ class Server {
 
 		void	setGeneralRoot(std::string generalRoot);
 
-		// adding parsed server
-	public:
-//		void	addServer(Meta meta);
-
 		// utils
 	public:
 		void	print_serv();
@@ -83,6 +79,12 @@ class Server {
 			public:
 				virtual char const *what() const throw();
 		};
+		
+		class WrongFormatMaxBodySizeException: public std::exception {
+			public:
+				virtual char const *what() const throw();
+		};
+
 };
 
 
