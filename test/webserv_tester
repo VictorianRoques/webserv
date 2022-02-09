@@ -164,10 +164,11 @@ Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\
 Transfer-Encoding: chunked\r\n\r\n')
-	for i in range(3965 * 8 + 2):
+	for i in range(3965 * 8):
 		time.sleep(0.001)
 		sock.send(b'3E8\r\n\
 Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egestas non risus et vehicula. Nam ac mauris odio. Maecenas convallis mi vel justo vehicula, a interdum leo porta. Mauris consequat nec urna sed aliquet. Aliquam aliquet, dui id hendrerit auctor, turpis ante facilisis sapien, sit amet interdum nibh ipsum et ex. Etiam vulputate in libero quis viverra. Nunc sit amet ipsum id ipsum scelerisque efficitur. Vivamus in sapien id tortor dapibus accumsan. Cras eleifend, est et vestibulum efficitur, lorem velit pulvinar mi, nec vehicula ligula nisl quis tortor. In sagittis sapien sit amet enim rutrum varius. Maecenas cursus justo a sapien blandit, sit amet tincidunt sem lacinia. Suspendisse bibendum tristique orci, et ornare massa mollis sit amet. Aenean dictum, turpis vitae varius auctor, arcu mi malesuada libero, et ullamcorper dolor justo in turpis. Pellentesque vestibulum porttitor porta. Phasellus consequat placerat tristique. Phasellus consequat placerat tristique...\r\n\r\n')
+	time.sleep(0.001)
 	sock.send(b'0\r\n\r\n')
 	ret = sock.recv(4096)
 	print(ret)
