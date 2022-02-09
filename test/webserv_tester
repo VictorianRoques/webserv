@@ -15,7 +15,7 @@ hostname = 'localhost'
 port = 8080
 test = ""
 if len(sys.argv) < 2:
-	print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory')
+	print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory, leak')
 	exit(1)
 elif len(sys.argv) == 2:
 	port = int(sys.argv[1])
@@ -159,8 +159,8 @@ def memory_tester():
 	sock.connect((hostname, port))
 	sock.send(b'POST / HTTP/1.1\r\n\
 Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
-User-Agent: python-requests/2.27.1\r\n\
-Accept-Encoding: gzip, deflate\r\n\
+User-Agent: webserv_tester\r\n\
+Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\
 Transfer-Encoding: chunked\r\n\r\n')
@@ -174,7 +174,12 @@ Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egesta
 
 def leak_tester():
 	for i in range(10000):
-		get_tester()
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.connect((hostname, port))
+		sock.send(b'GET / HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Connection: keep-alive\r\n\r\n')
 		time.sleep(0.001)
 
 
@@ -312,6 +317,7 @@ single_test['stress1'] = stress1
 single_test['stress2'] = stress2
 single_test['chunk'] = chunk
 single_test['memory'] = memory
+single_test['leak'] = leak
 
 time.sleep(1)
 
@@ -319,7 +325,7 @@ if (test != ''):
 	try:
 		single_test[test]()
 	except:
-		print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory]')
+		print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory, leak]')
 else:
 	for key in single_test:
 		single_test[key]()
