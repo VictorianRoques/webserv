@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 15:50:14 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 15:52:18 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ void	Request::buildFullPath(Location loc) {
 			_fullPath = findRightPath(_path, loc.getRoot(), loc.getLocationMatch());
 		}
 	}
-	if (loc.getAutoIndex() == false && IsPathDirectory(_fullPath))
+	if (loc.getAutoIndex() == false && pathIsDirectory(_fullPath))
 		_fullPath += "/" + loc.getIndex();
 	_fullPath = cleanSlash(_fullPath);
 	return ;
