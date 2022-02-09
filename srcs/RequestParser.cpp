@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 13:36:39 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 14:21:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,6 +188,8 @@ void	Request::buildFullPath(Location loc) {
 			_fullPath = findRightPath(_path, loc.getRoot(), loc.getLocationMatch());
 		}
 	}
+	if (loc.getAutoIndex() == false)
+		_fullPath += "/" + loc.getIndex();
 	_fullPath = cleanSlash(_fullPath);
 	return ;
 }
@@ -321,6 +323,7 @@ Request requestParser(std::string rq, std::vector<Server> servers_g) {
 			return request;
 		}
 		request.setPath(loc.getRedirection().second);
+		std::cout << "new redir Path = " << request.getPath() << std::endl;
 		request.setRedirCode(loc.getRedirection().first);
 		if (request.getPath()[0] == '/') // if absolute path, no further redirection possible
 			break ;

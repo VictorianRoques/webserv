@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 11:50:05 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 14:04:10 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ char const *Location::WrongPathException::what() const throw() { return "Invalid
 char const *Location::MissingBracketException::what() const throw() { return "Missing a bracket after 'server' or 'location' directive."; }
 //char const *Location::WrongPathException::what() const throw() { return "Invalid path for root in config_file. Probably missing a '/' in the beginning."; }
 char const *Location::RootAndAbsolutePathException::what() const throw() { return "You can't have a root and redirection with ABSOLUTE path (starting with a /) in the same location context."; }
+char const *Location::AutoIndexWithoutIndexException::what() const throw() { return "Autoindex is off but an index file is missing in one location {}."; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -298,6 +299,10 @@ void	Location::locationChecker() {
 	// GET is default method if no other method is specified
 	if (_methods.size() == 0)
 		_methods.push_back("GET");
+
+	// autoindex == off && no index -> error
+	if (getAutoIndex() == false && getIndex() == "")
+		throw AutoIndexWithoutIndexException();
 }
 
 /**************************************/
