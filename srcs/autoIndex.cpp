@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 10:23:58 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 10:50:46 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,6 @@ std::string	autoIndexHeader(std::string path) {
 }
 
 std::string autoIndexPageTitle(std::string path) {
-	size_t end = path.find("..");
-
-	path = (end != std::string::npos) ? path.substr(0, end - 1) : path.substr(0, end);
 	return "<h1>Index of " + path + "/" + "</h1>";
 }
 
@@ -34,10 +31,6 @@ std::string	autoIndexColumnNames() {
 	return "<div style=\"float: left; width: 32%;\"><p><strong>File Name:</strong></p></div>"
 	"<div style=\"float: left; width: 32%;\"><p><strong>Last Opened:</strong></p></div>"
 	"<div style=\"float: left; width: 32%;\"><p><strong>Size (in octets):</strong></p></div>";
-}
-
-std::string	autoIndexDrawnLine() {
-	return "<hr size=\"1\" width=\"100%\" color=\"black\">";
 }
 
 /**
@@ -123,7 +116,6 @@ std::string	Response::autoIndexBuilder(std::string path) {
 	content = autoIndexHeader(path);
 	content += autoIndexPageTitle(path);
 	content += autoIndexColumnNames();
-	content += autoIndexDrawnLine();
 
 	readdir(dirStream); // skip "."
 	while ((nextEntry = readdir(dirStream)) != NULL) {
