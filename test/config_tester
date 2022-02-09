@@ -3,6 +3,12 @@
 import time
 import subprocess
 
+print('[ \033[0;34mconfig_bad_client_max_body_size.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_bad_client_max_body_size.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
 
 print('[ \033[0;34mno config file\033[0m ]')
 subprocess.run(['../webserv'])
@@ -35,6 +41,21 @@ print('----------------------------------')
 print('[ \033[0;34mconfig_missing_bracket.conf\033[0m ]')
 subprocess.run(['../webserv', '../conf/config_missing_bracket.conf'])
 print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+print('[ \033[0;34mconfig_no_default_location.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_no_default_location.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
+time.sleep(0.5)
+print('----------------------------------')
+
+print('[ \033[0;34mconfig_no_location.conf\033[0m ]')
+subprocess.run(['../webserv', '../conf/config_no_location.conf'])
+print('[ \033[0;32mOK\033[0m ]')
+
 
 time.sleep(0.5)
 print('----------------------------------')
