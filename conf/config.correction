@@ -9,14 +9,23 @@ server
 		root www;
 		index index.html;
 		autoindex on;
-		methods GET;
+		methods GET DELETE;
 	}
 
     location /message
     {
         root www;
         index post.html;
-        methods GET POST;
+        autoindex off;
+        methods GET;
+    }
+
+    location /send
+    {
+        root www/php;
+        index post.php;
+        autoindex off;
+        methods POST GET;
         cgi_handler .php cgi_binary/darwin_phpcgi;
     }
 
@@ -24,6 +33,7 @@ server
     {
         root www;
         index upload.html;
+        autoindex off;
         methods GET POST;
     }
 

@@ -79,7 +79,7 @@ def delete_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
 	sock.settimeout(3)
-	sock.send(b'DELETE /hihi.txt HTTP/1.1\r\n\r\n')
+	sock.send(b'DELETE /Users/viroques/Documents/webserv/www/upload/bigTxt HTTP/1.1\r\n\r\n')
 	try:
 		ret = sock.recv(4096)
 		print(ret)
