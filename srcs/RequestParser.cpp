@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 12:26:58 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 13:36:39 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ Server findRightServer(std::vector<Server> servers_g, Request request) {
  * isChunked(): sets chunked = true/false
  **/
 void	Request::isChunked() {
-	if (_transferEncoding.size())
+	if (_transferEncoding.find("chunked") != std::string::npos)
 		setChunked(true);
 }
 
