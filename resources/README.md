@@ -15,4 +15,5 @@ CLIENT MAX BODY SIZE
 Can be defined for the server {} and for each location {}.
 Default value: 1M (nginx default value)
 
-
+AUTOINDEX
+Default: on
