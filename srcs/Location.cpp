@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 11:19:31 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 11:50:05 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,9 +154,9 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	}
 
 	// turn relative path into absolute
-	if (getRoot().find("..") != std::string::npos)
-		throw NonValidRootException();
-	else if (getRoot()[0] != '/')
+//	if (getRoot().find("..") != std::string::npos)
+//		throw NonValidRootException();
+//	else if (getRoot()[0] != '/')
 		setRoot(cleanSlash(getPWD() + "/" + getRoot()));
 	(void)vend;
 	return 2;
@@ -260,8 +260,6 @@ size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
 		if (it->find(";") != std::string::npos)
 			break ;
 	}
-	if (_methods.size() == 0)
-		_methods.push_back("GET");
 	return ret;
 }
 
@@ -290,9 +288,16 @@ size_t Location::locationContext(vec_str::iterator it) {
 	return ret;
 }
 
+/**
+ * locationChecker(): checks if location {} meets minimum requirements
+**/
 void	Location::locationChecker() {
 	if (_rootSpecified == true && getRedirection().second[0] == '/')
 		throw RootAndAbsolutePathException();
+	
+	// GET is default method if no other method is specified
+	if (_methods.size() == 0)
+		_methods.push_back("GET");
 }
 
 /**************************************/

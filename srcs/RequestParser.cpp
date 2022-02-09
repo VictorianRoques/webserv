@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 10:45:09 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/09 11:50:28 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,9 +171,7 @@ void	Request::isChunked() {
  **/
 void	Request::buildFullPath(Location loc) {
 
-//	std::cout << "ENTER BUUILD FULL PTH " << std::endl;
 	if (getRedirCode() == 308) { // if redirection 
-//		std::cout << "BUILD FULL PATH REDIR : " << std::endl;
 		if (loc.getRedirection().second[0] == '/') //absolute
 			_fullPath = loc.getRedirection().second;
 		else //relative
@@ -181,14 +179,12 @@ void	Request::buildFullPath(Location loc) {
 	}
 	else { 
 		if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) { // check if this is an upload
-//			std::cout << "BUILD FULL PATH UPLOAD : " << std::endl;
 			if (loc.getUploadDest()[0] == '/') //absolute
 				_fullPath = loc.getUploadDest();
 			else //relative
 				_fullPath = loc.getRoot() + "/" + loc.getUploadDest();
 		}
 		else {
-//			std::cout << "ELSE ELSE" << std::endl;
 			_fullPath = findRightPath(_path, loc.getRoot(), loc.getLocationMatch());
 		}
 	}

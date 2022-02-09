@@ -8,3 +8,4 @@ tmpOut
 webserv
 *.o
 */*.o
+objs
