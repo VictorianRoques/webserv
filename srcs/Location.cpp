@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 00:05:09 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 11:19:31 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,20 +250,18 @@ size_t	Location::dirCgiHandler(vec_str::iterator it, vec_str::iterator vend) {
 **/
 size_t	Location::dirMethods(vec_str::iterator it, vec_str::iterator vend) {
 
-	vec_str methods;
-	
 	size_t	ret = 1;
 
 	for (; it != vend; it++) {
 		ret++;
 		std::string tmp = it->substr(0, it->find(";"));
-		if (find(_methods.begin(), _methods.end(), tmp) == _methods.end()) {
+		if (find(_methods.begin(), _methods.end(), tmp) == _methods.end())
 					_methods.push_back(tmp);
-		}
-		if (it->find(";") != std::string::npos) {
+		if (it->find(";") != std::string::npos)
 			break ;
-		}
 	}
+	if (_methods.size() == 0)
+		_methods.push_back("GET");
 	return ret;
 }
 

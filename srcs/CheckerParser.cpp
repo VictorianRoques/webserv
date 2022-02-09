@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 10:22:32 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 11:16:09 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ const std::string WHITESPACE = "\f\t\n\r\v ";
 //           EXCEPTIONS               //
 /**************************************/
 char const *Parser::WrongServerNameException::what() const throw() { return "For this project, you'll need localhost as a server name."; }
+char const *Parser::MissingDefaultLocationException::what() const throw() { return "You need at least one location / { } context in your server {}."; }
 
 /**************************************/
 //           PARSER CHECKERS          //
@@ -41,11 +42,28 @@ bool	Parser::serverNameChecker() {
 }
 
 /**
+ * locationChecker(): checks if server has at least one location / { }
+**/
+bool	Parser::locationChecker() {
+	if (_location.size() < 1)
+		return false;
+	std::vector<Location>::iterator it = _location.begin();
+	for (; it != _location.end(); it++) {
+		if (it->getLocationMatch() == "/")
+			return true;
+	}
+	return false;
+}
+
+/**
  * serverChecker(): checks if Server meets minimum requirements
 **/
 void	Parser::serverChecker() {
 
-		// check server name
-		if (!serverNameChecker())
-			throw WrongServerNameException();
+	// check server name
+	if (!serverNameChecker())
+		throw WrongServerNameException();
+
+	if (!locationChecker())
+		throw MissingDefaultLocationException();
 }
