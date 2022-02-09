@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 11:16:09 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 17:07:20 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ bool	Parser::serverNameChecker() {
 	std::string			correct;
 	std::stringstream	out;
 
-	if (!vector_contains_str(getServerName(), "localhost") && !vector_contains_str(getServerName(), "www.localhost"))
+	if (_serverName.size() > 0 && !vector_contains_str(getServerName(), "localhost") && !vector_contains_str(getServerName(), "www.localhost"))
 		return false;
 	correct = "localhost:";
 	out << *getPort().begin();
