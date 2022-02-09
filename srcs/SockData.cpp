@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/08 22:39:39 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/09 13:44:20 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,6 @@ void	SockData::setResponse(int fd)
 		}
 	}
 	if (clients_[fd].isDeleteRequest()) {
-		std::cout << "|| isDeleteRequest ||" << std::endl;
 		Response	response(*servers_.begin());
 		response.makeAnswer(request);
 		response_[fd] = response.getResponse();
@@ -293,6 +292,7 @@ void	SockData::recvClientClose(int fd, int ret)
 	else {
 		cnxCloseRecv2(fd);
 	}
+	response_.erase(fd);
 	clients_.erase(fd);
 	FD_CLR(fd, &activeSet_);
 	FD_CLR(fd, &sendSet_);
