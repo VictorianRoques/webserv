@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 09:45:08 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 10:22:55 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,6 @@
 # include "Response.hpp"
 
 class Server;
-
-/**
- * global variable: vector containing all servers in parsed config file.
-**/
 
 Request	requestParser(std::string request_header, std::vector<Server> _servers_g);
 
@@ -79,7 +75,6 @@ class Parser: public Server {
 		// parsing helper functions
 		void	addPort(std::string port);
 		void	clear();
-		bool	serverNameChecker();
 		size_t	dirListen(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirRoot(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend);
@@ -91,7 +86,11 @@ class Parser: public Server {
 		size_t	dirOpen(vec_str::iterator it, vec_str::iterator vend);
 
 		void	print_test();
-		
+	
+		// CHECKERS
+		void	serverChecker();
+		bool	serverNameChecker();
+
 		//EXCEPTION
 
 		class MissingBracketException: public std::exception { public: virtual char const *what() const throw(); };
@@ -119,8 +118,6 @@ class Parser: public Server {
 		class WrongServerNameException: public std::exception { public: virtual char const *what() const throw(); };
 
 		class EmptyConfigException: public std::exception { public: virtual char const *what() const throw(); };
-
-
 
 };
 

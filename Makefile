@@ -6,7 +6,7 @@
 #    By: viroques <viroques@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
-#    Updated: 2022/02/08 22:45:27 by viroques         ###   ########.fr        #
+#    Updated: 2022/02/09 10:09:17 by pnielly          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,6 +25,7 @@ _SRC_		=	main.cpp \
 				cgiHandler.cpp \
 				Location.cpp \
 				Parser.cpp \
+				CheckerParser.cpp \
 				RequestParser.cpp \
 				Response.cpp \
 				ResponseHeader.cpp \

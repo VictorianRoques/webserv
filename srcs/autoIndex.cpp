@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/08 23:00:04 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 10:23:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,14 +44,14 @@ std::string	autoIndexDrawnLine() {
  * varName(): File Name
  * DATA_FOLDER is the folder's name where all data is stored (default: test)
 **/
-std::string	autoIndexVarName(std::string path, std::string name, struct stat buf, std::string generalRoot) {
+std::string	autoIndexVarName(std::string path, std::string name, struct stat buf) {
 	std::string content;
 //	size_t	pos;
 //	std::string	data_folder("/" + generalRoot);
 
-	std::cout << "AUTOINDEX ; GENERAL ROOT = " << generalRoot << std::endl;
-	std::cout << "AUTOINDEX ; PATH = " << path << std::endl;
-	std::cout << "AUTOINDEX ; NAME = " << name << std::endl;
+//	std::cout << "AUTOINDEX ; GENERAL ROOT = " << generalRoot << std::endl;
+//	std::cout << "AUTOINDEX ; PATH = " << path << std::endl;
+//	std::cout << "AUTOINDEX ; NAME = " << name << std::endl;
 
 	content = "<div style=\"float: left; width: 32%;\"><a href=\"";
 //	pos = path.rfind(data_folder) + data_folder.size();
@@ -132,7 +132,7 @@ std::string	Response::autoIndexBuilder(std::string path) {
 		if (stat(newPath.c_str(), &buf) < 0) // get Date and Size
 			throw StatFailedException();
 		
-		content += autoIndexVarName(path, name, buf, _generalRoot);
+		content += autoIndexVarName(path, name, buf);
 		content += autoIndexVarDate(buf);
 		
 		// ".." is a special case
