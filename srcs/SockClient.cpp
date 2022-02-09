@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/08 22:39:49 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/09 12:36:56 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 
 SockClient::SockClient(void) : chunk_(false)
 	{ return ; }
+
+SockClient::SockClient(const SockClient &sockClient)
+	{ *this = sockClient; }
 
 SockClient::~SockClient(void)
 	{ return ; }

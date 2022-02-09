@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/08 22:15:06 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/09 12:37:27 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class SockClient {
 
 	public:
 		SockClient(void);
+		SockClient(const SockClient &sockClient);
 		~SockClient(void);
 		SockClient	&operator=(const SockClient &sockClient);
 
