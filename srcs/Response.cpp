@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/08 23:55:18 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/09 10:37:38 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,38 +115,15 @@ int      Response::initRequest(Request &req)
 
 void        Response::setLocationConf()
 {
-	std::vector<Location> loc = _serv.getLocation();
-	std::vector<Location>::iterator it = loc.begin();
-	std::string short_path = _request.getPath();
-	size_t pos = short_path.length();
+	Location loc = findRightLocation(_serv.getLocation(), _request);
 
-	while (pos != 0) {
-		pos = short_path.rfind("/", pos - 1);
-		for (; it != loc.end(); it++) {
-			if (!strncmp(short_path.c_str(), it->getLocationMatch().c_str(), pos)) {
-				break ;
-			}
-			if (it->getLocationMatch() == "/")
-			{
-				_pathCgi = it->getCgiHandler().second;
-				_extensionCgi = it->getCgiHandler().first;
-				_index = it->getIndex();
-				_root = it->getRoot();
-				_AutoIndex = it->getAutoIndex();
-				_allowMethods = it->getMethods();
-				_uploadDest = it->getUploadDest();
-			}
-		}
-	}
-	if (it != loc.end()) {
-	_pathCgi = it->getCgiHandler().second;
-	_extensionCgi = it->getCgiHandler().first;
-	_index = it->getIndex();
-	_root = it->getRoot();
-	_AutoIndex = it->getAutoIndex();
-	_allowMethods = it->getMethods();
-	_uploadDest = it->getUploadDest();
-	}
+	_pathCgi = loc.getCgiHandler().second;
+	_extensionCgi = loc.getCgiHandler().first;
+	_index = loc.getIndex();
+	_root = loc.getRoot();
+	_AutoIndex = loc.getAutoIndex();
+	_allowMethods = loc.getMethods();
+	_uploadDest = loc.getUploadDest();
 }
 
 int      Response::readErrorPage(std::string &path)

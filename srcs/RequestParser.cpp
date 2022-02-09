@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 09:33:24 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 10:45:09 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,50 @@ void	Request::setRedirCode(size_t redirCode) { _redirCode = redirCode; }
 /**************************************/
 //              PARSING               //
 /**************************************/
+
+/**
+ * findRightLocation(): find the relevant Location {}
+ **/
+Location findRightLocation(std::vector<Location> loc, Request req) {
+	if (req.getPath()[0] != '/')
+		req.setPath("/" + req.getPath());
+	std::vector<Location>::iterator it = loc.begin();
+	// looking for exact match
+	for (; it != loc.end(); it++) {
+		if (it->getLocationMatch() == req.getPath()) {
+			return *it;
+		}
+	}
+	// no exact match found: looking for the longest match	
+	it = loc.begin();
+	size_t pos = req.getPath().length();
+
+	while (pos != 0) {
+		pos = req.getPath().rfind("/", pos - 1);
+		for (; it != loc.end(); it++) {
+			if (!strncmp(req.getPath().c_str(), it->getLocationMatch().c_str(), pos))
+				return *it ;
+			if (it->getLocationMatch() == "/")
+				return *it;
+		}
+	}
+	return *it;
+}
+
+/**
+ * findRightServer(): finds correct server
+ **/
+Server findRightServer(std::vector<Server> servers_g, Request request) {
+	std::vector<Server>::iterator it = servers_g.begin();
+	for (; it != servers_g.end(); it++) {
+		if (vector_contains_str(it->getServerName(), request.getHost())) {
+			return *it;
+		}
+	}
+	// if no exact match found: first server is default server
+	return *(servers_g.begin());
+
+}
 
 /**
  * isChunked(): sets chunked = true/false
@@ -234,50 +278,6 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Redir Code: " << NC << _redirCode << std::endl;
 	std::cout << std::endl;
 	std::cout << COLOR_REQ << "Body: " << NC << _body << std::endl;
-}
-
-/**
- * findRightLocation(): find the relevant Location {}
- **/
-Location findRightLocation(std::vector<Location> loc, Request req) {
-	if (req.getPath()[0] != '/')
-		req.setPath("/" + req.getPath());
-	std::vector<Location>::iterator it = loc.begin();
-	// looking for exact match
-	for (; it != loc.end(); it++) {
-		if (it->getLocationMatch() == req.getPath()) {
-			return *it;
-		}
-	}
-	// no exact match found: looking for the longest match	
-	it = loc.begin();
-	size_t pos = req.getPath().length();
-
-	while (pos != 0) {
-		pos = req.getPath().rfind("/", pos - 1);
-		for (; it != loc.end(); it++) {
-			if (!strncmp(req.getPath().c_str(), it->getLocationMatch().c_str(), pos))
-				return *it ;
-			if (it->getLocationMatch() == "/")
-				return *it;
-		}
-	}
-	return *it;
-}
-
-/**
- * findRightServer(): finds correct server
- **/
-Server findRightServer(std::vector<Server> servers_g, Request request) {
-	std::vector<Server>::iterator it = servers_g.begin();
-	for (; it != servers_g.end(); it++) {
-		if (vector_contains_str(it->getServerName(), request.getHost())) {
-			return *it;
-		}
-	}
-	// if no exact match found: first server is default server
-	return *(servers_g.begin());
-
 }
 
 /**

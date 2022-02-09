@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:58 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/07 16:16:23 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 10:42:06 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,5 +140,8 @@ class Request {
 		};
 
 };
+
+Server 								findRightServer(std::vector<Server> servers_g, Request request);
+Location 							findRightLocation(std::vector<Location> loc, Request req);
 
 # endif
