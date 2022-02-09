@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 00:12:37 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 09:33:25 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,15 +178,23 @@ std::string		hrefLocation(std::string location)
 std::string	findRightPath(std::string path, std::string root, std::string locationMatch) {
 	size_t start = locationMatch.length();
 	std::string relative = cleanSlash(root + "/" + path.substr(start - 1, path.find("?")));
-	if (pathIsFile(relative) || pathIsDirectory(relative))
+//		std::cout << "relative : " << relative << std::endl;
+	if (pathIsFile(relative) || pathIsDirectory(relative)) {
 		return relative;
+	}
 
 	std::string relative2 = cleanSlash(root + "/" + path.substr(0, path.find("?")));
-	if (pathIsFile(relative2) || pathIsDirectory(relative2))
+//		std::cout << "relative2 : " << relative2 << std::endl;
+	if (pathIsFile(relative2) || pathIsDirectory(relative2)) {
+		std::cout << "relative2 : " << relative2 << std::endl;
 		return relative2;
+	}
 
-	if (pathIsFile(path) || pathIsDirectory(path))
+	path = path.substr(0, path.find("?"));
+//	std::cout << "simple path : " << path << std::endl;
+	if (pathIsFile(path) || pathIsDirectory(path)) {
 		return path;
+	}
 
 	return relative;
 }
