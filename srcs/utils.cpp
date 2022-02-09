@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 14:20:51 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 15:38:26 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,12 @@ std::string	findRightPath(std::string path, std::string root, std::string locati
 
 	path = path.substr(0, path.find("?"));
 	std::cout << "simple path : " << path << std::endl;
+	if (pathIsFile(path) || pathIsDirectory(path)) {
+		return path;
+	}
+
+	path = cleanSlash(getPWD() + "/" + path);
+	std::cout << "pwd + path : " << path << std::endl;
 	if (pathIsFile(path) || pathIsDirectory(path)) {
 		return path;
 	}

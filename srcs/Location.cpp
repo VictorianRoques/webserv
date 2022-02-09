@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 14:04:10 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 15:49:24 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ char const *Location::NonValidCgiHandlerException::what() const throw() {
 	return "Non valid CGI Handler\nUsage: cgi_handler <file_extension> <CGI binary>; (you probably forgot a \";\").";
 }
 char const *Location::NonValidRedirectionException::what() const throw() {
-	return "Non valid redirection (status code should belong to [300;308]\nUsage: return <status> <URI>;).";
+	return "Non valid redirection (status code should be 308)\nUsage: return <status> <URI>;).";
 }
 char const *Location::WrongPathException::what() const throw() { return "Invalid path for location in config_file. Probably missing a '/' in the beginning."; }
 char const *Location::MissingBracketException::what() const throw() { return "Missing a bracket after 'server' or 'location' directive."; }
