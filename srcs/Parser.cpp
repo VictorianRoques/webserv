@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 11:33:53 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 12:17:39 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -291,15 +291,15 @@ void	Parser::clear() {
 	_location.clear();
 	_maxBodySize = 1000000;
 	_errorPage.clear();
-	_errorPage["400"] = "400.html";
-	_errorPage["403"] = "403.html";
-	_errorPage["404"] = "404.html";
-	_errorPage["405"] = "405.html";
-	_errorPage["406"] = "406.html";
-	_errorPage["413"] = "413.html";
-	_errorPage["429"] = "429.html";
-	_errorPage["499"] = "499.html";
-	_errorPage["500"] = "500.html";
+	_errorPage["400"] = "error_pages/400.html";
+	_errorPage["403"] = "error_pages/403.html";
+	_errorPage["404"] = "error_pages/404.html";
+	_errorPage["405"] = "error_pages/405.html";
+	_errorPage["406"] = "error_pages/406.html";
+	_errorPage["413"] = "error_pages/413.html";
+	_errorPage["429"] = "error_pages/429.html";
+	_errorPage["499"] = "error_pages/499.html";
+	_errorPage["500"] = "error_pages/500.html";
 }
 
 /**

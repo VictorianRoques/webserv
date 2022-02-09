@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/09 11:33:09 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/09 12:12:57 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,17 +69,6 @@ std::string&	Response::getUploadDest()	{ return _uploadDest; }
 ResponseHeader&	Response::getHeader() 		{ return _header; }
 std::string&	Response::getLocation()		{ return _location; }
 
-void	Response::sendPage(int code)
-{
-	std::string foundCode = std::to_string(code);
-	if (!readErrorPage(_errorPage[foundCode]))
-	{
-		if (code == 308 || code == 310)
-			_header.setStatusRedirect(foundCode, _body.length());
-		else
-			_header.setStatusError(foundCode, _body.length());
-	}
-}
 
 int      Response::initRequest(Request &req)
 {
@@ -126,6 +115,19 @@ void        Response::setLocationConf()
 	_AutoIndex = loc.getAutoIndex();
 	_allowMethods = loc.getMethods();
 	_uploadDest = loc.getUploadDest();
+}
+
+void	Response::sendPage(int code)
+{
+	std::string foundCode = std::to_string(code);
+	std::cout << "ERROR PAGE: " << _errorPage[foundCode] << std::endl;
+	if (!readErrorPage(_errorPage[foundCode]))
+	{
+		if (code == 308 || code == 310)
+			_header.setStatusRedirect(foundCode, _body.length());
+		else
+			_header.setStatusError(foundCode, _body.length());
+	}
 }
 
 int      Response::readErrorPage(std::string &path)
