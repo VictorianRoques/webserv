@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/09 10:59:08 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/09 11:33:09 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,12 +86,14 @@ int      Response::initRequest(Request &req)
     _request = req;
     _path = req.getFullPath();
 	_generalRoot = req.getGeneralRoot();
-    if (_request.getPath().empty() || _request.getMethod().empty() ||
-		_request.getProtocolVersion() != "HTTP/1.1" || _request.getHost().empty())
+    if (_request.getPath().empty() || _request.getMethod().empty()
+		|| _request.getProtocolVersion() != "HTTP/1.1"
+		|| (_request.getHost().empty() && _request.getMethod() != "DELETE"))
     {
 		sendPage(400);
 		return (1);
     }
+
     setLocationConf();
     if (req.getPath() == "/")
     {
