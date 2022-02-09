@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 10:22:55 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 11:03:41 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,7 @@ class Parser: public Server {
 		// CHECKERS
 		void	serverChecker();
 		bool	serverNameChecker();
+		bool	locationChecker();
 
 		//EXCEPTION
 
@@ -118,6 +119,8 @@ class Parser: public Server {
 		class WrongServerNameException: public std::exception { public: virtual char const *what() const throw(); };
 
 		class EmptyConfigException: public std::exception { public: virtual char const *what() const throw(); };
+
+		class MissingDefaultLocationException: public std::exception { public: virtual char const *what() const throw(); };
 
 };
 
