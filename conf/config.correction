@@ -8,9 +8,29 @@ server
 	{
 		root www;
 		index index.html;
-		autoindex on;
+		autoindex off;
 		methods GET DELETE;
 	}
+
+    location /autoindex
+    {
+        methods GET;
+    }
+
+    location /redirect
+    {
+        return 308 /;
+    }
+
+    location /loop1
+    {
+        return 308 loop2;
+    }
+
+    location /loop2
+    {
+        return 308 loop1;
+    }
 
     location /message
     {
@@ -39,7 +59,7 @@ server
 
     location /upload
     {
-        methods GET POST;
+        methods POST;
         upload_dest www/upload;
     }
 }
