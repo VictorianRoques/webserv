@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 12:10:16 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 12:26:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,7 +171,6 @@ void	Request::isChunked() {
  **/
 void	Request::buildFullPath(Location loc) {
 
-	_fullPath.clear();
 	if (getRedirCode() == 308) { // if redirection 
 		if (loc.getRedirection().second[0] == '/') //absolute
 			_fullPath = loc.getRedirection().second;
@@ -212,7 +211,6 @@ void	Request::firstLine(std::string line) {
 
 	rl = ft_split(line, " ");
 	setMethod(rl[0]);
-	_path.clear();
 	setPath(rl[1]);
 	setProtocolVersion(rl[2]);
 }

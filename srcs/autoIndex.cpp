@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 10:50:46 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/09 12:30:04 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ std::string	autoIndexHeader(std::string path) {
 }
 
 std::string autoIndexPageTitle(std::string path) {
-	return "<h1>Index of " + path + "/" + "</h1>";
+	return "<h1>Index of " + cleanSlash(path) + "</h1>";
 }
 
 std::string	autoIndexColumnNames() {
@@ -39,15 +39,9 @@ std::string	autoIndexColumnNames() {
 **/
 std::string	autoIndexVarName(std::string path, std::string name, struct stat buf) {
 	std::string content;
-//	size_t	pos;
-//	std::string	data_folder("/" + generalRoot);
 
-//	std::cout << "AUTOINDEX ; GENERAL ROOT = " << generalRoot << std::endl;
-//	std::cout << "AUTOINDEX ; PATH = " << path << std::endl;
-//	std::cout << "AUTOINDEX ; NAME = " << name << std::endl;
 
 	content = "<div style=\"float: left; width: 32%;\"><a href=\"";
-//	pos = path.rfind(data_folder) + data_folder.size();
 	content += makePathAbsolute(path + "/" + name);
 	content += "\">";
 	content += name;
