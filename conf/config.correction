@@ -1,0 +1,35 @@
+server 
+{
+	listen 127.0.0.1:8080;
+	server_name localhost;
+	client_max_body_size 1m;
+
+	location /
+	{
+		root www;
+		index index.html;
+		autoindex on;
+		methods GET;
+	}
+
+    location /message
+    {
+        root www;
+        index post.html;
+        methods GET POST;
+        cgi_handler .php cgi_binary/darwin_phpcgi;
+    }
+
+    location /input
+    {
+        root www;
+        index upload.html;
+        methods GET POST;
+    }
+
+    location /upload
+    {
+        methods GET POST;
+        upload_dest www/upload;
+    }
+}

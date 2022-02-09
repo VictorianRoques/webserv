@@ -1,0 +1,63 @@
+body, html {
+    height: 100%;
+  }
+  
+  .bg {
+    /* The image used */
+    background-image: url("../img/futur_bg.jpg");
+  
+    /* Full height */
+    height: 100%;
+  
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+.box {
+  position:absolute;
+  top:30%;
+  left:50%;
+  margin-top:-50px; /* this is half the height of your div*/  
+  margin-left:-100px; /*this is half of width of your div*/
+}
+
+.whiteText {
+    color:white;
+  }
+
+.button {
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+  }
+
+.buttonGreen {
+    background-color: #4CAF50; /* Green */
+    color: black; 
+    border: 2px solid #4CAF50;
+  }
+  
+.buttonGreen:hover {
+  background-color: white; 
+  color: black;
+}
+
+.buttonBlue { 
+  background-color: #008CBA;
+  color: black; 
+  border: 2px solid #008CBA;
+}
+
+.buttonBlue:hover {
+  background-color: white;
+  color: black;
+}
