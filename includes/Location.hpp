@@ -47,7 +47,7 @@ class Location {
 		bool								_autoIndex;
 		std::pair<std::string, std::string>	_cgiHandler;
 		std::string							_uploadDest;
-		size_t								_maxBodySize;
+		long long							_maxBodySize;
 	
 		std::string							_generalRoot;
 		bool								_rootSpecified; // true if found a root directive in the location
@@ -63,7 +63,7 @@ class Location {
 		bool								getAutoIndex() const;
 		std::pair<std::string, std::string>	getCgiHandler() const;
 		std::string							getUploadDest() const;
-		size_t								getMaxBodySize() const;
+		long long							getMaxBodySize() const;
 
 		std::string							getGeneralRoot() const;
 		
@@ -78,7 +78,7 @@ class Location {
 		void	setAutoIndex(bool autoIndex);
 		void	setCgiHandler(std::pair<std::string, std::string> cgiHandler);
 		void	setUploadDest(std::string uploadDest);
-		void	setMaxBodySize(size_t maxBodySize);
+		void	setMaxBodySize(long long maxBodySize);
 		void	setMaxBodySize(std::string maxBodySize);
 		
 		void	setGeneralRoot(std::string generalRoot);

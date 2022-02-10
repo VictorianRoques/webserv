@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 11:03:41 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 19:26:52 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ class Parser: public Server {
 		// parsing helper functions
 		void	addPort(std::string port);
 		void	clear();
+		void	buildErrorPageContent();
 		size_t	dirListen(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirRoot(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend);
@@ -91,6 +92,7 @@ class Parser: public Server {
 		void	serverChecker();
 		bool	serverNameChecker();
 		bool	locationChecker();
+		bool	errorPageChecker();
 
 		//EXCEPTION
 
@@ -105,6 +107,8 @@ class Parser: public Server {
 		class NoSuchDirectiveException: public std::exception { public: virtual char const *what() const throw(); };
 
 		class FailedToOpenException: public std::exception { public: virtual char const *what() const throw(); };
+		
+		class FailedToCloseException: public std::exception { public: virtual char const *what() const throw(); };
 		
 		class WrongPathException: public std::exception { public: virtual char const *what() const throw(); };
 
@@ -121,6 +125,8 @@ class Parser: public Server {
 		class EmptyConfigException: public std::exception { public: virtual char const *what() const throw(); };
 
 		class MissingDefaultLocationException: public std::exception { public: virtual char const *what() const throw(); };
+		
+		class ErrorPagePathException: public std::exception { public: virtual char const *what() const throw(); };
 
 };
 

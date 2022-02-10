@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 16:12:36 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 18:43:59 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ std::string							Location::getIndex() const { return _index; }
 bool								Location::getAutoIndex() const { return _autoIndex; }
 std::pair<std::string, std::string>	Location::getCgiHandler() const { return _cgiHandler; }
 std::string							Location::getUploadDest() const { return _uploadDest; }
-size_t								Location::getMaxBodySize() const { return _maxBodySize; }
+long long							Location::getMaxBodySize() const { return _maxBodySize; }
 
 std::string							Location::getGeneralRoot() const { return _generalRoot; }
 
@@ -102,21 +102,8 @@ void	Location::setAutoIndex(bool autoIndex) { _autoIndex = autoIndex; }
 void	Location::setIndex(std::string index) { _index = index; }
 void	Location::setCgiHandler(std::pair<std::string, std::string> cgiHandler) { _cgiHandler = cgiHandler; }
 void	Location::setUploadDest(std::string uploadDest) { _uploadDest = uploadDest; }
-void	Location::setMaxBodySize(size_t maxBodySize) { _maxBodySize = maxBodySize; }
-void	Location::setMaxBodySize(std::string maxBodySize) {
-	size_t pos;
-
-	_maxBodySize = static_cast<size_t>(std::atoi(maxBodySize.c_str()));
-	if ((pos = maxBodySize.find_first_not_of("0123456789")) != std::string::npos) {
-		if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k')
-			_maxBodySize *= 1024;
-		else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm')
-			_maxBodySize *= 1048576;
-		else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
-			_maxBodySize *= 1073741824;
-	}
-}
-
+void	Location::setMaxBodySize(long long maxBodySize) { _maxBodySize = maxBodySize; }
+void	Location::setMaxBodySize(std::string maxBodySize) { _maxBodySize = maxBodyAtoi(maxBodySize); }
 void	Location::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoot; }
 
 /**************************************/
@@ -314,6 +301,9 @@ void	Location::locationChecker() {
 
 void	Location::print_loc() {
 	std::cout << std::endl;
+//	std::cout << COLOR_LOC << "/**************************************/" << NC << std::endl;
+//	std::cout << COLOR_LOC << "//               LOCATION             //" << NC << std::endl;
+//	std::cout << COLOR_LOC << "/**************************************/" << NC << std::endl << std::endl;
 	std::cout << COLOR_LOC << "Match Modifier: " << NC << _matchModifier << std::endl;
 	std::cout << COLOR_LOC << "Location Match: " << NC << _locationMatch << std::endl;
 	std::cout << COLOR_LOC << "Root: " << NC << _root << std::endl;

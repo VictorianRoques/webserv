@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 17:07:20 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 17:50:37 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ const std::string WHITESPACE = "\f\t\n\r\v ";
 /**************************************/
 char const *Parser::WrongServerNameException::what() const throw() { return "For this project, you'll need localhost as a server name."; }
 char const *Parser::MissingDefaultLocationException::what() const throw() { return "You need at least one location / { } context in your server {}."; }
+char const *Parser::ErrorPagePathException::what() const throw() { return "error_page path isn't an existing file."; }
 
 /**************************************/
 //           PARSER CHECKERS          //
@@ -56,6 +57,18 @@ bool	Parser::locationChecker() {
 }
 
 /**
+ * errorPageChecker(): check if error_page directive is ok
+**/
+bool	Parser::errorPageChecker() {
+	map_str::iterator it = _errorPage.begin();
+	for (; it != _errorPage.end(); it++) {
+		if (!pathIsFile(it->second))
+			return false;
+	}
+	return true;
+}
+
+/**
  * serverChecker(): checks if Server meets minimum requirements
 **/
 void	Parser::serverChecker() {
@@ -66,4 +79,7 @@ void	Parser::serverChecker() {
 
 	if (!locationChecker())
 		throw MissingDefaultLocationException();
+
+	if (!errorPageChecker())
+		throw ErrorPagePathException();
 }
