@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 17:48:26 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 19:37:20 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ char const *Parser::LonelyBracketException::what() const throw() { return "Lonel
 char const *Parser::EmbeddedServersException::what() const throw() { return "Found a server in another server."; }
 char const *Parser::NoSuchDirectiveException::what() const throw() { return "Unknown directive in the file."; }
 char const *Parser::FailedToOpenException::what() const throw() { return "Failed to open <config_file>."; }
+char const *Parser::FailedToCloseException::what() const throw() { return "Failed to close <config_file>."; }
 char const *Parser::WrongPathException::what() const throw() { return "Invalid path for location in config_file. Probably missing a '/' in the beginning."; }
 char const *Parser::ErrorPageException::what() const throw() { return "Need at least two arguments to the error_page directive."; }
 char const *Parser::NeedOnePortException::what() const throw() { return "Need one and only one port per listen directive."; }
@@ -303,6 +304,18 @@ void	Parser::clear() {
 }
 
 /**
+ * buildErrorPageContent(): create a map_str<error code, error page content>
+**/
+void	Parser::buildErrorPageContent() {
+	map_str::iterator it = _errorPage.begin();
+	for (; it != _errorPage.end(); it++) {
+//		_errorPageContent[it->first] = getFileContent(it->second);
+//		std::cout << getFileContent(it->second);
+		_errorPageContent[it->first] = getFileContent(it->second);
+	}
+}
+
+/**
  * dirServer(): add the new server to '_servers_g' vector (called by interpret())
 **/
 size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
@@ -325,6 +338,7 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 			_ports_g.push_back(*_port.begin());
 
 		serverChecker();
+		buildErrorPageContent();
 
 		// add Server to servers_g
 		Server& server = dynamic_cast<Server&>(*this);
@@ -429,6 +443,9 @@ void	Parser::tokenizer(char **av) {
 			line.erase(0, posend);
 		}
 	}
+	file.close();
+//	if (file.close())
+//		throw FailedToCloseException();
 	// (used for testing)
 	//ft_putvec(tok, "\n");
 	interpreter(tok);

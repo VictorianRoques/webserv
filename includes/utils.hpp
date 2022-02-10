@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 20:37:19 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 10:42:34 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/10 19:27:30 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ std::string							hrefLocation(std::string location);
 std::string							findRightPath(std::string path, std::string root, std::string locationMatch);
 std::string							makePathAbsolute(std::string);
 long long							maxBodyAtoi(std::string maxBodySize);
+std::string							getFileContent(std::string path);
 
 /**
  * prototype of testing
@@ -113,6 +114,21 @@ class WrongFormatMaxBodySizeException: public std::exception {
 };
 
 class TooBigMaxBodySizeException: public std::exception {
+	public:
+		virtual char const *what() const throw();
+};
+
+class FileDisapearedException: public std::exception {
+	public:
+		virtual char const *what() const throw();
+};
+
+class FailedToOpenFileException: public std::exception {
+	public:
+		virtual char const *what() const throw();
+};
+
+class FailedToCloseFileException: public std::exception {
 	public:
 		virtual char const *what() const throw();
 };

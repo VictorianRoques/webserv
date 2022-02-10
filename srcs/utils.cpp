@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 17:45:19 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 19:32:18 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,9 @@
 char const *WrongPathFormatException::what() const throw() { return "Found a \"..\" not surrounded by '/' --> Wrong Path Format (check the root directives)."; }
 char const *WrongFormatMaxBodySizeException::what() const throw() { return "Wrong Format of client_max_body_size. Your value is probably too big or negative. Maybe you put several values.\nEx.: client_max_body_size 30M\nAllowed magnitudes : K, M, G"; }
 char const *TooBigMaxBodySizeException::what() const throw() { return "client_max_body_size is too big in config file."; }
+char const *FileDisapearedException::what() const throw() { return "The file existed when the config file was parsed but now it just disapeared..."; }
+char const *FailedToOpenFileException::what() const throw() { return "Failed to open file."; }
+char const *FailedToCloseFileException::what() const throw() { return "Failed to close file."; }
 
 /**
  * ft_split(): splits string into a vec_str
@@ -278,4 +281,32 @@ long long maxBodyAtoi(std::string maxBodySize) {
 //	std::cout << "MaxBodySize.length() = " << maxBodySize.length() << std::endl;
 
 		return ret;
+}
+
+/**
+ * getFileContent(): opens and reads a file and returns the content as a string
+**/
+std::string	getFileContent(std::string path) {
+	std::ifstream	file;
+	std::string		line;
+	std::string		ret;
+
+	if (!pathIsFile(path))
+		throw FileDisapearedException();
+
+	file.open(path.c_str());
+	if (!file.is_open())
+		throw FailedToOpenFileException();
+
+	while (!file.eof()) {
+		getline(file, line);
+		ret += line;
+	}
+
+	file.close();
+//	if (file.close())
+//		throw FailedToCloseExcpetion();
+
+//	std::cout << "RET: " << ret << std::endl;
+	return ret;
 }

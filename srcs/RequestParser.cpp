@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 17:05:02 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 18:44:57 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,6 +258,9 @@ void	Request::bodyLine(std::string line) {
  *  print_request(): self-explanatory
  **/
 void	Request::print_request() {
+	std::cout << COLOR_REQ << "/**************************************/" << NC << std::endl;
+	std::cout << COLOR_REQ << "//            PARSED REQUEST          //" << NC << std::endl;
+	std::cout << COLOR_REQ << "/**************************************/" << NC << std::endl << std::endl;
 	std::cout << COLOR_REQ << "Method: " << NC << _method << std::endl;
 	std::cout << COLOR_REQ << "Path: " << NC << _path << std::endl;
 	std::cout << COLOR_REQ << "Full Path: " << NC << _fullPath << std::endl;

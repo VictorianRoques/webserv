@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 17:47:15 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 19:36:08 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Server {
 		std::vector<Location>			_location;
 		int								_serverNb;
 		std::vector<Server>				_servers_g;
+		map_str							_errorPageContent;
 
 		std::string							_generalRoot;
 
@@ -50,6 +51,7 @@ class Server {
 		std::vector<size_t>				getPort() const;
 		vec_str							getServerName() const;
 		map_str							getErrorPage() const;
+		map_str							getErrorPageContent() const;
 		long long						getMaxBodySize() const;
 		std::vector<Location>			getLocation() const;
 		size_t							getServerNb() const;
@@ -62,6 +64,7 @@ class Server {
 		void	setPort(std::vector<size_t> port);
 		void	setServerName(vec_str serverName);
 		void	setErrorPage(map_str errorPage);
+		void	setErrorPageContent(map_str errorPageContent);
 		void	setMaxBodySize(long long maxBodySize);
 		void	setMaxBodySize(std::string maxBodySize);
 		void	setLocation(std::vector<Location> location);
