@@ -6,11 +6,18 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 15:38:26 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 12:56:14 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
+
+#define MAX_LONG_LONG 9223372036854775807
+
+// EXCEPTIONS
+char const *WrongPathFormatException::what() const throw() { return "Found a \"..\" not surrounded by '/' --> Wrong Path Format (check the root directives)."; }
+char const *WrongFormatMaxBodySizeException::what() const throw() { return "Wrong Format of client_max_body_size. Your value is probably too big or negative. Maybe you put several values.\nEx.: client_max_body_size 30M\nAllowed magnitudes : K, M, G"; }
+char const *TooBigMaxBodySizeException::what() const throw() { return "client_max_body_size is too big in config file."; }
 
 /**
  * ft_split(): splits string into a vec_str
@@ -54,9 +61,6 @@ bool	vector_contains_str(vec_str v, std::string str) {
 	}
 	return false;
 }
-
-// WrongPathFormatException()
-char const *WrongPathFormatException::what() const throw() { return "Found a \"..\" not surrounded by '/' --> Wrong Path Format (check the root directives)."; }
 
 /**
  * removeBackwards(): removes useless backward moves in a path. (ex.: "../webserv/test" --> "test" | "test/../test" --> "test")
@@ -180,28 +184,27 @@ std::string	findRightPath(std::string path, std::string root, std::string locati
 	if (locationMatch[start] == '/')
 		start--;
 	std::string relative = cleanSlash(root + "/" + path.substr(start, path.find("?")));
-		std::cout << "relative : " << relative << std::endl;
+//		std::cout << "relative : " << relative << std::endl;
 	if (pathIsFile(relative) || pathIsDirectory(relative)) {
-		std::cout << "Is file ? " << pathIsFile(relative) << std::endl;
-		std::cout << "Is directory ? " << pathIsDirectory(relative) << std::endl;
+//		std::cout << "Is file ? " << pathIsFile(relative) << std::endl;
+//		std::cout << "Is directory ? " << pathIsDirectory(relative) << std::endl;
 		return relative;
 	}
 
 	std::string relative2 = cleanSlash(root + "/" + path.substr(0, path.find("?")));
-		std::cout << "relative2 : " << relative2 << std::endl;
+//		std::cout << "relative2 : " << relative2 << std::endl;
 	if (pathIsFile(relative2) || pathIsDirectory(relative2)) {
-		std::cout << "relative2 : " << relative2 << std::endl;
 		return relative2;
 	}
 
 	path = path.substr(0, path.find("?"));
-	std::cout << "simple path : " << path << std::endl;
+//	std::cout << "simple path : " << path << std::endl;
 	if (pathIsFile(path) || pathIsDirectory(path)) {
 		return path;
 	}
 
 	path = cleanSlash(getPWD() + "/" + path);
-	std::cout << "pwd + path : " << path << std::endl;
+//	std::cout << "pwd + path : " << path << std::endl;
 	if (pathIsFile(path) || pathIsDirectory(path)) {
 		return path;
 	}
@@ -221,4 +224,58 @@ std::string	makePathAbsolute(std::string path) {
 	path = pwd.substr(0, pos) + "/" + path;
 
 	return cleanSlash(path);
+}
+
+/**
+ * maxBodyAtoi(): gets maxBodySize string and turns it into an int
+**/
+long long maxBodyAtoi(std::string maxBodySize) {
+	size_t pos;
+	size_t pos2;
+	long long	ret;
+
+	pos = maxBodySize.find_first_of("0123456789");
+	pos2 = maxBodySize.find_first_not_of("0123456789", pos);
+	if (pos2 - pos > 18)
+		throw TooBigMaxBodySizeException();
+
+//	if (ret > MAX_LONG_LONG)
+//		throw TooBigMaxBodySizeException();
+
+	ret = static_cast<long long>(std::atoi(maxBodySize.c_str()));
+
+	pos = maxBodySize.length() - 1; //last element of maxSizeBody
+
+	if (maxBodySize.at(pos) == ';')
+		maxBodySize.erase(pos, 1);
+
+	pos = maxBodySize.length() - 1; //last element of maxSizeBody
+
+	if (maxBodySize.at(pos) == 'o')
+		maxBodySize.erase(pos, 1);
+
+	pos = maxBodySize.length() - 1; //last element of maxSizeBody
+
+	if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k')
+		ret *= 1024;
+	else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm')
+		ret *= 1048576;
+	else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
+		ret *= 1073741824;
+	else if (!isdigit(maxBodySize.at(pos)))
+		throw WrongFormatMaxBodySizeException();
+
+	if (pos && !isdigit(maxBodySize.at(pos - 1)))
+		throw WrongFormatMaxBodySizeException();
+
+	if (maxBodySize.find_first_of("0123456789") != 0)
+		throw WrongFormatMaxBodySizeException();
+	
+	if (!ret)
+		throw WrongFormatMaxBodySizeException();
+
+//	std::cout << "MaxBodySize : pos = " << pos << std::endl;
+//	std::cout << "MaxBodySize.length() = " << maxBodySize.length() << std::endl;
+
+		return ret;
 }

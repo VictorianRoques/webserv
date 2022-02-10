@@ -308,7 +308,7 @@ Request requestParser(std::string rq, std::vector<Server> servers_g) {
 		request.bodyLine(rq.substr(2));
 
 	// check if bodySize is too big
-	if (request.getBody().length() > loc.getMaxBodySize()) {
+	if ((int)request.getBody().length() > loc.getMaxBodySize()) {
 		request.setTooBig(true);
 		return request;
 	}

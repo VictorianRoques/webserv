@@ -94,6 +94,7 @@ std::string							sizeToString(size_t size);
 std::string							hrefLocation(std::string location);
 std::string							findRightPath(std::string path, std::string root, std::string locationMatch);
 std::string							makePathAbsolute(std::string);
+long long							maxBodyAtoi(std::string maxBodySize);
 
 /**
  * prototype of testing
@@ -102,6 +103,16 @@ void	print_test(); //in Parser.cpp to print all servers class
 
 //Exception
 class WrongPathFormatException: public std::exception {
+	public:
+		virtual char const *what() const throw();
+};
+
+class WrongFormatMaxBodySizeException: public std::exception {
+	public:
+		virtual char const *what() const throw();
+};
+
+class TooBigMaxBodySizeException: public std::exception {
 	public:
 		virtual char const *what() const throw();
 };
