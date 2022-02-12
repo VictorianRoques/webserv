@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/08 23:54:16 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/12 11:45:23 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 # include "cgiHandler.hpp"
 # include "Server.hpp"
 # include "autoIndex.hpp"
+# include "SockData.hpp"
 # include "utils.hpp"
 
 class Response {
@@ -41,10 +42,12 @@ public:
     Response    &operator=(const Response &res);
 
     /* Init Function for make Response */
+    void            defaultError();
     int             initRequest(Request &req);
+    int             initFd(Request &req, fd_set *sendSet);
     void            setLocationConf();
-    void            makeAnswer(Request &req);
-
+    void            makeAnswer();
+    void            legalRead();
     /* Reading/send Data */
     int             readErrorPage(std::string &path);
     void            readContent(std::string &path);
@@ -52,7 +55,6 @@ public:
 
     /* HTTP Methods */
     void            getMethod();
-    void            headMethod();
     void            postMethod();
     void            deleteMethod();
     
@@ -98,7 +100,10 @@ private:
     std::string                 _uploadDest;
     ResponseHeader              _header;
     std::string                 _location;
-
+    int                         _code;
+    int                         _fd;
+    size_t                      _contentLength;
+    fd_set*                     _sendSet;
     std::map<std::string, void (Response::*)()> _methods;  
 };
 

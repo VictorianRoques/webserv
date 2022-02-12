@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/10 19:57:27 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/12 11:26:49 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,8 @@ void	SockData::setResponse(int fd)
 	for (; it != ite; ++it) {
 		if (vector_contains_str(it->getServerName(), request.getHost())) {
 			Response	response(*it);
-			response.makeAnswer(request);
+			response.initFd(request, &sendSet_);
+			response.makeAnswer();
 			response_[fd] = response.getResponse();
 			clients_[fd].getTmpRequest().clear();
 			clients_[fd].getRequest().clear();
@@ -117,7 +118,7 @@ void	SockData::setResponse(int fd)
 	}
 	if (clients_[fd].isDeleteRequest()) {
 		Response	response(*servers_.begin());
-		response.makeAnswer(request);
+		response.makeAnswer();
 		response_[fd] = response.getResponse();
 		clients_[fd].getTmpRequest().clear();
 		clients_[fd].getRequest().clear();

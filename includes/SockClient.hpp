@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockClient.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/10 17:32:55 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/12 11:28:19 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class SockClient {
 		size_t		port_;
 		std::string	tmpRequest_;
 		std::string	request_;
-		int			fd_[2];
+		// int			fd_[2];
 		bool		chunk_;
 
 	public:

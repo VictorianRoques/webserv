@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseHeader.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 18:17:41 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/08 23:53:12 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/12 11:03:32 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ public:
     void            setDate();
     void            setLocation(std::string location);
     void            setHeader(std::string status, std::string contentType, size_t length);
-    void            setStatusError(std::string code,size_t length);
+    void            setStatusError(int code,size_t length);
     void            setStatusRedirect(std::string code, size_t length);
     void            setCgiHeader(std::string cgiHeader);
 

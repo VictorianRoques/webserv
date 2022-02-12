@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/09 16:14:30 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/12 11:45:19 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()) {
 	_methods["GET"] = &Response::getMethod;
 	_methods["POST"] = &Response::postMethod;
 	_methods["DELETE"] = &Response::deleteMethod;
-	_methods["HEAD"] = &Response::headMethod;
 }
 Response::~Response() {}
 
@@ -69,6 +68,71 @@ std::string&	Response::getUploadDest()	{ return _uploadDest; }
 ResponseHeader&	Response::getHeader() 		{ return _header; }
 std::string&	Response::getLocation()		{ return _location; }
 
+void	Response::defaultError()
+{
+	_code = 404;
+	_fd = open(_errorPage["404"].c_str(), O_RDONLY);
+	// FD_SET(_fd, _sendSet);
+}
+
+int		Response::initFd(Request &req, fd_set *sendSet)
+{
+	_sendSet = sendSet;
+	if (initRequest(req))
+	{
+		defaultError();
+		return (0);
+	}
+	else
+	{
+		readContent(_path);
+	}
+	return (0);
+}
+
+void	Response::readContent(std::string &path)
+{
+	if (pathIsFile(path))
+	{
+		_fd = open(path.c_str(), O_RDONLY);
+		if (_fd < 0)
+		{
+			_code = 403;
+			return ;
+		}
+		_code = 200;
+		// FD_SET(_fd, _sendSet);
+	}
+	else
+	{
+		defaultError();
+	}
+}
+
+void	Response::legalRead()
+{
+	char buff[4096];
+
+	_contentLength = read(_fd, buff, 4096);
+	buff[_contentLength] = '\0';
+	_body = buff;
+	if (_code >= 400)
+	{
+		_header.setStatusError(_code, _contentLength);
+	}
+	else
+	{
+		_header.setHeader("200 OK", _request.getContentType(), _contentLength);
+	}
+}
+
+void     Response::makeAnswer()
+{
+	if (_fd >= 0 && _body.empty())
+		legalRead();
+	_header.writeHeader();
+	_response = _header.getHeader() + _body;
+}
 
 int      Response::initRequest(Request &req)
 {
@@ -79,10 +143,9 @@ int      Response::initRequest(Request &req)
 		|| _request.getProtocolVersion() != "HTTP/1.1"
 		|| (_request.getHost().empty() && _request.getMethod() != "DELETE"))
     {
-		sendPage(400);
+		_code = 400;
 		return (1);
     }
-
     setLocationConf();
     if (req.getPath() == "/")
     {
@@ -93,13 +156,14 @@ int      Response::initRequest(Request &req)
     }
     if ((int)_request.getBody().size() > _serv.getMaxBodySize())
     {
-		sendPage(413);
+		_code = 413;
         return (1);
     }
 	if (_request.getRedirCode() == 310)
 	{
 		_body = "<html><body>Too many Redirects, infinite loop</body></html>";
 		_header.setStatusRedirect("310", _body.length());
+		_code = 310;
 		return (1);
 	}
     return (0);
@@ -126,61 +190,31 @@ void	Response::sendPage(int code)
 		if (code == 308 || code == 310)
 			_header.setStatusRedirect(foundCode, _body.length());
 		else
-			_header.setStatusError(foundCode, _body.length());
+			_header.setStatusError(code, _body.length());
 	}
 }
 
-int      Response::readErrorPage(std::string &path)
-{
-	std::ifstream       ofs;
-	std::stringstream   buffer;
 
+int			Response::readErrorPage(std::string &path)
+{
 	if (pathIsFile(path))
 	{
-		ofs.open(path.c_str(), std::ifstream::in);
-		if (ofs.is_open() == false)
+		_fd = open(path.c_str(), O_RDONLY);
+		if (_fd < 0)
 		{
 			_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-			_header.setStatusError("500", _body.length());
+			_header.setStatusError(500, _body.length());
 			return (1);
 		}
-		buffer << ofs.rdbuf();
-		ofs.close();
-		_body = buffer.str();
-		return (0);
 	}
 	else
 	{
 		_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-		_header.setStatusError("500", _body.length());
+		_header.setStatusError(500, _body.length());
 		return (1);
 	}
-}
-
-void     Response::readContent(std::string &path)
-{
-	std::ifstream       fd;
-	std::stringstream   buffer;
-
-	if (pathIsFile(path) || pathIsDirectory(path))
-	{
-		fd.open(path.c_str(), std::ifstream::in);
-		if (fd.is_open() == false || pathIsDirectory(path))
-		{
-			sendPage(403);
-			return ;
-		}
-		buffer << fd.rdbuf();
-		fd.close();
-		_body = buffer.str();
-		if (_body.empty())
-			_body = "[Empty File]";
-		_header.setHeader("200 OK", _request.getContentType(), _body.length());
-	}
-	else
-	{
-		sendPage(404);
-	}
+	FD_SET(_fd, _sendSet);
+	return (0);
 }
 
 
@@ -264,26 +298,6 @@ void        Response::deleteMethod()
 	{
 		sendPage(404);
 	}
-}
-
-void    Response::headMethod()
-{
-	readContent(_path);
-	_body = "";
-}
-
-void     Response::makeAnswer(Request &req)
-{
-    if (initRequest(req) == 0
-		&& _methods.find(_request.getMethod()) != _methods.end() 
-		&& isAllow(_request.getMethod()))
-	{
-		(this->*_methods[_request.getMethod()])();
-	}
-    else if (_body.empty())
-		sendPage(405);
-	_header.writeHeader();
-	_response = _header.getHeader() + _body;
 }
 
 bool             Response::isAllow(std::string method)
