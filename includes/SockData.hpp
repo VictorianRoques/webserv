@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/10 20:01:15 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/13 22:26:13 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,15 @@
 # include <map>
 # include <new>
 # include <fstream>
+# include <iostream>
+# include <utility>
 
+# include <unistd.h>
 # include <arpa/inet.h>
+# include <netinet/in.h>
 # include <sys/socket.h>
+# include <sys/socket.h>
+# include <sys/time.h>
 
 # include "Server.hpp"
 # include "RequestParser.hpp"
@@ -33,14 +39,14 @@
 
 class SockData {
 	private:
-		std::vector<Server>					servers_;
-		std::vector<int>					sockListen_;
-		std::map<int, std::string>			response_;
-		std::map<int, SockClient>			clients_;
-		fd_set								activeSet_;
-		fd_set								recvSet_;
-		fd_set								sendSet_;
-		std::map<std::string, std::string>	errorPages_;
+		std::vector<Server>						servers_;
+		std::vector<std::pair<int, size_t> >	sockListen_;
+		std::map<int, std::string>				response_;
+		std::map<int, SockClient>				clients_;
+		fd_set									activeSet_;
+		fd_set									recvSet_;
+		fd_set									sendSet_;
+		std::map<std::string, std::string>		errorPages_;
 
 		std::string	red;
 		std::string	green;
@@ -65,8 +71,10 @@ class SockData {
 		void		setBadRequest(int fd);
 		/* checkers */
 		bool		isSockListen(int fd) const;
+		bool		isSockClient(int fd) const;
 		bool		isRecvSet(int fd) const;
 		bool		isSendSet(int fd) const;
+		
 		/* getters */
 		fd_set		*getRecvSet(void);
 		fd_set		*getSendSet(void);
