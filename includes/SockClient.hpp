@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/13 22:22:57 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/14 20:00:01 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <string>
 # include <vector>
 # include <sstream>
+# include <iostream>
 
 class SockClient {
 	

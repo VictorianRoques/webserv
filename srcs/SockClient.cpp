@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/09 12:36:56 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/14 20:01:26 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,6 @@ bool	SockClient::isChunkEof(void) const
 	}
 	return false;
 }
-
-#include <iostream>
 
 bool	SockClient::isDeleteRequest(void) const
 {

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/13 22:26:13 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/14 20:56:05 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ class SockData {
 		std::map<int, std::string>				response_;
 		std::map<int, SockClient>				clients_;
 		fd_set									activeSet_;
-		fd_set									recvSet_;
-		fd_set									sendSet_;
+		fd_set									readSet_;
+		fd_set									writeSet_;
 		std::map<std::string, std::string>		errorPages_;
 
 		std::string	red;
@@ -62,22 +62,22 @@ class SockData {
 		void		setServers(std::vector<Server> servers);
 		void		setSockListen(std::vector<size_t> ports);
 		void		initActiveSet(void);
-		void		initRecvSet(void);
-		void		initSendSet(void);
+		void		initReadSet(void);
+		void		initWriteSet(void);
 		void		addActiveSet(int fd);
-		void		setRecvToActive(void);
+		void		setReadToActive(void);
 		void		setResponse(int fd);
 		void		setInternalError(int fd);
 		void		setBadRequest(int fd);
 		/* checkers */
 		bool		isSockListen(int fd) const;
 		bool		isSockClient(int fd) const;
-		bool		isRecvSet(int fd) const;
-		bool		isSendSet(int fd) const;
+		bool		isReadSet(int fd) const;
+		bool		isWriteSet(int fd) const;
 		
 		/* getters */
-		fd_set		*getRecvSet(void);
-		fd_set		*getSendSet(void);
+		fd_set		*getReadSet(void);
+		fd_set		*getWriteSet(void);
 		size_t		getSizeListen(void) const;
 		int			getSockListen(size_t index) const;
 		size_t		clientsAlloc(void);

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/13 23:01:53 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/14 20:56:59 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 SockData::SockData(void)
 {
 	initActiveSet();
-	initRecvSet();
-	initSendSet();
+	initReadSet();
+	initWriteSet();
 	red = "\033[0;31m";
 	green = "\033[0;32m";
 	blue = "\033[0;34m";
@@ -37,8 +37,8 @@ SockData	&SockData::operator=(const SockData &sockData)
 	response_ = sockData.response_;
 	clients_ = sockData.clients_;
 	activeSet_ = sockData.activeSet_;
-	recvSet_ = sockData.recvSet_;
-	sendSet_ = sockData.sendSet_;
+	readSet_ = sockData.readSet_;
+	writeSet_ = sockData.writeSet_;
 	return *this;
 }
 
@@ -86,17 +86,17 @@ void	SockData::setSockListen(std::vector<size_t>	ports)
 void	SockData::initActiveSet(void)
 	{ FD_ZERO(&activeSet_); }
 
-void	SockData::initRecvSet(void)
-	{ FD_ZERO(&recvSet_); }
+void	SockData::initReadSet(void)
+	{ FD_ZERO(&readSet_); }
 
-void	SockData::initSendSet(void)
-	{ FD_ZERO(&sendSet_); }
+void	SockData::initWriteSet(void)
+	{ FD_ZERO(&writeSet_); }
 
 void	SockData::addActiveSet(int fd)
 	{ FD_SET(fd, &activeSet_); }
 
-void	SockData::setRecvToActive(void)
-	{ recvSet_ = activeSet_; }
+void	SockData::setReadToActive(void)
+	{ readSet_ = activeSet_; }
 
 void	SockData::setResponse(int fd)
 {
@@ -112,7 +112,7 @@ void	SockData::setResponse(int fd)
 			clients_[fd].getTmpRequest().clear();
 			clients_[fd].getRequest().clear();
 			clients_[fd].setChunk(false);
-			FD_SET(fd, &sendSet_);
+			FD_SET(fd, &writeSet_);
 			return ;
 		}
 	}
@@ -124,7 +124,7 @@ void	SockData::setResponse(int fd)
 		clients_[fd].getTmpRequest().clear();
 		clients_[fd].getRequest().clear();
 		clients_[fd].setChunk(false);
-		FD_SET(fd, &sendSet_);
+		FD_SET(fd, &writeSet_);
 	}
 	else {
 		setBadRequest(fd);
@@ -144,7 +144,7 @@ void	SockData::setResponse(int fd)
 			clients_[fd].getTmpRequest().clear();
 			clients_[fd].getRequest().clear();
 			clients_[fd].setChunk(false);
-			FD_SET(fd, &sendSet_);
+			FD_SET(fd, &writeSet_);
 			return ;
 		}
 	}
@@ -155,7 +155,7 @@ void	SockData::setResponse(int fd)
 		clients_[fd].getTmpRequest().clear();
 		clients_[fd].getRequest().clear();
 		clients_[fd].setChunk(false);
-		FD_SET(fd, &sendSet_);
+		FD_SET(fd, &writeSet_);
 	}
 	else {
 		setBadRequest(fd);
@@ -181,7 +181,7 @@ void	SockData::setInternalError(int fd)
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
 	clients_[fd].setChunk(false);
-	FD_SET(fd, &sendSet_);
+	FD_SET(fd, &writeSet_);
 }
 
 void	SockData::setBadRequest(int fd)
@@ -203,7 +203,7 @@ void	SockData::setBadRequest(int fd)
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
 	clients_[fd].setChunk(false);
-	FD_SET(fd, &sendSet_);
+	FD_SET(fd, &writeSet_);
 }
 
 /* checkers */
@@ -222,18 +222,18 @@ bool	SockData::isSockListen(int fd) const
 bool	SockData::isSockClient(int fd) const
 	{ return (clients_.count(fd) == 1); }
 
-bool	SockData::isRecvSet(int fd) const
-	{ return FD_ISSET(fd, &recvSet_); }
+bool	SockData::isReadSet(int fd) const
+	{ return FD_ISSET(fd, &readSet_); }
 
-bool	SockData::isSendSet(int fd) const
-	{ return FD_ISSET(fd, &sendSet_); }
+bool	SockData::isWriteSet(int fd) const
+	{ return FD_ISSET(fd, &writeSet_); }
 
 /* getters */
-fd_set	*SockData::getRecvSet(void)
-	{ return &recvSet_; }
+fd_set	*SockData::getReadSet(void)
+	{ return &readSet_; }
 
-fd_set	*SockData::getSendSet(void)
-	{ return &sendSet_; }
+fd_set	*SockData::getWriteSet(void)
+	{ return &writeSet_; }
 
 size_t	SockData::getSizeListen(void) const
 	{ return sockListen_.size(); }
@@ -339,11 +339,11 @@ void	SockData::sendClient(int fd)
 		close(fd);
 		clients_.erase(fd);
 		FD_CLR(fd, &activeSet_);
-		FD_CLR(fd, &sendSet_);
+		FD_CLR(fd, &writeSet_);
 		cnxCloseSend(fd);
 	}
 	else {
-		FD_CLR(fd, &sendSet_);
+		FD_CLR(fd, &writeSet_);
 		msgSent(fd);
 	}
 	response_.erase(fd);
@@ -362,7 +362,7 @@ void	SockData::recvClientClose(int fd, int ret)
 	response_.erase(fd);
 	clients_.erase(fd);
 	FD_CLR(fd, &activeSet_);
-	FD_CLR(fd, &sendSet_);
+	FD_CLR(fd, &writeSet_);
 }
 
 /* msg connection */
