@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/15 16:13:12 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/15 18:17:34 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ class Parser: public Server {
 	
 		// CHECKERS
 		void	serverChecker();
-		bool	serverNameChecker();
+		bool	serverNameCompleter();
 		bool	portsChecker();
 		bool	locationChecker();
 		bool	errorPageChecker();
