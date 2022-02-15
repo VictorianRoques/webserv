@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 16:16:11 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 18:51:59 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,10 +101,13 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 {
 	Response	response(server);
 	dataFds_[fd] = response.searchFd(request);
-	std::cout << "DATA FD_: " << dataFds_[fd] << std::endl;
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
+	clients_[fd].setResponseHeader(response.getResponseHeader());
 	clients_[fd].setChunk(false);
+	if (dataFds_[fd] != CGI) {
+		FD_SET(dataFds_[fd], &activeSet_);
+	}
 	FD_SET(fd, &writeSet_);
 }
 
@@ -303,30 +306,29 @@ void	SockData::recvClient(int fd)
 	}
 }
 
-void	SockData::getHeader(void)
-{
-
-}
-
 void	SockData::sendClient(int fd)
 {
 	char	buffer[BUF_SIZE];
 	int		ret;
-	if (dataFds_[fd] != ERROR && FD_ISSET(dataFds_[fd], &readSet_)) {
+	if (dataFds_[fd] != CGI && FD_ISSET(dataFds_[fd], &readSet_)) {
 		if ((ret = read(dataFds_[fd], buffer, BUF_SIZE - 1)) == ERROR) {
 			clearClient(fd);
 			clearDataFd(fd);
 			openFailureData(fd);
 		}
 		buffer[ret] = '\0';
-		clients_[fd].getData() += std::string(buffer);
+		clients_[fd].getBody() += std::string(buffer, ret);
 		if (ret < BUF_SIZE - 1) {
-			if (send(fd, clients_[fd].getFinalData().c_str(),
-			clients_[fd].getData().size(), 0) == ERROR) {
+			clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getBody().size());
+			clients_[fd].getResponseHeader().writeHeader();
+			std::cout << "HEADER: \n" << clients_[fd].getResponseHeader().getHeader() << std::endl;
+			std::string	data = clients_[fd].getResponseHeader().getHeader() + clients_[fd].getBody();
+			if (send(fd, data.c_str(), data.size(), 0) == ERROR) {
 				clearClient(fd);
 				cnxCloseSend(fd);
 			}
 			clearDataFd(fd);
+			clients_[fd].getBody().clear();
 			FD_CLR(fd, &writeSet_);
 		}
 	}
@@ -343,13 +345,13 @@ void	SockData::sendClient(int fd)
 /* client manager utils */
 void	SockData::recvClientClose(int fd, int ret)
 {
-	clearClient(fd);
 	if (ret == ERROR) {
 		cnxCloseRecv(fd);
 	}
 	else {
 		cnxCloseRecv2(fd);
 	}
+	clearClient(fd);
 }
 
 void	SockData::clearDataFd(int fd)

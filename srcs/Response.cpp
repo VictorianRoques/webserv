@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/15 16:00:50 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/15 17:10:43 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,22 +52,22 @@ Response	&Response::operator=(const Response &res)
 }
 
 
-Request&		Response::getRequest()		{ return _request; }
-std::string&	Response::getPath()			{ return _path; }
-std::string&	Response::getBody()			{ return _body; }
-std::string&	Response::getResponse()		{ return _response; }
-Server&			Response::getServ()			{ return _serv; }
-map_str&		Response::getErrorPage()	{ return _errorPage; }
-std::string&	Response::getPathCgi()		{ return _pathCgi; }
-std::string&	Response::getExtensionCgi()	{ return _extensionCgi; }
-std::string&	Response::getIndex()		{ return _index; }
-std::string&	Response::getRoot()			{ return _root; }
-std::string&	Response::getGeneralRoot()	{ return _generalRoot; }
-bool			Response::getAutoIndex()	{ return _autoIndex; }
-vec_str&		Response::getAllowMethods()	{ return _allowMethods; }
-std::string&	Response::getUploadDest()	{ return _uploadDest; }
-ResponseHeader&	Response::getHeader() 		{ return _header; }
-std::string&	Response::getLocation()		{ return _location; }
+Request&		Response::getRequest()			{ return _request; }
+std::string&	Response::getPath()				{ return _path; }
+std::string&	Response::getBody()				{ return _body; }
+std::string&	Response::getResponse()			{ return _response; }
+Server&			Response::getServ()				{ return _serv; }
+map_str&		Response::getErrorPage()		{ return _errorPage; }
+std::string&	Response::getPathCgi()			{ return _pathCgi; }
+std::string&	Response::getExtensionCgi()		{ return _extensionCgi; }
+std::string&	Response::getIndex()			{ return _index; }
+std::string&	Response::getRoot()				{ return _root; }
+std::string&	Response::getGeneralRoot()		{ return _generalRoot; }
+bool			Response::getAutoIndex()		{ return _autoIndex; }
+vec_str&		Response::getAllowMethods()		{ return _allowMethods; }
+std::string&	Response::getUploadDest()		{ return _uploadDest; }
+ResponseHeader&	Response::getResponseHeader()	{ return _header; }
+std::string&	Response::getLocation()			{ return _location; }
 
 void	Response::setFdError(int code)
 {
@@ -168,6 +168,7 @@ void		Response::setFdContent()
 		}
 		_header.setStatus("200 OK");
 		_header.setContentType(_request.getContentType());
+		std::cout << "Content Type: " << _request.getContentType() << std::endl;
 	}
 	else
 	{
@@ -188,14 +189,6 @@ void		Response::readFd()
 		_body = buffer;
 		_header.setBodyLength(_body.length());
 	}
-}
-
-void		Response::makeAnswer()
-{
-	if (_body.empty() == true && _fd)
-		readFd();
-	_header.writeHeader();
-	_response = _header.getHeader() + _body;
 }
 
 void        Response::setLocationConf()

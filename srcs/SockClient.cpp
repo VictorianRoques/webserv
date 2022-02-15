@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 14:28:10 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 18:49:31 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,13 @@ SockClient	&SockClient::operator=(const SockClient &sockClient)
 {
 	ip_ = sockClient.ip_;
 	port_ = sockClient.port_;
-	request_ = sockClient.request_;
-	tmpRequest_ = sockClient.tmpRequest_;
 	chunk_ = sockClient.chunk_;
+	tmpRequest_ = sockClient.tmpRequest_;
+	request_ = sockClient.request_;
+	body_ = sockClient.body_;
+	responseHeader_ = sockClient.responseHeader_;
+	fd_[0] = sockClient.fd_[0];
+	fd_[1] = sockClient.fd_[1];
 	return *this;
 }
 
@@ -40,6 +44,9 @@ void	SockClient::setPort(size_t port)
 
 void	SockClient::setChunk(bool chunk)
 	{ chunk_ = chunk; }
+
+void	SockClient::setResponseHeader(ResponseHeader &responseHeader)
+	{ responseHeader_ = responseHeader; }
 
 /* checkers */
 bool	SockClient::isChunk(void) const
@@ -128,8 +135,11 @@ std::string	&SockClient::getTmpRequest(void)
 std::string	&SockClient::getRequest(void)
 	{ return request_; }
 
-std::string	&SockClient::getData(void)
-	{ return data_; }
+ResponseHeader	&SockClient::getResponseHeader(void)
+	{ return responseHeader_; }
+
+std::string	&SockClient::getBody(void)
+	{ return body_; }
 
 int	&SockClient::getBeginPipe(void)
 	{ return fd_[1]; }

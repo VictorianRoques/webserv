@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/15 15:30:04 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/15 16:26:33 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ public:
     bool            getAutoIndex();
     vec_str&        getAllowMethods();
     std::string&    getUploadDest();
-    ResponseHeader& getHeader();
+    ResponseHeader& getResponseHeader();
     std::string&    getLocation();
 
 private:

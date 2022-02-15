@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 13:57:46 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 17:35:14 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@
 
 # define ERROR -1
 # define CGI -1
-# define BUF_SIZE 1024
+# define BUF_SIZE 512
 
 class SockData {
 	private:

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 16:13:50 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 18:49:43 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 # include <sstream>
 # include <iostream>
 
+# include "ResponseHeader.hpp"
+
 class SockClient {
 
 	private:
@@ -27,7 +29,7 @@ class SockClient {
 		bool			chunk_;
 		std::string		tmpRequest_;
 		std::string		request_;
-		std::string		data_;
+		std::string		body_;
 		ResponseHeader	responseHeader_;
 		int				fd_[2];
 
@@ -38,23 +40,25 @@ class SockClient {
 		SockClient	&operator=(const SockClient &sockClient);
 
 		/* setters */
-		void		setIp(char *ip);
-		void		setPort(size_t port);
-		void		setChunk(bool chunk);
+		void			setIp(char *ip);
+		void			setPort(size_t port);
+		void			setChunk(bool chunk);
+		void			setResponseHeader(ResponseHeader &responseHeader);
 		/* checkers */
-		bool		isChunk(void) const;
-		bool		isTmpRequestChunk(void) const;
-		bool		isChunkEof(void) const;
-		bool		isDeleteRequest(void) const;
-		bool		isBadRequest(void) const;
+		bool			isChunk(void) const;
+		bool			isTmpRequestChunk(void) const;
+		bool			isChunkEof(void) const;
+		bool			isDeleteRequest(void) const;
+		bool			isBadRequest(void) const;
 		/* getters */
-		char		*getIp(void) const;
-		size_t		getPort(void) const;
-		std::string	&getTmpRequest(void);
-		std::string	&getRequest(void);
-		std::string	&getData(void);
-		int			&getBeginPipe(void);
-		int			&getEndPipe(void);
+		char			*getIp(void) const;
+		size_t			getPort(void) const;
+		std::string		&getTmpRequest(void);
+		std::string		&getRequest(void);
+		ResponseHeader	&getResponseHeader(void);
+		std::string		&getBody(void);
+		int				&getBeginPipe(void);
+		int				&getEndPipe(void);
 
 };
 
