@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 01:38:19 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 01:52:29 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,6 +175,12 @@ bool	SockData::isReadSet(int fd) const
 bool	SockData::isWriteSet(int fd) const
 	{ return FD_ISSET(fd, &writeSet_); }
 
+bool	SockData::isBeginPipeReady(int fd)
+	{ return FD_ISSET(clients_[fd].getBeginPipe(), &writeSet_); }
+
+bool	SockData::isEndPipeReady(int fd)
+	{ return FD_ISSET(clients_[fd].getEndPipe(), &readSet_); }
+
 /* getters */
 fd_set	*SockData::getReadSet(void)
 	{ return &readSet_; }
@@ -279,12 +285,6 @@ void	SockData::recvClient(int fd)
 		exceptionError(fd, e);
 	}
 }
-
-bool	SockData::isBeginPipeReady(int fd)
-	{ return FD_ISSET(clients_[fd].getBeginPipe(), &writeSet_); }
-
-bool	SockData::isEndPipeReady(int fd)
-	{ return FD_ISSET(clients_[fd].getEndPipe(), &readSet_); }
 
 void	SockData::sendClient(int fd)
 {
