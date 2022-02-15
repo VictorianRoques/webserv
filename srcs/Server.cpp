@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 16:27:10 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/10 19:37:38 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 //           EXCEPTIONS               //
 /**************************************/
 char const *Server::ExceededMaxBodySizeException::what() const throw() { return "Exceeded max body size!"; }
-char const *Server::WrongFormatMaxBodySizeException::what() const throw() { return "Wrong Format of client_max_body_size.\nEx.: client_max_body_size 30M\nMagnitudes : K, M, G"; }
 
 /**************************************/
 //           COPLIAN CLASS            //
@@ -50,6 +49,7 @@ Server&	Server::operator=(const Server &x) {
 		_port = x.getPort();
 		_serverName = x.getServerName();
 		_errorPage = x.getErrorPage();
+		_errorPageContent = x.getErrorPageContent();
 		_maxBodySize = x.getMaxBodySize();
 		_location = x.getLocation();
 		_serverNb = x.getServerNb();
@@ -66,7 +66,8 @@ std::string 					Server::getIP() const { return _ip; }
 std::vector<size_t>				Server::getPort() const { return _port; }
 vec_str							Server::getServerName() const { return _serverName; }
 map_str							Server::getErrorPage() const { return _errorPage; }
-size_t							Server::getMaxBodySize() const { return _maxBodySize; }
+map_str							Server::getErrorPageContent() const { return _errorPageContent; }
+long long						Server::getMaxBodySize() const { return _maxBodySize; }
 std::vector<Location>			Server::getLocation() const { return _location; }
 size_t							Server::getServerNb() const { return _serverNb; }
 
@@ -80,28 +81,9 @@ void	Server::setIP(std::string ip) { _ip = ip; }
 void	Server::setPort(std::vector<size_t> port) { _port = port; }
 void	Server::setServerName(vec_str serverName) { _serverName = serverName; }
 void	Server::setErrorPage(map_str errorPage) { _errorPage = errorPage; }
-void	Server::setMaxBodySize(size_t maxBodySize) { _maxBodySize = maxBodySize; }
-void	Server::setMaxBodySize(std::string maxBodySize) {
-	size_t pos;
-
-	_maxBodySize = static_cast<size_t>(std::atoi(maxBodySize.c_str()));
-	if ((pos = maxBodySize.find_first_not_of("0123456789 \t")) != std::string::npos) {
-		if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k')
-			_maxBodySize *= 1024;
-		else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm')
-			_maxBodySize *= 1048576;
-		else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
-			_maxBodySize *= 1073741824;
-	}
-	if (maxBodySize.length() == pos)
-		return ;
-
-	std::cout << "Max BOdy Size = " << maxBodySize << std::endl;
-	std::cout << "Max BOdy length= " << maxBodySize.size() << std::endl;
-	std::cout << "POS = " << pos << std::endl;
-	if (!((maxBodySize.at(pos + 1) == 'o' && maxBodySize.size() == pos + 3) || (maxBodySize.at(pos + 1) == ';' && maxBodySize.size() == pos + 2)))
-		throw WrongFormatMaxBodySizeException();
-}
+void	Server::setErrorPageContent(map_str errorPageContent) { _errorPageContent = errorPageContent; }
+void	Server::setMaxBodySize(long long maxBodySize) { _maxBodySize = maxBodySize; }
+void	Server::setMaxBodySize(std::string maxBodySize) { _maxBodySize = maxBodyAtoi(maxBodySize); }
 void	Server::setLocation(std::vector<Location> location) { _location = location; }
 void	Server::setServerNb(size_t serverNb) { _serverNb = serverNb; }
 
@@ -114,12 +96,16 @@ void	Server::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoo
 void	Server::print_serv() {
 	if (_serverNb > 1)
 		std::cout << "____________________________________________________" << std::endl << std::endl;
+	std::cout << COLOR_SERV << "/**************************************/" << NC << std::endl;
+	std::cout << COLOR_SERV << "//               SERVER               //" << NC << std::endl;
+	std::cout << COLOR_SERV << "/**************************************/" << NC << std::endl << std::endl;
 	std::cout << COLOR_SERV << "Server no. " << NC << _serverNb << std::endl;
 	std::cout << COLOR_SERV << "Server Name: " << NC; ft_putvec(_serverName, " ");
 	std::cout << COLOR_SERV << "IP: " << NC << _ip << std::endl;
 	std::cout << COLOR_SERV << "Port: " << NC; ft_putvec(_port, " ");
 	std::cout << COLOR_SERV << "Error Page: " << NC; ft_putmap(_errorPage, " ");
 	std::cout << COLOR_SERV << "Client_Max_Body_Size: " << NC << _maxBodySize << std::endl;
+//	std::cout << COLOR_SERV << "Error Page Content: " << NC; ft_putmap(_errorPageContent, " ");
 
 	std::cout << std::endl;
 	std::vector<Location>::iterator	it = _location.begin();

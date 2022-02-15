@@ -124,7 +124,7 @@ int      Response::initRequest(Request &req)
         else
             _path = _root + "/" + _index;
     }
-    if (_request.getBody().size() > _serv.getMaxBodySize())
+    if ((int)_request.getBody().size() > _serv.getMaxBodySize())
     {
 		setFdError(413);
         return (1);

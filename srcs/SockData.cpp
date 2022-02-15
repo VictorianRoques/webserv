@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/09 13:44:20 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/10 19:57:27 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,43 @@ SockData	&SockData::operator=(const SockData &sockData)
 void	SockData::setServers(std::vector<Server> servers)
 	{ servers_ = servers; }
 
+/*
+** A socket can only listen on one port at a time
+** so we bind a socket with every ports specified
+*/
+void	SockData::setSockListen(std::vector<size_t>	ports)
+{
+	int					sockTmp;
+	sockaddr_in			addr;
+	for (size_t i = 0; i < ports.size(); ++i) {
+		if ((sockTmp = socket(AF_INET, SOCK_STREAM, 0)) == ERROR) {
+			perror("socket");
+			closeListen(i);
+			exit(EXIT_FAILURE);
+		}
+		int opt = 1;
+		if (setsockopt(sockTmp, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == ERROR) {
+			perror("setsockopt");
+			closeListen(i);
+			exit(EXIT_FAILURE);
+		}
+		addr.sin_family = AF_INET;
+		addr.sin_addr.s_addr = INADDR_ANY;
+		addr.sin_port = htons(ports[i]);
+		if (bind(sockTmp, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == ERROR) {
+			perror("bind");
+			closeListen(i);
+			exit(EXIT_FAILURE);
+		}
+		if (listen(sockTmp, 1024) == ERROR) {
+			perror("listen");
+			closeListen(i);
+			exit(EXIT_FAILURE);
+		}
+		sockListen_.push_back(sockTmp);
+	}
+}
+
 void	SockData::initActiveSet(void)
 	{ FD_ZERO(&activeSet_); }
 
@@ -57,9 +94,6 @@ void	SockData::initSendSet(void)
 
 void	SockData::addActiveSet(int fd)
 	{ FD_SET(fd, &activeSet_); }
-
-void	SockData::setSockListen(std::vector<int> sockListen)
-	{ sockListen_ = sockListen; }
 
 void	SockData::setRecvToActive(void)
 	{ recvSet_ = activeSet_; }
@@ -414,6 +448,19 @@ void	SockData::exceptionError(int fd, std::exception &e)
 }
 
 /* utils */
+
+/*
+** If an error occurs before the server is actually started,
+** all the socket fds are closed before exit
+*/
+
+void	SockData::closeListen(size_t endInd)
+{
+	for (size_t i = 0; i < endInd; ++i) {
+		close(sockListen_[i]);
+	}
+}
+
 void	SockData::printBuffer(char buffer[BUF_SIZE]) const
 {
 	std::cout << red;

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/07 23:34:18 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/10 20:01:15 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,13 +33,14 @@
 
 class SockData {
 	private:
-		std::vector<Server>			servers_;
-		std::vector<int>			sockListen_;
-		std::map<int, std::string>	response_;
-		std::map<int, SockClient>	clients_;
-		fd_set						activeSet_;
-		fd_set						recvSet_;
-		fd_set						sendSet_;
+		std::vector<Server>					servers_;
+		std::vector<int>					sockListen_;
+		std::map<int, std::string>			response_;
+		std::map<int, SockClient>			clients_;
+		fd_set								activeSet_;
+		fd_set								recvSet_;
+		fd_set								sendSet_;
+		std::map<std::string, std::string>	errorPages_;
 
 		std::string	red;
 		std::string	green;
@@ -53,11 +54,11 @@ class SockData {
 		SockData	&operator=(const SockData &sockData);
 		/* setters */
 		void		setServers(std::vector<Server> servers);
+		void		setSockListen(std::vector<size_t> ports);
 		void		initActiveSet(void);
 		void		initRecvSet(void);
 		void		initSendSet(void);
 		void		addActiveSet(int fd);
-		void		setSockListen(std::vector<int> sockListen);
 		void		setRecvToActive(void);
 		void		setResponse(int fd);
 		void		setInternalError(int fd);
@@ -92,6 +93,7 @@ class SockData {
 		/* msg exception */
 		void		exceptionError(int fd, std::exception &e);
 		/* utils */
+		void		closeListen(size_t endInd);
 		void		printBuffer(char buffer[BUF_SIZE]) const;
 		/* bad alloc exception */
 		struct badAllocException : public std::exception {
