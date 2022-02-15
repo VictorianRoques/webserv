@@ -1,24 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   socket.hpp                                         :+:      :+:    :+:   */
+/*   SockExec.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/21 19:02:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/13 12:38:09 by fhamel           ###   ########.fr       */
+/*   Created: 2022/02/14 19:39:47 by fhamel            #+#    #+#             */
+/*   Updated: 2022/02/14 19:42:50 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SOCKET_HPP
-# define SOCKET_HPP
+# include "SockExec.hpp"
 
-# include <cstdlib>
-# include <cstring>
+/* getters */
+int	SockExec::getFdClient(void) const
+	{ return fd_client_; }
 
-# include "SockData.hpp"
+int	SockExec::getFdData(void) const
+	{ return fd_data_; }
 
-void				sockServ(std::vector<Server> servers, std::vector<size_t> ports);
+int	SockExec::getFdRequest(void) const
+	{ return fd_request_; }
 
-
-#endif
+std::string	SockExec::getRequest(void) const
+	{ return request_; }

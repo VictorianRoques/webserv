@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/10 17:32:55 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 14:28:07 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,19 @@
 # include <string>
 # include <vector>
 # include <sstream>
+# include <iostream>
 
 class SockClient {
-	
+
 	private:
+
 		char		*ip_;
 		size_t		port_;
+		bool		chunk_;
 		std::string	tmpRequest_;
 		std::string	request_;
+		std::string	data_;
 		int			fd_[2];
-		bool		chunk_;
 
 	public:
 		SockClient(void);
@@ -48,6 +51,10 @@ class SockClient {
 		size_t		getPort(void) const;
 		std::string	&getTmpRequest(void);
 		std::string	&getRequest(void);
+		std::string	&getData(void);
+		int			&getBeginPipe(void);
+		int			&getEndPipe(void);
+
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/09 12:36:56 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 14:28:10 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,8 +71,6 @@ bool	SockClient::isChunkEof(void) const
 	return false;
 }
 
-#include <iostream>
-
 bool	SockClient::isDeleteRequest(void) const
 {
 	std::istringstream	data(request_);
@@ -129,3 +127,12 @@ std::string	&SockClient::getTmpRequest(void)
 
 std::string	&SockClient::getRequest(void)
 	{ return request_; }
+
+std::string	&SockClient::getData(void)
+	{ return data_; }
+
+int	&SockClient::getBeginPipe(void)
+	{ return fd_[1]; }
+
+int	&SockClient::getEndPipe(void)
+	{ return fd_[0]; }
