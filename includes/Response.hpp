@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/15 14:51:11 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/15 15:30:04 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@
 # include "autoIndex.hpp"
 # include "utils.hpp"
 
-# define BUF_SIZE 4096
 class Response {
 
 public:

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/15 14:46:47 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/15 16:00:50 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,7 @@ void	Response::setFdError(int code)
 
 int		Response::searchFd(Request &req)
 {
+	std::cout << "HELLOW" << std::endl;
 	if (initRequest(req))
 		return _fd;
 	if(_methods.find(_request.getMethod()) != _methods.end() 
@@ -101,6 +102,7 @@ int		Response::searchFd(Request &req)
 	}
     else
 		setFdError(405);
+	std::cout << "fd: " << std::endl;
 	return _fd;
 }
 
@@ -156,7 +158,6 @@ void		Response::getMethod()
 
 void		Response::setFdContent()
 {
-	std::cout << "PATH: " << _path << std::endl;
 	if (pathIsFile(_path))
 	{
 		_fd = open(_path.c_str(), O_RDONLY);
