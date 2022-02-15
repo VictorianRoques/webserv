@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 19:26:52 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/15 16:13:12 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ class Parser: public Server {
 		// CHECKERS
 		void	serverChecker();
 		bool	serverNameChecker();
+		bool	portsChecker();
 		bool	locationChecker();
 		bool	errorPageChecker();
 
@@ -121,6 +122,8 @@ class Parser: public Server {
 		class ConfigFileIsDirectoryException: public std::exception { public: virtual char const *what() const throw(); };
 
 		class WrongServerNameException: public std::exception { public: virtual char const *what() const throw(); };
+		
+		class DuplicatePortException: public std::exception { public: virtual char const *what() const throw(); };
 
 		class EmptyConfigException: public std::exception { public: virtual char const *what() const throw(); };
 

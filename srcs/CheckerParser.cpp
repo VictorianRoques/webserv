@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 17:50:37 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/15 16:19:57 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ const std::string WHITESPACE = "\f\t\n\r\v ";
 //           EXCEPTIONS               //
 /**************************************/
 char const *Parser::WrongServerNameException::what() const throw() { return "For this project, you'll need localhost as a server name."; }
+char const *Parser::DuplicatePortException::what() const throw() { return "You've assigned a port multiple times..."; }
 char const *Parser::MissingDefaultLocationException::what() const throw() { return "You need at least one location / { } context in your server {}."; }
 char const *Parser::ErrorPagePathException::what() const throw() { return "error_page path isn't an existing file."; }
 
@@ -39,6 +40,22 @@ bool	Parser::serverNameChecker() {
 	correct += out.str();
 	_serverName.push_back(correct);
 	_serverName.push_back("www." + correct);
+	return true;
+}
+
+/**
+ * portChecker(): checks if a port is defined several times (forbidden)
+**/
+bool	Parser::portsChecker() {
+	std::vector<size_t>::iterator it = _ports_g.begin();
+	std::vector<size_t>::iterator it1;
+	for (; it != _ports_g.end() - 1; it++) {
+		it1 = it + 1;
+		for (; it1 != _ports_g.end(); it1++) {
+			if (*it1 == *it)
+				return false;
+		}
+	}
 	return true;
 }
 
@@ -76,6 +93,9 @@ void	Parser::serverChecker() {
 	// check server name
 	if (!serverNameChecker())
 		throw WrongServerNameException();
+
+	if (!portsChecker())
+		throw DuplicatePortException();
 
 	if (!locationChecker())
 		throw MissingDefaultLocationException();
