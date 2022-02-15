@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/08 23:54:16 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/15 14:51:11 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,36 +30,40 @@
 # include "autoIndex.hpp"
 # include "utils.hpp"
 
+# define BUF_SIZE 4096
 class Response {
 
 public:
-
+    
     Response();
     Response(Server &serv);
+    Response(Server &serv, Request &req);
     Response(const Response &res);
     ~Response();
     Response    &operator=(const Response &res);
 
     /* Init Function for make Response */
     int             initRequest(Request &req);
+    int             searchFd(Request &req);
     void            setLocationConf();
-    void            makeAnswer(Request &req);
+    void            makeAnswer();
 
     /* Reading/send Data */
-    int             readErrorPage(std::string &path);
-    void            readContent(std::string &path);
-    void            sendPage(int code);
 
     /* HTTP Methods */
-    void            getMethod();
-    void            headMethod();
-    void            postMethod();
-    void            deleteMethod();
+    void               getMethod();
+    // void            postMethod();
+    // void            deleteMethod();
     
     /* Helper Functions */
     int             upload();
     bool            isAllow(std::string method);
 	std::string		autoIndexBuilder(std::string path);
+
+    /* Set Fd */
+    void            setFdContent();
+    void            setFdError(int code);
+    void            readFd();
 
     /* Getters */
 
@@ -93,12 +97,14 @@ private:
     std::string                 _index;
     std::string                 _root;
     std::string                 _generalRoot;
-    bool                        _AutoIndex;
+    bool                        _autoIndex;
     vec_str                     _allowMethods;
     std::string                 _uploadDest;
     ResponseHeader              _header;
     std::string                 _location;
-
+    int                         _code;
+    int                         _fd;
+    
     std::map<std::string, void (Response::*)()> _methods;  
 };
 
