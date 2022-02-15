@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/14 20:56:59 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 01:38:19 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ SockData	&SockData::operator=(const SockData &sockData)
 {
 	servers_ = sockData.servers_;
 	sockListen_ = sockData.sockListen_;
-	response_ = sockData.response_;
 	clients_ = sockData.clients_;
 	activeSet_ = sockData.activeSet_;
 	readSet_ = sockData.readSet_;
@@ -98,64 +97,28 @@ void	SockData::addActiveSet(int fd)
 void	SockData::setReadToActive(void)
 	{ readSet_ = activeSet_; }
 
-void	SockData::setResponse(int fd)
+void	SockData::setDataFd(int fd, Request &request, Server &server)
 {
-	Request	request = requestParser(clients_[fd].getRequest(), servers_);
-	std::vector<Server>::iterator	it = servers_.begin();
-	std::vector<Server>::iterator	ite = servers_.end();
-	for (; it != ite; ++it) {
-		if (vector_contains_str(it->getServerName(), request.getHost())) {
-			Response	response(*it);
-			response.makeAnswer(request);
-			response_[fd] = response.getResponse();
-			// responseFds[fd] = searchFdData(request);
-			clients_[fd].getTmpRequest().clear();
-			clients_[fd].getRequest().clear();
-			clients_[fd].setChunk(false);
-			FD_SET(fd, &writeSet_);
-			return ;
-		}
-	}
-	if (clients_[fd].isDeleteRequest()) {
-		Response	response(*servers_.begin());
-		response.makeAnswer(request);
-		response_[fd] = response.getResponse();
-		// responseFds[fd] = searchFdData(request
-		clients_[fd].getTmpRequest().clear();
-		clients_[fd].getRequest().clear();
-		clients_[fd].setChunk(false);
-		FD_SET(fd, &writeSet_);
-	}
-	else {
-		setBadRequest(fd);
-	}
+	Response	response(server);
+	dataFds_[fd] = response.searchFd(request);
+	clients_[fd].getTmpRequest().clear();
+	clients_[fd].getRequest().clear();
+	clients_[fd].setChunk(false);
+	FD_SET(fd, &writeSet_);
 }
 
 void	SockData::setResponse(int fd)
 {
 	Request	request = requestParser(clients_[fd].getRequest(), servers_);
-	std::vector<Server>::iterator	it = servers_.begin();
-	std::vector<Server>::iterator	ite = servers_.end();
+	std::vector<Server>::iterator	it = servers_.begin(), ite = servers_.end();
 	for (; it != ite; ++it) {
 		if (vector_contains_str(it->getServerName(), request.getHost())) {
-			Response	response(*it);
-			response.makeAnswer(request);
-			response_[fd] = response.getResponse();
-			clients_[fd].getTmpRequest().clear();
-			clients_[fd].getRequest().clear();
-			clients_[fd].setChunk(false);
-			FD_SET(fd, &writeSet_);
+			setDataFd(fd, request, *it);
 			return ;
 		}
 	}
 	if (clients_[fd].isDeleteRequest()) {
-		Response	response(*servers_.begin());
-		response.makeAnswer(request);
-		response_[fd] = response.getResponse();
-		clients_[fd].getTmpRequest().clear();
-		clients_[fd].getRequest().clear();
-		clients_[fd].setChunk(false);
-		FD_SET(fd, &writeSet_);
+		setDataFd(fd, request, *servers_.begin());
 	}
 	else {
 		setBadRequest(fd);
@@ -164,46 +127,30 @@ void	SockData::setResponse(int fd)
 
 void	SockData::setInternalError(int fd)
 {
-	std::string			response, body, size;
-	std::stringstream	ss;
-	body += "<!DOCTYPE html>\n<html><title>500</title><body>\
-<h1>500 Internal Server Error</h1>\
-<h3>Sorry, server is under pressure at the moment...</h3></body></html>\n";
-	ss << body.size();
-	ss >> size;
-	response += "HTTP/1.1 500 Internal Server Error\r\n";
-	response += "Content-Type: text/html\r\n";
-	response += "Content-Length: "; response += size; response += "\r\n";
-	response += "Connection: keep-alive\r\n";
-	response += "\r\n";
-	response += body;
-	response_[fd] = response;
-	clients_[fd].getTmpRequest().clear();
-	clients_[fd].getRequest().clear();
-	clients_[fd].setChunk(false);
-	FD_SET(fd, &writeSet_);
+	int	fd_error_500;
+	if ((fd_error_500 = open("../error_pages/500.html", O_RDONLY)) == ERROR) {
+		close(fd);
+		clients_.erase(fd);
+		dataFds_.erase(fd);
+		openFailure500(fd);
+		return ;
+	}
+	dataFds_[fd] = fd_error_500;
+	FD_SET(fd, &activeSet_);
 }
 
-void	SockData::setBadRequest(int fd)
+void	SockData::setInternalError(int fd)
 {
-	std::string			response, body, size;
-	std::stringstream	ss;
-	body += "<!DOCTYPE html>\n<html><title>400</title><body>\
-<h1>400 Bad Request</h1>\
-<h3>Sorry, server couldn't process the request</h3></body></html>\n";
-	ss << body.size();
-	ss >> size;
-	response += "HTTP/1.1 400 Bad Request\r\n";
-	response += "Content-Type: text/html\r\n";
-	response += "Content-Length: "; response += size; response += "\r\n";
-	response += "Connection: keep-alive\r\n";
-	response += "\r\n";
-	response += body;
-	response_[fd] = response;
-	clients_[fd].getTmpRequest().clear();
-	clients_[fd].getRequest().clear();
-	clients_[fd].setChunk(false);
-	FD_SET(fd, &writeSet_);
+	int	fd_error_400;
+	if ((fd_error_400 = open("../error_pages/400.html", O_RDONLY)) == ERROR) {
+		close(fd);
+		clients_.erase(fd);
+		dataFds_.erase(fd);
+		openFailure400(fd);
+		return ;
+	}
+	dataFds_[fd] = fd_error_400;
+	FD_SET(fd, &activeSet_);
 }
 
 /* checkers */
@@ -333,34 +280,67 @@ void	SockData::recvClient(int fd)
 	}
 }
 
+bool	SockData::isBeginPipeReady(int fd)
+	{ return FD_ISSET(clients_[fd].getBeginPipe(), &writeSet_); }
+
+bool	SockData::isEndPipeReady(int fd)
+	{ return FD_ISSET(clients_[fd].getEndPipe(), &readSet_); }
+
 void	SockData::sendClient(int fd)
 {
-	if (send(fd, response_[fd].c_str(), response_[fd].size(), 0) == ERROR) {
-		close(fd);
-		clients_.erase(fd);
-		FD_CLR(fd, &activeSet_);
-		FD_CLR(fd, &writeSet_);
-		cnxCloseSend(fd);
+	char	buffer[BUF_SIZE];
+	int		ret;
+	if (FD_ISSET(dataFds_[fd], &readSet_)) {
+		if ((ret = read(dataFds_[fd], buffer, BUF_SIZE - 1)) == ERROR) {
+			clearClient(fd);
+			clearDataFd(fd);
+			openFailureData(fd);
+		}
+		buffer[ret] = '\0';
+		clients_[fd].getData() += std::string(buffer);
+		if (ret < BUF_SIZE - 1) {
+			if (send(fd, clients_[fd].getData().c_str(),
+			clients_[fd].getData().size(), 0) == ERROR) {
+				clearClient(fd);
+				cnxCloseSend(fd);
+			}
+			clearDataFd(fd);
+			FD_CLR(fd, &writeSet_);
+		}
 	}
-	else {
-		FD_CLR(fd, &writeSet_);
-		msgSent(fd);
-	}
-	response_.erase(fd);
+	// else if (isBeginPipeReady(fd) && !isEndPipeReady(fd)) {
+	// 	SockExec sockExec = setSockExec(fd);
+	// 	startCgi(sockExec);
+	// }
+	// else if (isBeginPipeReady(fd) && isEndPipeReady(fd)) {
+	// 	writeToCgi(fd);
+	// }
 }
 
 /* client manager utils */
 void	SockData::recvClientClose(int fd, int ret)
 {
-	close(fd);
+	clearClient(fd);
 	if (ret == ERROR) {
 		cnxCloseRecv(fd);
 	}
 	else {
 		cnxCloseRecv2(fd);
 	}
-	response_.erase(fd);
+}
+
+void	SockData::clearDataFd(int fd)
+{
+	close(dataFds_[fd]);
+	FD_CLR(dataFds_[fd], &activeSet_);
+	dataFds_.erase(fd);
+}
+
+void	SockData::clearClient(int fd)
+{
+	close(fd);
 	clients_.erase(fd);
+	dataFds_.erase(fd);
 	FD_CLR(fd, &activeSet_);
 	FD_CLR(fd, &writeSet_);
 }
@@ -475,6 +455,42 @@ void	SockData::exceptionError(int fd, std::exception &e)
 	std::cout << "Server: " << e.what() << ": " << clients_[fd].getIp();
 	std::cout << " on port " << clients_[fd].getPort();
 	std::cout << " | socket fd: " << fd;
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::openFailure500(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: couldn't open '../error_pages/500.html'";
+	std::cout << " | socket fd " << fd;
+	std::cout << " | closing connection"; 
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::openFailure400(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: couldn't open '../error_pages/400.html'";
+	std::cout << " | socket fd " << fd;
+	std::cout << " | closing connection"; 
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::openFailureData(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: couldn't open data file";
+	std::cout << " | socket fd " << fd;
+	std::cout << " | closing connection"; 
 	std::cout << std::endl;
 	std::cout << white;
 	std::cout << "-----------------------------" << std::endl;

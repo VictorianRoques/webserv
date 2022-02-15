@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/14 20:01:26 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 01:10:35 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,3 +127,6 @@ std::string	&SockClient::getTmpRequest(void)
 
 std::string	&SockClient::getRequest(void)
 	{ return request_; }
+
+std::string	&SockClient::getData(void)
+	{ return data_; }
