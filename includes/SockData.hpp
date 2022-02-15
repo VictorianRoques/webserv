@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 01:31:49 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 13:57:46 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@
 # include "SockClient.hpp"
 
 # define ERROR -1
+# define CGI -1
 # define BUF_SIZE 1024
 
 class SockData {
@@ -108,6 +109,7 @@ class SockData {
 		void		openFailure500(int fd);
 		void		openFailure400(int fd);
 		void		openFailureData(int fd);
+		void		pipeFailure(int fd);
 		/* utils */
 		void		closeListen(size_t endInd);
 		void		printBuffer(char buffer[BUF_SIZE]) const;
