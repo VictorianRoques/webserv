@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 16:12:51 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 16:16:11 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 {
 	Response	response(server);
 	dataFds_[fd] = response.searchFd(request);
-	clients_[fd].setResponseHeader(response.getHeader());
+	std::cout << "DATA FD_: " << dataFds_[fd] << std::endl;
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
 	clients_[fd].setChunk(false);
@@ -151,6 +151,7 @@ void	SockData::setBadRequest(int fd)
 }
 
 /* checkers */
+
 bool	SockData::isSockListen(int fd) const
 {
 	std::vector<std::pair<int, size_t> >::const_iterator	it = sockListen_.begin();
@@ -311,7 +312,7 @@ void	SockData::sendClient(int fd)
 {
 	char	buffer[BUF_SIZE];
 	int		ret;
-	if (FD_ISSET(dataFds_[fd], &readSet_)) {
+	if (dataFds_[fd] != ERROR && FD_ISSET(dataFds_[fd], &readSet_)) {
 		if ((ret = read(dataFds_[fd], buffer, BUF_SIZE - 1)) == ERROR) {
 			clearClient(fd);
 			clearDataFd(fd);

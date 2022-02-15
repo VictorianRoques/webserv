@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
+#    By: viroques <viroques@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
-#    Updated: 2022/02/09 14:39:13 by fhamel           ###   ########.fr        #
+#    Updated: 2022/02/15 15:48:08 by viroques         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -69,7 +69,7 @@ $(D_OBJS)%.o : $(D_SRCS)%.cpp Makefile
 
 $(NAME) : $(OBJS) Makefile
 	@printf "Compiling objects...\n"
-	@$(CC) $(OBJS) -o $(NAME)
+	@$(CC) $(FSANITIZE) $(OBJS) -o $(NAME)
 	@printf "[ $(G)$(NAME)$(W) ] Compiled\n"
 
 clean :

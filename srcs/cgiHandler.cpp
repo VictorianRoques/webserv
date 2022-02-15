@@ -4,13 +4,27 @@ cgiHandler::cgiHandler() {}
 
 cgiHandler::cgiHandler(Request &req)
 {
-    _env["PATH_TRANSLATED"] = req.getFullPath();
-    _env["QUERY_STRING"] = req.getQueryString();
-    _env["PATH_INFO"] = req.getFullPath().substr(req.getFullPath().rfind("/") + 1);
+    /* Serveur */
+
+    _env["GATEWAY_INTERFACE"] = "CGI/1.1";
+    _env["SCRIPT_NAME"] = "cgi_binary/darwin_phpcgi";
+    _env["SERVER_NAME"] = "localhost";
+    _env["SERVER_PORT"] = "8080";
+    _env["SERVER_PROTOCOL"] = "HTTP/1.1";
+
+    /* Client */
+
+
+    /* Requete */
+
+    _env["REDIRECT_STATUS"] = "200";
     _env["REQUEST_METHOD"] = req.getMethod();
     _env["CONTENT_TYPE"] = req.getContentType();
     _env["CONTENT_LENGTH"] = req.getContentLength();
-	_env["REDIRECT_STATUS"] = "200";
+    _env["PATH_TRANSLATED"] = req.getFullPath();
+    _env["PATH_INFO"] = req.getFullPath().substr(req.getFullPath().rfind("/") + 1);
+    _env["QUERY_STRING"] = req.getQueryString();
+
     _body = req.getBody();
 }
 

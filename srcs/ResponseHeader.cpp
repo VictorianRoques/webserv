@@ -22,7 +22,7 @@ std::string     ResponseHeader::getDate() const         { return _date; }
 std::string     ResponseHeader::getLocation() const     { return _location; }
 std::string     ResponseHeader::getHeader() const       { return _header; }
 
-void            ResponseHeader::setStatusError(std::string code, size_t length) 
+void            ResponseHeader::setStatusError(std::string code) 
 {
     if (code == "400")
         _status = "400 Bad Request";
@@ -32,10 +32,9 @@ void            ResponseHeader::setStatusError(std::string code, size_t length)
         _status = "403 Forbidden";
     else if (code == "404")
         _status = "404 Not Found";
-    else if (code == "500")
-        _status = "500 Internal Servor Error";
+    else if (code == "405")
+        _status = "405 Method Not Allowed";
     _contentType = "text/html";
-    _bodyLength = length;
 }
 
 void            ResponseHeader::setStatus(std::string status)           {_status = status; }
@@ -49,7 +48,7 @@ void            ResponseHeader::setHeader(std::string status, std::string conten
     _contentType = contentType;
     _bodyLength = length;
 }
-
+void            ResponseHeader::setRes(std::string head) { _header = head; }
 void            ResponseHeader::setStatusRedirect(std::string code, size_t length)
 {
     if (code == "310")
@@ -77,6 +76,8 @@ void               ResponseHeader::setCgiHeader(std::string cgiHeader)
 
 void            ResponseHeader::writeHeader()
 {
+    if (_header.empty() == false)
+        return ;
     _header = "HTTP/1.1 " + _status + "\r\n";
     if (_contentType.empty() == false)
         _header += "Content-Type: " + _contentType + "\r\n";

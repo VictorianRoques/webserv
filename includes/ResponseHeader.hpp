@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 18:17:41 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/08 23:53:12 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/14 12:07:29 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,10 @@ public:
     void            setDate();
     void            setLocation(std::string location);
     void            setHeader(std::string status, std::string contentType, size_t length);
-    void            setStatusError(std::string code,size_t length);
+    void            setStatusError(std::string code);
     void            setStatusRedirect(std::string code, size_t length);
     void            setCgiHeader(std::string cgiHeader);
-
+    void            setRes(std::string head);
     /* Write Final Header */
     
     void            writeHeader();
