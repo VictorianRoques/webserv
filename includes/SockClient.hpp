@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 14:28:07 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 16:13:50 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,14 @@ class SockClient {
 
 	private:
 
-		char		*ip_;
-		size_t		port_;
-		bool		chunk_;
-		std::string	tmpRequest_;
-		std::string	request_;
-		std::string	data_;
-		int			fd_[2];
+		char			*ip_;
+		size_t			port_;
+		bool			chunk_;
+		std::string		tmpRequest_;
+		std::string		request_;
+		std::string		data_;
+		ResponseHeader	responseHeader_;
+		int				fd_[2];
 
 	public:
 		SockClient(void);

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 14:40:06 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/15 16:12:51 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,7 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 {
 	Response	response(server);
 	dataFds_[fd] = response.searchFd(request);
+	clients_[fd].setResponseHeader(response.getHeader());
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getRequest().clear();
 	clients_[fd].setChunk(false);
@@ -137,7 +138,7 @@ void	SockData::setInternalError(int fd)
 	FD_SET(fd, &activeSet_);
 }
 
-void	SockData::setInternalError(int fd)
+void	SockData::setBadRequest(int fd)
 {
 	int	fd_error_400;
 	if ((fd_error_400 = open("../error_pages/400.html", O_RDONLY)) == ERROR) {
@@ -301,6 +302,11 @@ void	SockData::recvClient(int fd)
 	}
 }
 
+void	SockData::getHeader(void)
+{
+
+}
+
 void	SockData::sendClient(int fd)
 {
 	char	buffer[BUF_SIZE];
@@ -314,7 +320,7 @@ void	SockData::sendClient(int fd)
 		buffer[ret] = '\0';
 		clients_[fd].getData() += std::string(buffer);
 		if (ret < BUF_SIZE - 1) {
-			if (send(fd, clients_[fd].getData().c_str(),
+			if (send(fd, clients_[fd].getFinalData().c_str(),
 			clients_[fd].getData().size(), 0) == ERROR) {
 				clearClient(fd);
 				cnxCloseSend(fd);
