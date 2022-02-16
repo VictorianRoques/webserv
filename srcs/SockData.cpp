@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/16 17:54:36 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 20:08:20 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,7 @@ void	SockData::recvClient(int fd)
 						clients_[fd].getEndPipe() = fdTmp[0];
 						clients_[fd].getBeginPipe() = fdTmp[1];
 						FD_SET(clients_[fd].getEndPipe(), &readSet_);
-						close(clients_[fd].getEndPipe());
+						std::cout << "end pipe: " << clients_[fd].getEndPipe() << std::endl;
 					}
 					else {
 						/* CGI not needed -> write() file containing data to client */
@@ -298,6 +298,8 @@ void	SockData::sendClient(int fd)
 {
 	char	buffer[BUF_SIZE];
 	int		ret;
+	std::cout << clients_[fd].getEndPipe() << std::endl;
+	while (1) {}
 	if (dataFds_[fd] != CGI && FD_ISSET(dataFds_[fd], &readSet_)) {
 		if ((ret = read(dataFds_[fd], buffer, BUF_SIZE - 1)) == ERROR) {
 			clearClient(fd);
@@ -309,7 +311,6 @@ void	SockData::sendClient(int fd)
 		if (ret < BUF_SIZE - 1) {
 			clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getResponseBody().size());
 			clients_[fd].getResponseHeader().writeHeader();
-			std::cout << "HEADER: \n" << clients_[fd].getResponseHeader().getHeader() << std::endl;
 			std::string	data = clients_[fd].getResponseHeader().getHeader() + clients_[fd].getResponseBody();
 			if (send(fd, data.c_str(), data.size(), 0) == ERROR) {
 				clearClient(fd);
@@ -326,12 +327,14 @@ void	SockData::sendClient(int fd)
 		// FD_CLR(fd, &writeSet_);
 	}
 	else if (isEndPipeReady(fd) && isBeginPipeReady(fd)) {
+		std::cout << "PIPE READY" << std::endl;
 		writeToCgi(fd);
 		close(clients_[fd].getBeginPipe());
 		FD_CLR(clients_[fd].getEndPipe(), &activeSet_);
 		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
 	}
 	else if (isEndPipeReady(fd) && !isBeginPipeReady(fd)) {
+		std::cout << "yoyoyoyo" << std::endl;
 		SockExec sockExec = initSockExec(fd);
 		// Need to pass Server to cgiHandler
 		cgiHandler cgi(clients_[fd].getRequest());
