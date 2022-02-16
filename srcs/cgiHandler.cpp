@@ -91,7 +91,7 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     {
         dup2(sockExec.getDataFd(), STDIN_FILENO);
         dup2(sockExec.getClientFd(), STDOUT_FILENO);
-        execve("cgi_binary/darwin_phpcgi", argv, envp);
+        execve("cgi_binary/cgi_of_love", argv, envp);
         std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
     }
     else

@@ -1,0 +1,13 @@
+#!/usr/local/bin/python3
+import subprocess
+import cgi, cgitb
+import os
+
+# header
+contentLength = "Content-Length: " + os.environ["CONTENT_LENGTH"] + "\r"
+pathScript = os.environ["PATH_TRANSLATED"]
+print("HTTP/1.1 200 OK\r")
+print(contentLength)
+
+# body
+subprocess.run(pathScript)
