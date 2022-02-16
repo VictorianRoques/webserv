@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/15 16:19:57 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/15 18:18:14 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,19 +27,25 @@ char const *Parser::ErrorPagePathException::what() const throw() { return "error
 /**************************************/
 
 /**
- * serverNameChecker(): returns true is serverName contains a correct server name : localhost:<server_port>
+ * serverNameChecker(): corrects server name : adds <server_name>:<server_port> and "www".<server_name>:<server_port> to the _serverName vector
 **/
-bool	Parser::serverNameChecker() {
+bool	Parser::serverNameCompleter() {
 	std::string			correct;
 	std::stringstream	out;
 
-	if (_serverName.size() > 0 && !vector_contains_str(getServerName(), "localhost") && !vector_contains_str(getServerName(), "www.localhost"))
-		return false;
-	correct = "localhost:";
+//	if (_serverName.size() > 0 && !vector_contains_str(getServerName(), "localhost") && !vector_contains_str(getServerName(), "www.localhost"))
+//		return false;
+//	correct = "localhost:";
 	out << *getPort().begin();
-	correct += out.str();
-	_serverName.push_back(correct);
-	_serverName.push_back("www." + correct);
+	std::vector<std::string>::iterator it = _serverName.begin();
+	std::vector<std::string>::iterator itend = _serverName.end();
+	for (; it != itend; it++){
+		correct = *it + ":" + out.str();
+		_serverName.push_back(correct);
+		_serverName.push_back("www." + correct);
+	}
+//	correct += out.str();
+//	_serverName.push_back(it);
 	return true;
 }
 
@@ -91,8 +97,7 @@ bool	Parser::errorPageChecker() {
 void	Parser::serverChecker() {
 
 	// check server name
-	if (!serverNameChecker())
-		throw WrongServerNameException();
+	serverNameCompleter();
 
 	if (!portsChecker())
 		throw DuplicatePortException();
