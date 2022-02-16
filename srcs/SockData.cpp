@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/16 15:10:08 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 16:35:56 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,14 @@ void	SockData::setBadRequest(int fd)
 	}
 	dataFds_[fd] = fd_error_400;
 	FD_SET(fd, &activeSet_);
+}
+
+SockExec  SockData::initSockExec(int fd)
+{
+	SockExec sockExec;
+	sockExec.setDataFd(clients_[fd].getEndPipe());
+	sockExec.setClientFd(fd);
+	return sockExec;
 }
 
 /* checkers */
@@ -324,7 +332,9 @@ void	SockData::sendClient(int fd)
 	}
 	else if (isEndPipeReady(fd) && !isBeginPipeReady(fd)) {
 		SockExec sockExec = initSockExec(fd);
-		if (startCgi(sockExec, clients_[fd].getRequest()) == ERROR) {
+		// Need to pass Server to cgiHandler
+		cgiHandler cgi(clients_[fd].getRequest());
+		if (cgi.startCgi(sockExec) == ERROR) {
 			clearClient(fd);
 			clearDataFd(fd);
 			forkFailure(fd);
@@ -339,7 +349,6 @@ void	SockData::writeToCgi(int fd)
 	clients_[fd].getRequest().getBody().size()) == ERROR) {
 		clearClient(fd);
 		clearDataFd(fd);
-
 	}
 }
 

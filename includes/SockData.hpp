@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/16 15:04:47 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 16:35:54 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@
 # include "Response.hpp"
 # include "SockClient.hpp"
 # include "SockExec.hpp"
+# include  "cgiHandler.hpp"
 
 # define ERROR -1
 # define CGI -1
@@ -97,7 +98,7 @@ class SockData {
 		void		recvClientClose(int fd, int ret);
 		void		clearClient(int fd);
 		void		clearDataFd(int fd);
-		SockExec	initSockExec(int fd) const;
+		SockExec	initSockExec(int fd);
 		void		writeToCgi(int fd);
 		
 		/* msg connection */

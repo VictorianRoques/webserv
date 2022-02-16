@@ -21,6 +21,8 @@ cgiHandler::cgiHandler(Request &req)
     _env["QUERY_STRING"] = req.getQueryString();
 
     _body = req.getBody();
+    // _pathToBinaryCgi = 
+    // Pass Location au constructor
 }
 
 cgiHandler::cgiHandler(const cgiHandler &cgi) { *this = cgi; }
@@ -61,7 +63,7 @@ char**          cgiHandler::keyMapConvert(std::string key)
     return argv;
 }
 
-int             cgiHandler::startCgi(std::string  pathToBinaryCgi, SockExec &sockExec)
+int             cgiHandler::startCgi(SockExec &sockExec)
 {
     (void)      sockExec;
     char        **envp;
@@ -77,8 +79,8 @@ int             cgiHandler::startCgi(std::string  pathToBinaryCgi, SockExec &soc
     {
             std::cerr << RED << e.what() << NC << std::endl;
     }
+    /* write in getDataFd() with body ! */
 
-    /* write in Fd the content of body !*/
     pid = fork();
     if (pid == -1)
     {
@@ -87,11 +89,9 @@ int             cgiHandler::startCgi(std::string  pathToBinaryCgi, SockExec &soc
     }
     else if (pid == 0)
     {
-        /*
-        dup2(pipe in Fd in)
-        dup2(pipe in Fd out) 
-        */
-        execve(pathToBinaryCgi.c_str(), argv, envp);
+        dup2(sockExec.getDataFd(), STDIN_FILENO);
+        dup2(sockExec.getClientFd(), STDOUT_FILENO);
+        execve("cgi_binary/darwin_phpcgi", argv, envp);
         std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
     }
     else

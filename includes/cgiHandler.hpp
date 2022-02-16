@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:01 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/16 14:06:48 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/16 15:56:07 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ private:
 
     std::map<std::string, std::string>  _env;
     std::string                         _body;
+    std::string                         _pathToBinaryCgi;
 
 public:
 
@@ -45,7 +46,7 @@ public:
 
     char            **envToString();
     char            **keyMapConvert(std::string key);
-    int             startCgi(std::string pathToBinaryCgi, SockExec &sockExec);
+    int             startCgi(SockExec &sockExec);
 };
 
 #endif

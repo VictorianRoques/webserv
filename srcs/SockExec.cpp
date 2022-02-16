@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockExec.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/14 19:39:47 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/16 14:20:17 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 16:39:02 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ SockExec	&SockExec::operator=(const SockExec &sockExec)
 {
 	dataFd_ = sockExec.dataFd_;
 	clientFd_ = sockExec.clientFd_;
+	return *this;
 }
 
 /* setters */
@@ -40,3 +41,4 @@ int	SockExec::getDataFd(void) const
 
 int	SockExec::getClientFd(void) const
 	{ return clientFd_; }
+
