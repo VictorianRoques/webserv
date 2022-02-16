@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 18:51:59 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 15:10:08 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,6 @@ SockData	&SockData::operator=(const SockData &sockData)
 void	SockData::setServers(std::vector<Server> servers)
 	{ servers_ = servers; }
 
-/*
-** A socket can only listen on one port at a time
-** so we bind a socket with every ports specified
-*/
 void	SockData::setSockListen(std::vector<size_t>	ports)
 {
 	int					sockListen;
@@ -101,9 +97,10 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 {
 	Response	response(server);
 	dataFds_[fd] = response.searchFd(request);
-	clients_[fd].getTmpRequest().clear();
-	clients_[fd].getRequest().clear();
+	clients_[fd].setRequest(request);
 	clients_[fd].setResponseHeader(response.getResponseHeader());
+	clients_[fd].getTmpRequest().clear();
+	clients_[fd].getFinalRequest().clear();
 	clients_[fd].setChunk(false);
 	if (dataFds_[fd] != CGI) {
 		FD_SET(dataFds_[fd], &activeSet_);
@@ -113,7 +110,7 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 
 void	SockData::setResponse(int fd)
 {
-	Request	request = requestParser(clients_[fd].getRequest(), servers_);
+	Request	request = requestParser(clients_[fd].getFinalRequest(), servers_);
 	std::vector<Server>::iterator	it = servers_.begin(), ite = servers_.end();
 	for (; it != ite; ++it) {
 		if (vector_contains_str(it->getServerName(), request.getHost())) {
@@ -154,7 +151,6 @@ void	SockData::setBadRequest(int fd)
 }
 
 /* checkers */
-
 bool	SockData::isSockListen(int fd) const
 {
 	std::vector<std::pair<int, size_t> >::const_iterator	it = sockListen_.begin();
@@ -195,24 +191,7 @@ size_t	SockData::getSizeListen(void) const
 int		SockData::getSockListen(size_t index) const
 	{ return sockListen_[index].first; }
 
-size_t	SockData::clientsAlloc(void)
-{
-	std::map<int, SockClient>::iterator	it = clients_.begin();
-	std::map<int, SockClient>::iterator	ite = clients_.end();
-	size_t	totalSize = 0;
-	for (; it != ite; ++it) {
-		totalSize += it->second.getTmpRequest().size();
-		totalSize += it->second.getRequest().size();
-	}
-	return totalSize;
-}
-
 /* client manager */
-/*
-** After finding there was some activity on a listening fd
-** a new socket is created in order to create a connexion with the client.
-** This fd is then added to the active set of fds to be monitored
-*/
 void	SockData::addClient(int fd)
 {
 	int			newSock;
@@ -262,7 +241,7 @@ void	SockData::recvClient(int fd)
 	try {
 		clients_[fd].getTmpRequest() += std::string(buffer);
 		if (ret < BUF_SIZE - 1) {
-			clients_[fd].getRequest() += clients_[fd].getTmpRequest();
+			clients_[fd].getFinalRequest() += clients_[fd].getTmpRequest();
 			if (!clients_[fd].isChunk()) {
 				if (clients_[fd].isTmpRequestChunk()) {
 					clients_[fd].setChunk(true);
@@ -317,29 +296,51 @@ void	SockData::sendClient(int fd)
 			openFailureData(fd);
 		}
 		buffer[ret] = '\0';
-		clients_[fd].getBody() += std::string(buffer, ret);
+		clients_[fd].getResponseBody() += std::string(buffer, ret);
 		if (ret < BUF_SIZE - 1) {
-			clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getBody().size());
+			clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getResponseBody().size());
 			clients_[fd].getResponseHeader().writeHeader();
 			std::cout << "HEADER: \n" << clients_[fd].getResponseHeader().getHeader() << std::endl;
-			std::string	data = clients_[fd].getResponseHeader().getHeader() + clients_[fd].getBody();
+			std::string	data = clients_[fd].getResponseHeader().getHeader() + clients_[fd].getResponseBody();
 			if (send(fd, data.c_str(), data.size(), 0) == ERROR) {
 				clearClient(fd);
 				cnxCloseSend(fd);
 			}
 			clearDataFd(fd);
-			clients_[fd].getBody().clear();
+			clients_[fd].getResponseBody().clear();
 			FD_CLR(fd, &writeSet_);
 		}
 	}
-	// else if (isEndPipeReady(fd) && isBeginPipeReady(fd)) {
-	// 	// SockExec sockExec = setSockExec(fd);
-	// 	// startCgi(sockExec);
-	// }
-	// else if (isEndPipeReady(fd) && isBeginPipeReady(fd)) {
-	// 	// writeToCgi(fd);
-	// 	close(clients_[fd].getBeginPipe());
-	// }
+	else if (dataFds_[fd] == AUTOINDEX) {
+		// buildAutoIndex();
+		// write();
+		// FD_CLR(fd, &writeSet_);
+	}
+	else if (isEndPipeReady(fd) && isBeginPipeReady(fd)) {
+		writeToCgi(fd);
+		close(clients_[fd].getBeginPipe());
+		FD_CLR(clients_[fd].getEndPipe(), &activeSet_);
+		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
+	}
+	else if (isEndPipeReady(fd) && !isBeginPipeReady(fd)) {
+		SockExec sockExec = initSockExec(fd);
+		if (startCgi(sockExec, clients_[fd].getRequest()) == ERROR) {
+			clearClient(fd);
+			clearDataFd(fd);
+			forkFailure(fd);
+		}
+		FD_SET(clients_[fd].getBeginPipe(), &writeSet_);
+	}
+}
+
+void	SockData::writeToCgi(int fd)
+{
+	if (write(clients_[fd].getBeginPipe(), clients_[fd].getRequest().getBody().c_str(),
+	clients_[fd].getRequest().getBody().size()) == ERROR) {
+		clearClient(fd);
+		clearDataFd(fd);
+
+	}
 }
 
 /* client manager utils */
@@ -457,7 +458,7 @@ void	SockData::msgRecv(int fd)
 	std::cout << "Message: " << std::endl;
 	std::cout << white;
 	std::cout << "-----------------------------" << std::endl;
-	std::cout << clients_[fd].getRequest() << std::endl;
+	std::cout << clients_[fd].getFinalRequest() << std::endl;
 }
 
 void	SockData::msgSent(int fd)
@@ -533,6 +534,30 @@ void	SockData::pipeFailure(int fd)
 	std::cout << "-----------------------------" << std::endl;
 }
 
+void	SockData::writeFailure(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: couldn't write";
+	std::cout << " | socket fd " << fd;
+	std::cout << " | closing connection"; 
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
+void	SockData::forkFailure(int fd)
+{
+	std::cout << "-----------------------------" << std::endl;
+	std::cout << red;
+	std::cout << "Server: couldn't fork";
+	std::cout << " | socket fd " << fd;
+	std::cout << " | closing connection"; 
+	std::cout << std::endl;
+	std::cout << white;
+	std::cout << "-----------------------------" << std::endl;
+}
+
 /* utils */
 
 /*
@@ -545,14 +570,4 @@ void	SockData::closeListen(size_t endInd)
 	for (size_t i = 0; i < endInd; ++i) {
 		close(sockListen_[i].first);
 	}
-}
-
-void	SockData::printBuffer(char buffer[BUF_SIZE]) const
-{
-	std::cout << red;
-	std::cout << "buffer: \n";
-	std::cout << white;
-	std::cout << "#################################" << std::endl;
-	std::cout << buffer << std::endl;
-	std::cout << "#################################" << std::endl;
 }

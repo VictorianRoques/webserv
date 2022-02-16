@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 18:49:43 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 14:57:54 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <sstream>
 # include <iostream>
 
+# include "RequestParser.hpp"
 # include "ResponseHeader.hpp"
 
 class SockClient {
@@ -28,9 +29,10 @@ class SockClient {
 		size_t			port_;
 		bool			chunk_;
 		std::string		tmpRequest_;
-		std::string		request_;
-		std::string		body_;
+		std::string		finalRequest_;
+		Request			request_;
 		ResponseHeader	responseHeader_;
+		std::string		responseBody_;
 		int				fd_[2];
 
 	public:
@@ -43,7 +45,8 @@ class SockClient {
 		void			setIp(char *ip);
 		void			setPort(size_t port);
 		void			setChunk(bool chunk);
-		void			setResponseHeader(ResponseHeader &responseHeader);
+		void			setRequest(const Request &request);
+		void			setResponseHeader(const ResponseHeader &responseHeader);
 		/* checkers */
 		bool			isChunk(void) const;
 		bool			isTmpRequestChunk(void) const;
@@ -54,11 +57,12 @@ class SockClient {
 		char			*getIp(void) const;
 		size_t			getPort(void) const;
 		std::string		&getTmpRequest(void);
-		std::string		&getRequest(void);
+		std::string		&getFinalRequest(void);
+		Request			&getRequest(void);
 		ResponseHeader	&getResponseHeader(void);
-		std::string		&getBody(void);
-		int				&getBeginPipe(void);
+		std::string		&getResponseBody(void);
 		int				&getEndPipe(void);
+		int				&getBeginPipe(void);
 
 };
 

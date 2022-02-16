@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 17:35:14 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 15:04:47 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,12 @@
 # include "Parser.hpp"
 # include "Response.hpp"
 # include "SockClient.hpp"
+# include "SockExec.hpp"
 
 # define ERROR -1
 # define CGI -1
-# define BUF_SIZE 512
+# define AUTOINDEX -2
+# define BUF_SIZE 1024
 
 class SockData {
 	private:
@@ -78,41 +80,49 @@ class SockData {
 		bool		isWriteSet(int fd) const;
 		bool		isBeginPipeReady(int fd);
 		bool		isEndPipeReady(int fd);
-		
+
 		/* getters */
 		fd_set		*getReadSet(void);
 		fd_set		*getWriteSet(void);
 		size_t		getSizeListen(void) const;
 		int			getSockListen(size_t index) const;
-		size_t		clientsAlloc(void); // ???
+
 		/* client manager */
 		void		addClient(int fd);
 		void		recvClient(int fd);
 		void		sendClient(int fd);
-		/* client manager utils */
+
+		/* utils */
+		void		closeListen(size_t endInd);
+		void		recvClientClose(int fd, int ret);
 		void		clearClient(int fd);
 		void		clearDataFd(int fd);
-		void		recvClientClose(int fd, int ret);
+		SockExec	initSockExec(int fd) const;
+		void		writeToCgi(int fd);
+		
 		/* msg connection */
 		void		cnxFailed(void);
 		void		cnxRefused(SockClient sockClient);
 		void		cnxAccepted(SockClient sockClient);
+
 		/* msg recv */
 		void		cnxCloseRecv(int fd);
 		void		cnxCloseRecv2(int fd);
 		void		cnxCloseSend(int fd);
+
 		/* msg send */
 		void		msgRecv(int fd);
 		void		msgSent(int fd);
+
 		/* msg exception */
 		void		exceptionError(int fd, std::exception &e);
 		void		openFailure500(int fd);
 		void		openFailure400(int fd);
 		void		openFailureData(int fd);
 		void		pipeFailure(int fd);
-		/* utils */
-		void		closeListen(size_t endInd);
-		void		printBuffer(char buffer[BUF_SIZE]) const;
+		void		writeFailure(int fd);
+		void		forkFailure(int fd);
+
 		/* bad alloc exception */
 		struct badAllocException : public std::exception {
 			const char	*what(void) const throw() { return "memory overload"; }

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/15 18:49:31 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 14:57:47 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ SockClient	&SockClient::operator=(const SockClient &sockClient)
 	chunk_ = sockClient.chunk_;
 	tmpRequest_ = sockClient.tmpRequest_;
 	request_ = sockClient.request_;
-	body_ = sockClient.body_;
+	responseBody_ = sockClient.responseBody_;
 	responseHeader_ = sockClient.responseHeader_;
 	fd_[0] = sockClient.fd_[0];
 	fd_[1] = sockClient.fd_[1];
@@ -45,7 +45,10 @@ void	SockClient::setPort(size_t port)
 void	SockClient::setChunk(bool chunk)
 	{ chunk_ = chunk; }
 
-void	SockClient::setResponseHeader(ResponseHeader &responseHeader)
+void	SockClient::setRequest(const Request &request)
+	{ request_ = request; }
+
+void	SockClient::setResponseHeader(const ResponseHeader &responseHeader)
 	{ responseHeader_ = responseHeader; }
 
 /* checkers */
@@ -80,7 +83,7 @@ bool	SockClient::isChunkEof(void) const
 
 bool	SockClient::isDeleteRequest(void) const
 {
-	std::istringstream	data(request_);
+	std::istringstream	data(finalRequest_);
 	std::vector<std::string>	arr;
 	std::string					line;
 	size_t						pos = 0;
@@ -101,7 +104,7 @@ bool	SockClient::isDeleteRequest(void) const
 
 bool	SockClient::isBadRequest(void) const
 {
-	std::istringstream	data(request_);
+	std::istringstream	data(finalRequest_);
 	std::string			line;
 	std::getline(data, line);
 	if (line.find("GET") != 0 && line.find("POST") != 0 &&
@@ -132,14 +135,17 @@ size_t	SockClient::getPort(void) const
 std::string	&SockClient::getTmpRequest(void)
 	{ return tmpRequest_; }
 
-std::string	&SockClient::getRequest(void)
+std::string	&SockClient::getFinalRequest(void)
+	{ return finalRequest_; }
+
+Request	&SockClient::getRequest(void)
 	{ return request_; }
 
 ResponseHeader	&SockClient::getResponseHeader(void)
 	{ return responseHeader_; }
 
-std::string	&SockClient::getBody(void)
-	{ return body_; }
+std::string	&SockClient::getResponseBody(void)
+	{ return responseBody_; }
 
 int	&SockClient::getBeginPipe(void)
 	{ return fd_[1]; }
