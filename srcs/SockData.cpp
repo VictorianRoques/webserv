@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/16 16:35:56 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/16 17:54:36 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 {
 	Response	response(server);
 	dataFds_[fd] = response.searchFd(request);
+	// clients_[fd].setResponse(response.getResponse());
 	clients_[fd].setRequest(request);
 	clients_[fd].setResponseHeader(response.getResponseHeader());
 	clients_[fd].getTmpRequest().clear();
@@ -257,31 +258,31 @@ void	SockData::recvClient(int fd)
 				else {
 					msgRecv(fd);
 					setResponse(fd);
+					if (dataFds_[fd] == CGI) {
+						/* CGI needed -> set up pipe for process communication */
+						int	fdTmp[2];
+						if (pipe(fdTmp) == ERROR) {
+							clearClient(fd);
+							clearDataFd(fd);
+							setInternalError(fd);
+							pipeFailure(fd);
+							return ;
+						}
+						clients_[fd].getEndPipe() = fdTmp[0];
+						clients_[fd].getBeginPipe() = fdTmp[1];
+						FD_SET(clients_[fd].getEndPipe(), &readSet_);
+						close(clients_[fd].getEndPipe());
+					}
+					else {
+						/* CGI not needed -> write() file containing data to client */
+						FD_SET(dataFds_[fd], &activeSet_);
+					}
 					return ;
 				}
 			}
 			if (clients_[fd].isChunkEof()) {
 				msgRecv(fd);
 				setResponse(fd);
-				if (dataFds_[fd] == CGI) {
-					/* CGI needed -> set up pipe for process communication */
-					int	fdTmp[2];
-					if (pipe(fdTmp) == ERROR) {
-						clearClient(fd);
-						clearDataFd(fd);
-						setInternalError(fd);
-						pipeFailure(fd);
-						return ;
-					}
-					clients_[fd].getBeginPipe() = fdTmp[1];
-					clients_[fd].getEndPipe() = fdTmp[0];
-					FD_SET(clients_[fd].getEndPipe(), &readSet_);
-					close(clients_[fd].getEndPipe());
-				}
-				else {
-					/* CGI not needed -> write() file containing data to client */
-					FD_SET(dataFds_[fd], &activeSet_);
-				}
 				return ;
 			}
 			clients_[fd].getTmpRequest().clear();
@@ -320,8 +321,8 @@ void	SockData::sendClient(int fd)
 		}
 	}
 	else if (dataFds_[fd] == AUTOINDEX) {
-		// buildAutoIndex();
-		// write();
+		// std::string	data = getResponse();
+		// write(fd, data.c_str(), data.size());
 		// FD_CLR(fd, &writeSet_);
 	}
 	else if (isEndPipeReady(fd) && isBeginPipeReady(fd)) {
