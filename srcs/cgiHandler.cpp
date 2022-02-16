@@ -71,6 +71,9 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     pid_t       pid;
     int         status;
 
+    std::cout << "PATH TRANSLATED: \n";
+    std::cout << _env["PATH_TRANSLATED"] << std::endl;
+
     try {
         envp = envToString();
         argv = keyMapConvert(_env["PATH_TRANSLATED"]);
@@ -91,11 +94,12 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     {
         dup2(sockExec.getDataFd(), STDIN_FILENO);
         dup2(sockExec.getClientFd(), STDOUT_FILENO);
-        execve("cgi_binary/cgi_of_love", argv, envp);
+        execve("cgi_binary/cgi_tester", argv, envp);
         std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
     }
     else
     {
+        close(sockExec.getClientFd());
         wait(&status);
     }
     for (int i = 0; envp[i]; i++)

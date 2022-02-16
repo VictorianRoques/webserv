@@ -42,7 +42,7 @@ server
         index post.php;
         autoindex off;
         methods POST GET;
-        cgi_handler .php cgi_binary/darwin_phpcgi;
+        cgi_handler .php cgi_binary/cgi_tester;
     }
 
     location /input

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/16 17:47:51 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/16 19:22:49 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ int		Response::needCgi()
 	if (_extensionCgi.empty() == false &&
 		_path.find(_extensionCgi) != std::string::npos)
 	{
+		std::cout << "CALL CGI" << std::endl;
 		return (1);
 	}
 	return (0);
