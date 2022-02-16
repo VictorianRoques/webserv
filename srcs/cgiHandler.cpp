@@ -5,18 +5,13 @@ cgiHandler::cgiHandler() {}
 cgiHandler::cgiHandler(Request &req)
 {
     /* Serveur */
-
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
     _env["SCRIPT_NAME"] = "cgi_binary/darwin_phpcgi";
     _env["SERVER_NAME"] = "localhost";
     _env["SERVER_PORT"] = "8080";
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
 
-    /* Client */
-
-
     /* Requete */
-
     _env["REDIRECT_STATUS"] = "200";
     _env["REQUEST_METHOD"] = req.getMethod();
     _env["CONTENT_TYPE"] = req.getContentType();
@@ -66,14 +61,13 @@ char**          cgiHandler::keyMapConvert(std::string key)
     return argv;
 }
 
-std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
+int             cgiHandler::startCgi(std::string  pathToBinaryCgi, SockExec &sockExec)
 {
+    (void)      sockExec;
     char        **envp;
     char        **argv;
     pid_t       pid;
-    int         tmpStdIn = dup(STDIN_FILENO);
-    int         tmpStdOut = dup(STDOUT_FILENO);
-    std::string newBody;
+    int         status;
 
     try {
         envp = envToString();
@@ -83,53 +77,30 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
     {
             std::cerr << RED << e.what() << NC << std::endl;
     }
-    
-    FILE*   fileIn = fopen("tmpIn", "w+");
-    FILE*   fileOut = fopen("tmpOut", "w+");
-    int     fdIn =  fileno(fileIn);
-    int     fdOut = fileno(fileOut);
-    int     status;
 
-    write(fdIn, _body.c_str(), _body.size());
-    lseek(fdIn, 0, SEEK_SET);
+    /* write in Fd the content of body !*/
     pid = fork();
     if (pid == -1)
     {
         std::cerr << RED << "Fork crashed." << std::endl;
-        return ("<html><body>FATAL ERROR</body></html>");
+        return (-1);
     }
     else if (pid == 0)
     {
-        dup2(fdIn, STDIN_FILENO);
-        dup2(fdOut, STDOUT_FILENO);
+        /*
+        dup2(pipe in Fd in)
+        dup2(pipe in Fd out) 
+        */
         execve(pathToBinaryCgi.c_str(), argv, envp);
         std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
-        write(STDOUT_FILENO, "<html><body>FATAL ERROR</body></html>", 38);
     }
     else
     {
-        char buffer[4096];
         wait(&status);
-        lseek(fdOut, 0, SEEK_SET);
-        int ret = 1;
-        while (ret > 0)
-        {
-            memset(buffer, 0, 4096);
-            ret = read(fdOut, buffer, 4096 - 1);
-            newBody += buffer;
-        }
     }
-    dup2(tmpStdIn, STDOUT_FILENO);
-    dup2(tmpStdOut, STDOUT_FILENO);
-    fclose(fileIn);
-    fclose(fileOut);
-    close(fdIn);
-    close(fdOut);
-    remove("tmpIn");
-    remove("tmpOut");
     for (int i = 0; envp[i]; i++)
         delete [] envp[i];
     delete[] envp;
-    return newBody;
+    return (0);
 }
 

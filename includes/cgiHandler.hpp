@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:01 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/10 15:23:35 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/16 14:06:48 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "RequestParser.hpp"
 # include "Server.hpp"
+# include "SockExec.hpp"
 # include <unistd.h>
 # include "utils.hpp"
 
@@ -44,7 +45,7 @@ public:
 
     char            **envToString();
     char            **keyMapConvert(std::string key);
-    std::string     execute(std::string pathToBinaryCgi);
+    int             startCgi(std::string pathToBinaryCgi, SockExec &sockExec);
 };
 
 #endif

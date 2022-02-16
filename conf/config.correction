@@ -2,14 +2,14 @@ server
 {
 	listen 127.0.0.1:8080;
 	server_name localhost;
-	client_max_body_size 1m;
+	client_max_body_size 10m;
 
 	location /
 	{
 		root www;
         autoindex off;
 		index index.html;
-        client_max_body_size 1m
+        client_max_body_size 10m
 		methods GET DELETE;
 	}
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/15 17:10:43 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 15:19:53 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@ Response::Response() {}
 Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()), _code(0) {
 	
 	_methods["GET"] = &Response::getMethod;
-// 	_methods["POST"] = &Response::postMethod;
-// 	_methods["DELETE"] = &Response::deleteMethod;
+	_methods["POST"] = &Response::postMethod;
+	_methods["DELETE"] = &Response::deleteMethod;
 }
 
 Response::~Response() {}
@@ -69,44 +69,43 @@ std::string&	Response::getUploadDest()		{ return _uploadDest; }
 ResponseHeader&	Response::getResponseHeader()	{ return _header; }
 std::string&	Response::getLocation()			{ return _location; }
 
-void	Response::setFdError(int code)
-{
-	_code = code;
-	std::string path = _errorPage[std::to_string(_code)];
-	if (pathIsFile(path))
-	{
-		_fd = open(path.c_str(), O_RDONLY);
-		_header.setStatusError(std::to_string(code));
-		if (_fd < 0)
-		{
-			_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-			_header.setHeader("500 Internal Servor Error", "text/html", _body.length());
-		}
-	}
-	else
-	{
-		_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-		_header.setHeader("500 Internal Servor Error", "text/html", _body.length());
-	}
-}
-
 int		Response::searchFd(Request &req)
 {
-	std::cout << "HELLOW" << std::endl;
 	if (initRequest(req))
 		return _fd;
-	if(_methods.find(_request.getMethod()) != _methods.end() 
-		&& isAllow(_request.getMethod()))
-	{
-		(this->*_methods[_request.getMethod()])();
-	}
-    else
-		setFdError(405);
-	std::cout << "fd: " << std::endl;
+	if (needCgi())
+		return (-1);
+	answer();
 	return _fd;
 }
 
-int      Response::initRequest(Request &req)
+void	Response::answer()
+{
+	if (_methods.find(_request.getMethod()) != _methods.end() 
+		&& isAllow(_request.getMethod()))
+	{
+		(this->*_methods[_request.getMethod()])();
+		if (_fd == -2)
+		{
+			_header.writeHeader();
+			_response = _header.getHeader() + _body;
+		}
+	}
+    else
+		setFdError(405);
+}
+
+int		Response::needCgi()
+{
+	if (_extensionCgi.empty() == false &&
+		_path.find(_extensionCgi) != std::string::npos)
+	{
+		return (1);
+	}
+	return (0);
+}
+
+int		Response::initRequest(Request &req)
 {
     _request = req;
     _path = req.getFullPath();
@@ -126,7 +125,7 @@ int      Response::initRequest(Request &req)
         else
             _path = _root + "/" + _index;
     }
-    if ((int)_request.getBody().size() > _serv.getMaxBodySize())
+    if ((size_t)_request.getBody().size() > (size_t)_serv.getMaxBodySize())
     {
 		setFdError(413);
         return (1);
@@ -136,24 +135,33 @@ int      Response::initRequest(Request &req)
 		_body = "<html><body>Too many Redirects, infinite loop</body></html>";
 		_header.setStatusRedirect("310", _body.length());
 		_code = 310;
+		_fd = -2;
 		return (1);
 	}
     return (0);
 }
 
-void		Response::getMethod()
+void	Response::setFdError(int code)
 {
-	if (_autoIndex == true && pathIsDirectory(_path))
+	_code = code;
+	std::string path = _errorPage[std::to_string(_code)];
+	if (pathIsFile(path))
 	{
-		_body = autoIndexBuilder(_path);
-		_header.setHeader("200 OK", "text/html", _body.length());
+		_fd = open(path.c_str(), O_RDONLY);
+		_header.setStatusError(std::to_string(code));
+		if (_fd < 0)
+		{
+			_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
+			_header.setHeader("500 Internal Servor Error", "text/html", _body.length());
+			_fd = -2;
+		}
 	}
 	else
 	{
-		setFdContent();
+		_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
+		_header.setHeader("500 Internal Servor Error", "text/html", _body.length());
+		_fd = -2;
 	}
-	if (_request.getRedirCode() == 308)
-		_header.setStatus("308 Permanent Redirect");
 }
 
 void		Response::setFdContent()
@@ -168,7 +176,6 @@ void		Response::setFdContent()
 		}
 		_header.setStatus("200 OK");
 		_header.setContentType(_request.getContentType());
-		std::cout << "Content Type: " << _request.getContentType() << std::endl;
 	}
 	else
 	{
@@ -176,18 +183,64 @@ void		Response::setFdContent()
 	}
 }
 
-void		Response::readFd()
+void		Response::getMethod()
 {
-	// Need to change to unsigned char
-	char buffer[32000];
-	size_t ret = 0;
-	
-	if (_fd)
+	if (_autoIndex == true && pathIsDirectory(_path))
 	{
-		ret = read(_fd, buffer, 3199);
-		buffer[ret] = '\0';
-		_body = buffer;
-		_header.setBodyLength(_body.length());
+		_body = autoIndexBuilder(_path);
+		_header.setHeader("200 OK", "text/html", _body.length());
+		_fd = -2;
+	}
+	else
+	{
+		setFdContent();
+	}
+	if (_request.getRedirCode() == 308)
+		_header.setStatus("308 Permanent Redirect");
+}
+
+void		Response::deleteMethod()
+{
+	if (pathIsFile(_path) || pathIsDirectory(_path))
+	{
+		if (remove(_path.c_str()))
+		{
+			setFdError(403);
+			return ;
+		}
+		_header.setStatus("204 No Content");
+		_fd = -2;
+	}
+	else
+	{
+		setFdError(404);
+	}
+}
+
+void		Response::postMethod()
+{
+    // cgi ??
+ 	if (_uploadDest.empty() == false) 
+    {
+		int ret = upload();
+		if (ret == 1)
+		{
+			setFdError(400);
+			return ;
+		}
+		if (ret == 2)
+		{
+			setFdError(403);
+			return ;
+		}
+		_body = hrefLocation(_uploadDest);
+		_header.setHeader("201 Created", "text/html", _body.length());
+    }
+	else
+	{
+		_header.setStatus("204 No Content");
+		_body = "";
+		_fd = -2;
 	}
 }
 
@@ -238,7 +291,15 @@ int			Response::upload()
     body = body.substr(body.find("\r\n\r\n") + 4);
     body = body.substr(0, body.find(boundary));
     body = body.substr(0, body.length() - 2);
-		
+	
+	/*
+		Open Create file, 201 Created
+		open failed -> 403 
+		Return fd , Florian write body dans ce fd !
+		Return body "Your files have been Upload "
+		+ setHeader()
+	*/
+
     std::ofstream myfile;
     myfile.open(_uploadDest.c_str());
     if (myfile.is_open() == false)

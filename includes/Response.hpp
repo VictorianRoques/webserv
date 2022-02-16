@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/15 16:26:33 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/16 13:37:46 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,28 +41,25 @@ public:
     ~Response();
     Response    &operator=(const Response &res);
 
-    /* Init Function for make Response */
     int             initRequest(Request &req);
     int             searchFd(Request &req);
+    void            answer();
     void            setLocationConf();
-    void            makeAnswer();
-
-    /* Reading/send Data */
 
     /* HTTP Methods */
-    void               getMethod();
-    // void            postMethod();
-    // void            deleteMethod();
+    void            getMethod();
+    void            postMethod();
+    void            deleteMethod();
     
     /* Helper Functions */
-    int             upload();
     bool            isAllow(std::string method);
-	std::string		autoIndexBuilder(std::string path);
+    int             upload();
+    std::string		autoIndexBuilder(std::string path);
+    int             needCgi();
 
     /* Set Fd */
     void            setFdContent();
     void            setFdError(int code);
-    void            readFd();
 
     /* Getters */
 
