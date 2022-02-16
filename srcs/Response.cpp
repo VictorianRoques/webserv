@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/09 16:14:30 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/15 17:26:04 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,6 +283,7 @@ void     Response::makeAnswer(Request &req)
     else if (_body.empty())
 		sendPage(405);
 	_header.writeHeader();
+	std::cout << "HEADER: \n" << _header.getHeader() << std::endl;
 	_response = _header.getHeader() + _body;
 }
 

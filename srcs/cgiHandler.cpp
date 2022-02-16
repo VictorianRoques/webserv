@@ -60,7 +60,8 @@ std::string     cgiHandler::execute(std::string  pathToBinaryCgi)
     int         tmpStdIn = dup(STDIN_FILENO);
     int         tmpStdOut = dup(STDOUT_FILENO);
     std::string newBody;
-
+    std::cout << _env["PATH_TRANSLATED"] << std::endl;
+    std::cout << pathToBinaryCgi << std::endl;
     try {
         envp = envToString();
         argv = keyMapConvert(_env["PATH_TRANSLATED"]);

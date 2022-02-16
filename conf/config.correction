@@ -1,7 +1,7 @@
 server 
 {
 	listen 127.0.0.1:8080;
-	server_name example.com;
+	server_name localhost example.com;
 	client_max_body_size 1m;
 
 	location /
@@ -41,7 +41,7 @@ server
         index post.php;
         autoindex off;
         methods POST GET;
-        cgi_handler .php cgi_binary/darwin_phpcgi;
+        cgi_handler .php cgi_binary/cgi_binary;
     }
 
     location /input
