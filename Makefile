@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: viroques <viroques@student.42.fr>          +#+  +:+       +#+         #
+#    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
-#    Updated: 2022/02/16 16:38:31 by viroques         ###   ########.fr        #
+#    Updated: 2022/02/17 17:22:27 by fhamel           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,6 @@ _SRC_		=	main.cpp \
 				SockClient.cpp \
 				socket.cpp \
 				utils.cpp \
-				SockExec.cpp \
 
 SRCS		=	$(addprefix $(D_SRCS), $(_SRC_))
 

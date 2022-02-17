@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cgiHandler.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
+/*   Updated: 2022/02/17 17:22:11 by fhamel           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "cgiHandler.hpp"
 
 cgiHandler::cgiHandler() {}
@@ -64,9 +76,8 @@ char**          cgiHandler::keyMapConvert(std::string key)
     return argv;
 }
 
-int             cgiHandler::startCgi(SockExec &sockExec)
+int             cgiHandler::startCgi(int dataFd, int outputFd)
 {
-    (void)      sockExec;
     char        **envp;
     char        **argv;
     pid_t       pid;
@@ -90,8 +101,8 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     }
     else if (pid == 0)
     {
-        dup2(sockExec.getDataFd(), STDIN_FILENO);
-        dup2(sockExec.getClientFd(), STDOUT_FILENO);
+        dup2(dataFd, STDIN_FILENO);
+        dup2(outputFd, STDOUT_FILENO);
         if (execve("cgi_binary/cgi_tester", argv, envp) == -1) {
             std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
             exit(EXIT_FAILURE);
@@ -99,7 +110,7 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     }
     else
     {
-        close(sockExec.getClientFd());
+		close(dataFd);
         wait(&status);
         if (status != 0) {
             std::cerr << RED << "status: " << status << " | CGI mission abort" << NC << std::endl;

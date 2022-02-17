@@ -6,13 +6,13 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/16 14:57:47 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 17:23:39 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "SockClient.hpp"
 
-SockClient::SockClient(void) : chunk_(false)
+SockClient::SockClient(void) : chunk_(false), cgi_(false)
 	{ return ; }
 
 SockClient::SockClient(const SockClient &sockClient)
@@ -26,6 +26,7 @@ SockClient	&SockClient::operator=(const SockClient &sockClient)
 	ip_ = sockClient.ip_;
 	port_ = sockClient.port_;
 	chunk_ = sockClient.chunk_;
+	cgi_ = sockClient.cgi_;
 	tmpRequest_ = sockClient.tmpRequest_;
 	request_ = sockClient.request_;
 	responseBody_ = sockClient.responseBody_;
@@ -45,15 +46,27 @@ void	SockClient::setPort(size_t port)
 void	SockClient::setChunk(bool chunk)
 	{ chunk_ = chunk; }
 
+void	SockClient::setCgi(bool cgi)
+	{ cgi_ = cgi; }
+
 void	SockClient::setRequest(const Request &request)
 	{ request_ = request; }
 
 void	SockClient::setResponseHeader(const ResponseHeader &responseHeader)
 	{ responseHeader_ = responseHeader; }
 
+void	SockClient::setResponse(const Response &response)
+	{ response_ = response; }
+
+void	SockClient::setOutputFd(int outputFd)
+	{ outputFd_ = outputFd; }
+
 /* checkers */
 bool	SockClient::isChunk(void) const
 	{ return chunk_; }
+
+bool	SockClient::isCgi(void) const
+	{ return cgi_; }
 
 bool	SockClient::isTmpRequestChunk(void) const
 {
@@ -144,6 +157,9 @@ Request	&SockClient::getRequest(void)
 ResponseHeader	&SockClient::getResponseHeader(void)
 	{ return responseHeader_; }
 
+Response	&SockClient::getResponse(void)
+	{ return response_; }
+
 std::string	&SockClient::getResponseBody(void)
 	{ return responseBody_; }
 
@@ -152,3 +168,6 @@ int	&SockClient::getBeginPipe(void)
 
 int	&SockClient::getEndPipe(void)
 	{ return fd_[0]; }
+
+int	&SockClient::getOutputFd(void)
+	{ return outputFd_; }

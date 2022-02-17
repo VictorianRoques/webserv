@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/16 14:57:54 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 17:23:43 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 
 # include "RequestParser.hpp"
 # include "ResponseHeader.hpp"
+# include "Response.hpp"
 
 class SockClient {
 
@@ -28,12 +29,15 @@ class SockClient {
 		char			*ip_;
 		size_t			port_;
 		bool			chunk_;
+		bool			cgi_;
 		std::string		tmpRequest_;
 		std::string		finalRequest_;
 		Request			request_;
 		ResponseHeader	responseHeader_;
+		Response		response_;
 		std::string		responseBody_;
 		int				fd_[2];
+		int				outputFd_;
 
 	public:
 		SockClient(void);
@@ -45,10 +49,14 @@ class SockClient {
 		void			setIp(char *ip);
 		void			setPort(size_t port);
 		void			setChunk(bool chunk);
+		void			setCgi(bool cgi);
 		void			setRequest(const Request &request);
 		void			setResponseHeader(const ResponseHeader &responseHeader);
+		void			setResponse(const Response &response);
+		void			setOutputFd(int outputFd);
 		/* checkers */
 		bool			isChunk(void) const;
+		bool			isCgi(void) const;
 		bool			isTmpRequestChunk(void) const;
 		bool			isChunkEof(void) const;
 		bool			isDeleteRequest(void) const;
@@ -61,8 +69,10 @@ class SockClient {
 		Request			&getRequest(void);
 		ResponseHeader	&getResponseHeader(void);
 		std::string		&getResponseBody(void);
+		Response		&getResponse(void);
 		int				&getEndPipe(void);
 		int				&getBeginPipe(void);
+		int				&getOutputFd(void);
 
 };
 

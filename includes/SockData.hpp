@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 05:29:31 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 16:57:37 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <fstream>
 # include <iostream>
 # include <utility>
+# include <sstream>
 
 # include <unistd.h>
 # include <arpa/inet.h>
@@ -33,8 +34,7 @@
 # include "Parser.hpp"
 # include "Response.hpp"
 # include "SockClient.hpp"
-# include "SockExec.hpp"
-# include  "cgiHandler.hpp"
+# include "cgiHandler.hpp"
 
 # define ERROR -1
 # define CGI -1
@@ -98,7 +98,6 @@ class SockData {
 		void		recvClientClose(int fd, int ret);
 		void		clearClient(int fd);
 		void		clearDataFd(int fd);
-		SockExec	initSockExec(int fd);
 		void		writeToCgi(int fd);
 		
 		/* msg connection */

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:01 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/16 15:56:07 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/17 17:21:33 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 
 # include "RequestParser.hpp"
 # include "Server.hpp"
-# include "SockExec.hpp"
 # include <unistd.h>
 # include "utils.hpp"
 
@@ -46,7 +45,7 @@ public:
 
     char            **envToString();
     char            **keyMapConvert(std::string key);
-    int             startCgi(SockExec &sockExec);
+    int             startCgi(int dataFd, int outputFd);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 05:29:03 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 17:17:09 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,9 +97,9 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 {
 	Response	response(server);
 	dataFds_[fd] = response.searchFd(request);
-	// clients_[fd].setResponse(response.getResponse());
 	clients_[fd].setRequest(request);
 	clients_[fd].setResponseHeader(response.getResponseHeader());
+	clients_[fd].setResponse(response);
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getFinalRequest().clear();
 	clients_[fd].setChunk(false);
@@ -149,14 +149,6 @@ void	SockData::setBadRequest(int fd)
 	}
 	dataFds_[fd] = fd_error_400;
 	FD_SET(fd, &activeSet_);
-}
-
-SockExec  SockData::initSockExec(int fd)
-{
-	SockExec sockExec;
-	sockExec.setDataFd(clients_[fd].getEndPipe());
-	sockExec.setClientFd(fd);
-	return sockExec;
 }
 
 /* checkers */
@@ -260,6 +252,7 @@ void	SockData::recvClient(int fd)
 					setResponse(fd);
 					if (dataFds_[fd] == CGI) {
 						/* CGI needed -> set up pipe for process communication */
+						clients_[fd].setCgi(true);
 						int	fdTmp[2];
 						if (pipe(fdTmp) == ERROR) {
 							clearClient(fd);
@@ -305,6 +298,11 @@ void	SockData::sendClient(int fd)
 		buffer[ret] = '\0';
 		clients_[fd].getResponseBody() += std::string(buffer, ret);
 		if (ret < BUF_SIZE - 1) {
+			if (clients_[fd].isCgi()) {
+				// clients_[fd].getResponseHeader().setCgiStatus(clients_[fd].getResponseBody());
+				// clients_[fd].getResponseBody() = cleanBody(clients_[fd].getResponseBody());
+				// clients_[fd].setCgi(false);
+			}
 			clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getResponseBody().size());
 			clients_[fd].getResponseHeader().writeHeader();
 			std::string	data = clients_[fd].getResponseHeader().getHeader() + clients_[fd].getResponseBody();
@@ -329,10 +327,21 @@ void	SockData::sendClient(int fd)
 		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
 	}
 	else if (!isBeginPipeReady(fd)) {
-		SockExec sockExec = initSockExec(fd);
+		std::stringstream	ss;
+		ss << fd;
+		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
+		int fd_output;
+		if ((fd_output = open(pathFile.c_str(), O_CREAT | O_TRUNC, 0666)) == ERROR) {
+			close(clients_[fd].getEndPipe());
+			close(clients_[fd].getBeginPipe());
+			clearClient(fd);
+			clearDataFd(fd);
+			return ;
+		}
+		clients_[fd].setOutputFd(fd_output);
 		// Need to pass Server to cgiHandler
 		cgiHandler cgi(clients_[fd].getRequest());
-		if (cgi.startCgi(sockExec) == ERROR) {
+		if (cgi.startCgi(clients_[fd].getEndPipe(), clients_[fd].getOutputFd()) == ERROR) {
 			close(clients_[fd].getEndPipe());
 			close(clients_[fd].getBeginPipe());
 			clearClient(fd);
@@ -350,6 +359,7 @@ void	SockData::writeToCgi(int fd)
 		clearClient(fd);
 		clearDataFd(fd);
 	}
+	FD_SET(clients_[fd].getOutputFd(), &activeSet_);
 }
 
 /* client manager utils */
