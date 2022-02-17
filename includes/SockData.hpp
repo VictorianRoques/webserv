@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/16 16:35:54 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/17 05:29:31 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,6 @@ class SockData {
 		void		openFailureData(int fd);
 		void		pipeFailure(int fd);
 		void		writeFailure(int fd);
-		void		forkFailure(int fd);
 
 		/* bad alloc exception */
 		struct badAllocException : public std::exception {

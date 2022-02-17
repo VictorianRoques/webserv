@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 04:51:22 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 05:29:03 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,7 +296,6 @@ void	SockData::sendClient(int fd)
 {
 	char	buffer[BUF_SIZE];
 	int		ret;
-	std::cout << dataFds_[fd] << std::endl;
 	if (dataFds_[fd] != CGI && FD_ISSET(dataFds_[fd], &readSet_)) {
 		if ((ret = read(dataFds_[fd], buffer, BUF_SIZE - 1)) == ERROR) {
 			clearClient(fd);
@@ -324,21 +323,21 @@ void	SockData::sendClient(int fd)
 		// FD_CLR(fd, &writeSet_);
 	}
 	else if (isBeginPipeReady(fd)) {
-		std::cout << "1" << std::endl;
 		writeToCgi(fd);
 		close(clients_[fd].getBeginPipe());
 		FD_CLR(clients_[fd].getEndPipe(), &activeSet_);
 		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
 	}
 	else if (!isBeginPipeReady(fd)) {
-		std::cout << "2" << std::endl;
 		SockExec sockExec = initSockExec(fd);
 		// Need to pass Server to cgiHandler
 		cgiHandler cgi(clients_[fd].getRequest());
 		if (cgi.startCgi(sockExec) == ERROR) {
+			close(clients_[fd].getEndPipe());
+			close(clients_[fd].getBeginPipe());
 			clearClient(fd);
 			clearDataFd(fd);
-			forkFailure(fd);
+			return ;
 		}
 		FD_SET(clients_[fd].getBeginPipe(), &writeSet_);
 	}
@@ -549,18 +548,6 @@ void	SockData::writeFailure(int fd)
 	std::cout << "-----------------------------" << std::endl;
 	std::cout << red;
 	std::cout << "Server: couldn't write";
-	std::cout << " | socket fd " << fd;
-	std::cout << " | closing connection"; 
-	std::cout << std::endl;
-	std::cout << white;
-	std::cout << "-----------------------------" << std::endl;
-}
-
-void	SockData::forkFailure(int fd)
-{
-	std::cout << "-----------------------------" << std::endl;
-	std::cout << red;
-	std::cout << "Server: couldn't fork";
 	std::cout << " | socket fd " << fd;
 	std::cout << " | closing connection"; 
 	std::cout << std::endl;

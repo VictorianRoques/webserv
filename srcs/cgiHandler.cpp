@@ -103,6 +103,10 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     {
         close(sockExec.getClientFd());
         wait(&status);
+        if (status != 0) {
+            std::cerr << RED << "status: " << status << " | CGI mission abort" << NC << std::endl;
+            return -1;
+        }
     }
     for (int i = 0; envp[i]; i++)
         delete [] envp[i];
