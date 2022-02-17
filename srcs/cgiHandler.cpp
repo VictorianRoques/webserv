@@ -6,7 +6,7 @@ cgiHandler::cgiHandler(Request &req)
 {
     /* Serveur */
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["SCRIPT_NAME"] = "cgi_binary/darwin_phpcgi";
+    _env["SCRIPT_NAME"] = "cgi_binary/cgi_tester";
     _env["SERVER_NAME"] = "localhost";
     _env["SERVER_PORT"] = "8080";
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
@@ -18,6 +18,7 @@ cgiHandler::cgiHandler(Request &req)
     _env["CONTENT_LENGTH"] = req.getContentLength();
     _env["PATH_TRANSLATED"] = req.getFullPath();
     _env["PATH_INFO"] = req.getFullPath().substr(req.getFullPath().rfind("/") + 1);
+    // _env["PATH_INFO"] = "/post.php";
     _env["QUERY_STRING"] = req.getQueryString();
 
     _body = req.getBody();
@@ -70,9 +71,6 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     char        **argv;
     pid_t       pid;
     int         status;
-
-    std::cout << "PATH TRANSLATED: \n";
-    std::cout << _env["PATH_TRANSLATED"] << std::endl;
 
     try {
         envp = envToString();
