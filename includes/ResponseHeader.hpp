@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 18:17:41 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/14 12:07:29 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/17 17:15:43 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,8 @@ public:
     void            setStatusRedirect(std::string code, size_t length);
     void            setCgiHeader(std::string cgiHeader);
     void            setRes(std::string head);
-    /* Write Final Header */
     
+    void            setCgiStatus(std::string body);
     void            writeHeader();
 
 private:

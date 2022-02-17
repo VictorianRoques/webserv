@@ -92,7 +92,7 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     {
         dup2(sockExec.getDataFd(), STDIN_FILENO);
         dup2(sockExec.getClientFd(), STDOUT_FILENO);
-        if (execve("cgi_binary/cgi_tester", argv, envp) == -1) {
+        if (execve("cgi_binary/cgi_of_love", argv, envp) == -1) {
             std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
             exit(EXIT_FAILURE);
         }
