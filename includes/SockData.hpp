@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 17:28:43 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 22:47:20 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,10 @@
 # include "cgiHandler.hpp"
 
 # define ERROR -1
+
 # define CGI -1
-# define AUTOINDEX -2
+# define STR_DATA -2
+
 # define BUF_SIZE 1024
 
 class SockData {
@@ -81,6 +83,7 @@ class SockData {
 		bool		isWriteSet(int fd) const;
 		bool		isBeginPipeReady(int fd);
 		bool		isEndPipeReady(int fd);
+		bool		isFileRequest(int fd);
 
 		/* getters */
 		fd_set		*getReadSet(void);
@@ -93,13 +96,21 @@ class SockData {
 		void		recvClient(int fd);
 		void		sendClient(int fd);
 
-		/* utils */
-		void		closeListen(size_t endInd);
-		void		recvClientClose(int fd, int ret);
-		void		clearClient(int fd);
-		void		clearDataFd(int fd);
+		/* client manager utils */
+		/* requests */
+		void		fileRequest(int fd);
+		void		cgiRequest(int fd);
+		void		strDataRequest(int fd);
+		/* cgi */
 		void		writeToCgi(int fd);
-		void		cleanBody(std::string &responseBody);
+		void		setUpCgi(int fd);
+
+		/* utils */
+		void		recvClientClose(int fd, int ret);
+		void		clearDataFd(int fd);
+		void		clearClient(int fd);
+		std::string	cleanBody(std::string &responseBody);
+		void		closeListen(size_t endInd);
 		
 		/* msg connection */
 		void		cnxFailed(void);
