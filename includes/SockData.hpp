@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 16:57:37 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 17:28:43 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ class SockData {
 		void		clearClient(int fd);
 		void		clearDataFd(int fd);
 		void		writeToCgi(int fd);
+		void		cleanBody(std::string &responseBody);
 		
 		/* msg connection */
 		void		cnxFailed(void);

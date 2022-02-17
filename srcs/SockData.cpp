@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 17:17:09 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 17:33:46 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,6 +285,9 @@ void	SockData::recvClient(int fd)
 	}
 }
 
+void	SockData::cleanBody(std::string &responseBody)
+	{ responseBody = responseBody.substr(0, responseBody.find("\r\n\r\n")); }
+
 void	SockData::sendClient(int fd)
 {
 	char	buffer[BUF_SIZE];
@@ -299,9 +302,9 @@ void	SockData::sendClient(int fd)
 		clients_[fd].getResponseBody() += std::string(buffer, ret);
 		if (ret < BUF_SIZE - 1) {
 			if (clients_[fd].isCgi()) {
-				// clients_[fd].getResponseHeader().setCgiStatus(clients_[fd].getResponseBody());
-				// clients_[fd].getResponseBody() = cleanBody(clients_[fd].getResponseBody());
-				// clients_[fd].setCgi(false);
+				clients_[fd].getResponseHeader().setCgiStatus(clients_[fd].getResponseBody());
+				clients_[fd].setCgi(false);
+				cleanBody(clients_[fd].getResponseBody());
 			}
 			clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getResponseBody().size());
 			clients_[fd].getResponseHeader().writeHeader();
@@ -336,6 +339,7 @@ void	SockData::sendClient(int fd)
 			close(clients_[fd].getBeginPipe());
 			clearClient(fd);
 			clearDataFd(fd);
+			std::cout << "yoyoyo" << std::endl;
 			return ;
 		}
 		clients_[fd].setOutputFd(fd_output);
@@ -346,6 +350,7 @@ void	SockData::sendClient(int fd)
 			close(clients_[fd].getBeginPipe());
 			clearClient(fd);
 			clearDataFd(fd);
+			std::cout << "hihihi" << std::endl;
 			return ;
 		}
 		FD_SET(clients_[fd].getBeginPipe(), &writeSet_);
