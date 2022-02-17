@@ -94,8 +94,10 @@ int             cgiHandler::startCgi(SockExec &sockExec)
     {
         dup2(sockExec.getDataFd(), STDIN_FILENO);
         dup2(sockExec.getClientFd(), STDOUT_FILENO);
-        execve("cgi_binary/cgi_tester", argv, envp);
-        std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
+        if (execve("cgi_binary/cgi_tester", argv, envp) == -1) {
+            std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
+            exit(EXIT_FAILURE);
+        }
     }
     else
     {
