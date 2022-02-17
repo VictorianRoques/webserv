@@ -90,4 +90,7 @@ void            ResponseHeader::writeHeader()
     _header += "\r\n";
 }
 
-
+void            ResponseHeader::setCgiStatus(std::string body)
+{
+    setCgiHeader(body.substr(0, body.find("\r\n\r\n")));
+}
