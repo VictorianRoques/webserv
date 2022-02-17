@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 17:33:46 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 17:59:03 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,11 +285,9 @@ void	SockData::recvClient(int fd)
 	}
 }
 
-void	SockData::cleanBody(std::string &responseBody)
-	{ responseBody = responseBody.substr(0, responseBody.find("\r\n\r\n")); }
-
 void	SockData::sendClient(int fd)
 {
+	std::cout << "Heyhey" << std::endl;
 	char	buffer[BUF_SIZE];
 	int		ret;
 	if (dataFds_[fd] != CGI && FD_ISSET(dataFds_[fd], &readSet_)) {
@@ -302,9 +300,11 @@ void	SockData::sendClient(int fd)
 		clients_[fd].getResponseBody() += std::string(buffer, ret);
 		if (ret < BUF_SIZE - 1) {
 			if (clients_[fd].isCgi()) {
+				std::cout << "1" << std::endl;
 				clients_[fd].getResponseHeader().setCgiStatus(clients_[fd].getResponseBody());
 				clients_[fd].setCgi(false);
 				cleanBody(clients_[fd].getResponseBody());
+				std::cout << "2" << std::endl;
 			}
 			clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getResponseBody().size());
 			clients_[fd].getResponseHeader().writeHeader();
@@ -324,9 +324,11 @@ void	SockData::sendClient(int fd)
 		// FD_CLR(fd, &writeSet_);
 	}
 	else if (isBeginPipeReady(fd)) {
+		std::cout << "pipe ready" << std::endl;
 		writeToCgi(fd);
+		std::cout << "pipe done" << std::endl;
 		close(clients_[fd].getBeginPipe());
-		FD_CLR(clients_[fd].getEndPipe(), &activeSet_);
+		FD_SET(clients_[fd].getOutputFd(), &activeSet_);
 		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
 	}
 	else if (!isBeginPipeReady(fd)) {
@@ -339,7 +341,6 @@ void	SockData::sendClient(int fd)
 			close(clients_[fd].getBeginPipe());
 			clearClient(fd);
 			clearDataFd(fd);
-			std::cout << "yoyoyo" << std::endl;
 			return ;
 		}
 		clients_[fd].setOutputFd(fd_output);
@@ -350,7 +351,6 @@ void	SockData::sendClient(int fd)
 			close(clients_[fd].getBeginPipe());
 			clearClient(fd);
 			clearDataFd(fd);
-			std::cout << "hihihi" << std::endl;
 			return ;
 		}
 		FD_SET(clients_[fd].getBeginPipe(), &writeSet_);
@@ -363,11 +363,12 @@ void	SockData::writeToCgi(int fd)
 	clients_[fd].getRequest().getBody().size()) == ERROR) {
 		clearClient(fd);
 		clearDataFd(fd);
+		writeFailure(fd);
 	}
-	FD_SET(clients_[fd].getOutputFd(), &activeSet_);
+	perror("test");
 }
 
-/* client manager utils */
+/* utils */
 void	SockData::recvClientClose(int fd, int ret)
 {
 	if (ret == ERROR) {
@@ -394,6 +395,9 @@ void	SockData::clearClient(int fd)
 	FD_CLR(fd, &activeSet_);
 	FD_CLR(fd, &writeSet_);
 }
+
+void	SockData::cleanBody(std::string &responseBody)
+	{ responseBody = responseBody.substr(0, responseBody.find("\r\n\r\n")); }
 
 /* msg connection */
 void	SockData::cnxFailed(void)
