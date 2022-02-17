@@ -121,6 +121,11 @@ Location findRightLocation(std::vector<Location> loc, Request req) {
 	if (req.getPath()[0] != '/')
 		req.setPath("/" + req.getPath());
 	std::vector<Location>::iterator it = loc.begin();
+	// if queryString attached to path, remove it
+	if (req.getPath().find("?") != std::string::npos) {
+		req.setPath(req.getPath().substr(0, req.getPath().find("?")));
+		std::cout << "YOYOY " << req.getPath() << std::endl;
+	}
 	// looking for exact match
 	for (; it != loc.end(); it++) {
 		if (it->getLocationMatch() == req.getPath()) {
@@ -172,10 +177,14 @@ void	Request::isChunked() {
 void	Request::buildFullPath(Location loc) {
 
 	if (getRedirCode() == 308) { // if redirection 
-		if (loc.getRedirection().second[0] == '/') //absolute
+		if (loc.getRedirection().second[0] == '/') { //absolute
 			_fullPath = loc.getRedirection().second;
-		else //relative
+			std::cout << "ABSOLUTE REDIR" << std::endl;
+		}
+		else { //relative
 			_fullPath = loc.getRoot() + "/" + _path;
+			std::cout << "relative REDIR" << std::endl;
+		}
 	}
 	else { 
 		if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) { // check if this is an upload
@@ -185,11 +194,9 @@ void	Request::buildFullPath(Location loc) {
 				_fullPath = loc.getRoot() + "/" + loc.getUploadDest();
 		}
 		else {
-			_fullPath = findRightPath(_path, loc.getRoot(), loc.getLocationMatch());
+			_fullPath = findRightPath(_path, loc.getRoot(), loc.getAutoIndex(), loc.getIndex());
 		}
 	}
-	if (loc.getAutoIndex() == false && pathIsDirectory(_fullPath))
-		_fullPath += "/" + loc.getIndex();
 	_fullPath = cleanSlash(_fullPath);
 	return ;
 }

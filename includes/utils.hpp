@@ -92,7 +92,7 @@ int									pathIsFile(std::string &path);
 std::string							getTime();
 std::string							sizeToString(size_t size);
 std::string							hrefLocation(std::string location);
-std::string							findRightPath(std::string path, std::string root, std::string locationMatch);
+std::string							findRightPath(std::string path, std::string root, bool autoIndex, std::string index);
 std::string							makePathAbsolute(std::string);
 long long							maxBodyAtoi(std::string maxBodySize);
 std::string							getFileContent(std::string path);
