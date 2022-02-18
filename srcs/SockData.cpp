@@ -3,10 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   SockData.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/02/18 19:37:06 by fhamel           ###   ########.fr       */
+=======
+/*   Updated: 2022/02/18 17:43:23 by victorianro      ###   ########.fr       */
+>>>>>>> 19efb83a35173c8d2cb49550f8d2ff2c9105b0d0
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -356,7 +360,28 @@ void	SockData::fileRequest(int fd)
 		std::stringstream	ss;
 		ss << fd;
 		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
+<<<<<<< HEAD
 		unlink(pathFile.c_str());
+=======
+		int outputFd = open(pathFile.c_str(), O_RDONLY);
+		clients_[fd].setOutputFd(outputFd);
+		FD_SET(clients_[fd].getBeginPipe(), &writeSet_);
+	}
+	else if (isBeginPipeReady(fd)) {
+		writeToCgi(fd);
+		close(clients_[fd].getBeginPipe());
+		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
+		dataFds_[fd] = clients_[fd].getOutputFd();
+		FD_SET(clients_[fd].getOutputFd(), &activeSet_);
+	}
+}
+
+void	SockData::strDataRequest(int fd)
+{
+	std::string	data = clients_[fd].getResponse().getData();
+	if (send(fd, data.c_str(), data.size(), 0) == ERROR) {
+		clearClient(fd);
+>>>>>>> 19efb83a35173c8d2cb49550f8d2ff2c9105b0d0
 		clearDataFd(fd);
 		clients_[fd].setDataReady(true);
 	}
