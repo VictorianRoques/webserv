@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:01 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/17 23:51:37 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 16:14:40 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ public:
 
     char            **envToString();
     char            **keyMapConvert(std::string key);
-    int             startCgi(int fd, int dataFd);
+    int             startCgi(int fd);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 17:23:43 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 18:55:37 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,15 +29,15 @@ class SockClient {
 		char			*ip_;
 		size_t			port_;
 		bool			chunk_;
-		bool			cgi_;
+		bool			dataReady_;
 		std::string		tmpRequest_;
 		std::string		finalRequest_;
 		Request			request_;
-		ResponseHeader	responseHeader_;
 		Response		response_;
-		std::string		responseBody_;
-		int				fd_[2];
+		int				inputFd_;
 		int				outputFd_;
+		std::string		responseBody_;
+		std::string		data_;
 
 	public:
 		SockClient(void);
@@ -50,13 +50,15 @@ class SockClient {
 		void			setPort(size_t port);
 		void			setChunk(bool chunk);
 		void			setCgi(bool cgi);
+		void			setDataReady(bool dataReady);
 		void			setRequest(const Request &request);
-		void			setResponseHeader(const ResponseHeader &responseHeader);
 		void			setResponse(const Response &response);
+		void			setInputFd(int inputFd);
 		void			setOutputFd(int outputFd);
+
 		/* checkers */
 		bool			isChunk(void) const;
-		bool			isCgi(void) const;
+		bool			isDataReady() const;
 		bool			isTmpRequestChunk(void) const;
 		bool			isChunkEof(void) const;
 		bool			isDeleteRequest(void) const;
@@ -67,11 +69,10 @@ class SockClient {
 		std::string		&getTmpRequest(void);
 		std::string		&getFinalRequest(void);
 		Request			&getRequest(void);
-		ResponseHeader	&getResponseHeader(void);
-		std::string		&getResponseBody(void);
 		Response		&getResponse(void);
-		int				&getEndPipe(void);
-		int				&getBeginPipe(void);
+		std::string		&getResponseBody(void);
+		std::string		&getData(void);
+		int				&getInputFd(void);
 		int				&getOutputFd(void);
 
 };

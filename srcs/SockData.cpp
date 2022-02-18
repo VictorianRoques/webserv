@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 16:03:48 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 19:37:06 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,6 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 	Response	response(server);
 	dataFds_[fd] = response.searchFd(request);
 	clients_[fd].setRequest(request);
-	clients_[fd].setResponseHeader(response.getResponseHeader());
 	clients_[fd].setResponse(response);
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getFinalRequest().clear();
@@ -182,12 +181,6 @@ bool	SockData::isWriteSet(int fd) const
 bool	SockData::isReadingOver(int ret) const
 	{ return (ret < BUF_SIZE - 1); }
 
-bool	SockData::isBeginPipeReady(int fd)
-	{ return FD_ISSET(clients_[fd].getBeginPipe(), &writeSet_); }
-
-bool	SockData::isEndPipeReady(int fd)
-	{ return FD_ISSET(clients_[fd].getEndPipe(), &readSet_); }
-
 bool	SockData::isFileRequest(int fd)
 	{ return (dataFds_[fd] != CGI && FD_ISSET(dataFds_[fd], &readSet_)); }
 
@@ -230,10 +223,6 @@ void	SockData::addClient(int fd)
 			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
 				cnxFailed();
 			}
-			if (setsockopt(newSock, SOL_SOCKET, SO_NOSIGPIPE,
-			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
-				cnxFailed();
-			}
 			FD_SET(newSock, &activeSet_);
 			cnxAccepted(sockClient);
 		}
@@ -269,22 +258,86 @@ void	SockData::recvClient(int fd)
 	}
 }
 
+void	SockData::sendDataClient(int fd)
+{
+	std::cout << "data: " << std::endl;
+	std::cout << clients_[fd].getData() << std::endl;
+	if (send(fd, clients_[fd].getData().c_str(),
+	clients_[fd].getData().size(), 0) == ERROR) {
+		clearClient(fd);
+		writeFailure(fd);
+	}
+	msgSent(fd);
+	FD_CLR(fd, &writeSet_);
+}
+
 void	SockData::sendClient(int fd)
 {
-	if (isFileRequest(fd)) {
-		std::cout << "fileRequest() called" << std::endl;
-		fileRequest(fd);
+	if (clients_[fd].isDataReady()) {
+		sendDataClient(fd);
+		return ;
 	}
-	else if (dataFds_[fd] == CGI) {
-		std::cout << "cgiRequest() called" << std::endl;
+	if (dataFds_[fd] == CGI) {
 		cgiRequest(fd);
 	}
 	else if (dataFds_[fd] == STR_DATA) {
-		// strDataRequest(fd);
+		strDataRequest(fd);
+	}
+	else {
+		fileRequest(fd);
 	}
 }
 
 /* requests */
+void	SockData::cgiRequest(int fd)
+{
+		// Need to pass Server to cgiHandler
+		std::stringstream	ss;
+		ss << fd;
+		if (FD_ISSET(clients_[fd].getInputFd(), &writeSet_)) {
+			std::string	pathFile = "./cgi_binary/.cgi_input_" + ss.str();
+			FD_CLR(clients_[fd].getInputFd(), &writeSet_);
+			if (write(clients_[fd].getInputFd(),
+			clients_[fd].getRequest().getBody().c_str(),
+			clients_[fd].getRequest().getBody().size()) == ERROR) {
+				close(clients_[fd].getInputFd());
+				unlink(pathFile.c_str());
+				clearClient(fd);
+				clearDataFd(fd);
+				writeFailure(fd);
+				return ;
+			}
+			FD_SET(clients_[fd].getInputFd(), &activeSet_);
+			return ;
+		}
+		if (FD_ISSET(clients_[fd].getInputFd(), &readSet_)) {
+			close(clients_[fd].getInputFd());
+			FD_CLR(clients_[fd].getInputFd(), &activeSet_);
+			cgiHandler cgi(clients_[fd].getRequest());
+			if (cgi.startCgi(fd) == ERROR) {
+				clearClient(fd);
+				clearDataFd(fd);
+				return ;
+			}
+			std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
+			if ((clients_[fd].getOutputFd() =
+			open(pathFile.c_str(), O_RDONLY)) == ERROR) {
+				clearClient(fd);
+				clearDataFd(fd);
+				openFailureData(fd);
+				return ;
+			}
+			dataFds_[fd] = clients_[fd].getOutputFd();
+			FD_SET(dataFds_[fd], &activeSet_);
+		}
+}
+
+void	SockData::strDataRequest(int fd)
+{
+	clients_[fd].getData() = clients_[fd].getResponse().getData();
+	clients_[fd].setDataReady(true);
+}
+
 void	SockData::fileRequest(int fd)
 {
 	char	buffer[BUF_SIZE];
@@ -298,108 +351,38 @@ void	SockData::fileRequest(int fd)
 	buffer[ret] = '\0';
 	clients_[fd].getResponseBody() += std::string(buffer, ret);
 	if (isReadingOver(ret)) {
-		if (clients_[fd].isCgi()) {
-			clients_[fd].getResponseHeader().setCgiStatus(clients_[fd].getResponseBody());
-			clients_[fd].getResponseBody() = cleanBody(clients_[fd].getResponseBody());
-		}
-		clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getResponseBody().size());
-		clients_[fd].getResponseHeader().writeHeader();
-		std::string	data = clients_[fd].getResponseHeader().getHeader() + clients_[fd].getResponseBody();
-		if (send(fd, data.c_str(), data.size(), 0) == ERROR) {
-			clearClient(fd);
-			cnxCloseSend(fd);
-		}
-		if (clients_[fd].isCgi()) {
-			std::stringstream	ss;
-			ss << fd;
-			std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
-			close(clients_[fd].getOutputFd());
-			clients_[fd].setCgi(false);
-			unlink(pathFile.c_str());
-		}
-		clearDataFd(fd);
-		clients_[fd].getResponseBody().clear();
-		FD_CLR(fd, &writeSet_);
-	}
-}
-
-void	SockData::cgiRequest(int fd)
-{
-	if (!isBeginPipeReady(fd)) {
-		// Need to pass Server to cgiHandler
-		cgiHandler cgi(clients_[fd].getRequest());
-		if (cgi.startCgi(fd, clients_[fd].getEndPipe()) == ERROR) {
-			close(clients_[fd].getEndPipe());
-			close(clients_[fd].getBeginPipe());
-			clearClient(fd);
-			clearDataFd(fd);
-			return ;
-		}
+		clients_[fd].getResponse().makeAnswer(clients_[fd].getResponseBody(), false);
+		clients_[fd].getData() = clients_[fd].getResponse().getData();
 		std::stringstream	ss;
 		ss << fd;
 		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
-		int outputFd = open(pathFile.c_str(), O_RDONLY);
-		clients_[fd].setOutputFd(outputFd);
-		FD_SET(clients_[fd].getBeginPipe(), &writeSet_);
-	}
-	else if (isBeginPipeReady(fd)) {
-		writeToCgi(fd);
-		close(clients_[fd].getBeginPipe());
-		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
-		dataFds_[fd] = clients_[fd].getOutputFd();
-		FD_SET(clients_[fd].getOutputFd(), &activeSet_);
-	}
-}
-
-void	SockData::strDataRequest(int fd)
-{
-	clients_[fd].getResponse().makeAnswer();
-	std::string	data = clients_[fd].getResponse().getData();
-	if (send(fd, data.c_str(), data.size(), 0) == ERROR) {
-		clearClient(fd);
+		unlink(pathFile.c_str());
 		clearDataFd(fd);
-		writeFailure(fd);
-		return ;
+		clients_[fd].setDataReady(true);
 	}
-	FD_CLR(fd, &writeSet_);
 }
 
 void	SockData::requestReceived(int fd)
 {
 	msgRecv(fd);
 	setResponse(fd);
+	FD_SET(fd, &writeSet_);
 	if (dataFds_[fd] == CGI) {
-		setUpCgi(fd);
+		std::stringstream	ss;
+		ss << fd;
+		std::string	pathFile = "./cgi_binary/.cgi_input_" + ss.str();
+		if ((clients_[fd].getInputFd() =
+		open(pathFile.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666)) == ERROR) {
+			clearClient(fd);
+			clearDataFd(fd);
+			openFailureData(fd);
+			return ;
+		}
+		FD_SET(clients_[fd].getInputFd(), &writeSet_);
 	}
-	else {
+	else if (dataFds_[fd] > CGI) {
 		FD_SET(dataFds_[fd], &activeSet_);
 	}
-}
-
-/* cgi */
-void	SockData::writeToCgi(int fd)
-{
-	if (write(clients_[fd].getBeginPipe(), clients_[fd].getRequest().getBody().c_str(),
-	clients_[fd].getRequest().getBody().size()) == ERROR) {
-		clearClient(fd);
-		clearDataFd(fd);
-		writeFailure(fd);
-	}
-}
-
-void	SockData::setUpCgi(int fd)
-{
-	clients_[fd].setCgi(true);
-	int	fdTmp[2];
-	if (pipe(fdTmp) == ERROR) {
-		clearClient(fd);
-		clearDataFd(fd);
-		setInternalError(fd);
-		pipeFailure(fd);
-		return ;
-	}
-	clients_[fd].getEndPipe() = fdTmp[0];
-	clients_[fd].getBeginPipe() = fdTmp[1];
 }
 
 /* utils */
@@ -584,18 +567,6 @@ void	SockData::openFailureData(int fd)
 	std::cerr << "-----------------------------" << std::endl;
 	std::cerr << red;
 	std::cerr << "Server: couldn't open data file";
-	std::cerr << " | socket fd " << fd;
-	std::cerr << " | closing connection"; 
-	std::cerr << std::endl;
-	std::cerr << white;
-	std::cerr << "-----------------------------" << std::endl;
-}
-
-void	SockData::pipeFailure(int fd)
-{
-	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << red;
-	std::cerr << "Server: couldn't pipe";
 	std::cerr << " | socket fd " << fd;
 	std::cerr << " | closing connection"; 
 	std::cerr << std::endl;

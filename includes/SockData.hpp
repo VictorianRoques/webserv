@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 00:49:10 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 19:12:32 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,8 +82,6 @@ class SockData {
 		bool		isReadSet(int fd) const;
 		bool		isWriteSet(int fd) const;
 		bool		isReadingOver(int fd) const;
-		bool		isBeginPipeReady(int fd);
-		bool		isEndPipeReady(int fd);
 		bool		isFileRequest(int fd);
 
 		/* getters */
@@ -97,15 +95,13 @@ class SockData {
 		void		recvClient(int fd);
 		void		sendClient(int fd);
 
-		/* client manager utils */
 		/* requests */
+
 		void		fileRequest(int fd);
 		void		cgiRequest(int fd);
 		void		strDataRequest(int fd);
+		void		sendDataClient(int fd);
 		void		requestReceived(int fd);
-		/* cgi */
-		void		writeToCgi(int fd);
-		void		setUpCgi(int fd);
 
 		/* utils */
 		void		recvClientClose(int fd, int ret);
@@ -133,7 +129,6 @@ class SockData {
 		void		openFailure500(int fd);
 		void		openFailure400(int fd);
 		void		openFailureData(int fd);
-		void		pipeFailure(int fd);
 		void		writeFailure(int fd);
 
 		/* bad alloc exception */

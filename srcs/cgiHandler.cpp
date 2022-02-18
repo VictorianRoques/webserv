@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 15:58:18 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 19:23:42 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ char**          cgiHandler::keyMapConvert(std::string key)
     return argv;
 }
 
-int             cgiHandler::startCgi(int fd, int dataFd)
+int             cgiHandler::startCgi(int fd)
 {
     char        **envp;
     char        **argv;
@@ -93,14 +93,27 @@ int             cgiHandler::startCgi(int fd, int dataFd)
     {
         std::stringstream	ss;
 		ss << fd;
-		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
-		int outputFd = open(pathFile.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666);
-        if (dup2(dataFd, STDIN_FILENO) == -1) {
-            std::cerr << RED << "dup2 issue." << NC << std::endl;
+		std::string	pathFileIn = "./cgi_binary/.cgi_input_" + ss.str();
+        std::string pathFileOut = "./cgi_binary/.cgi_output_" + ss.str();
+		int inputFd, outputFd; 
+        if ((inputFd = open(pathFileIn.c_str(),
+        O_RDONLY)) == -1) {
+            std::cerr << RED << "open issue." << NC << std::endl;
+            exit(EXIT_FAILURE);
         }
-        close(dataFd);
+        if ((outputFd = open(pathFileOut.c_str(),
+        O_CREAT | O_TRUNC | O_WRONLY)) == -1) {
+            std::cerr << RED << "open issue." << NC << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        if (dup2(inputFd, STDIN_FILENO) == -1) {
+            std::cerr << RED << "dup2 issue." << NC << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        close(inputFd);
         if (dup2(outputFd, STDOUT_FILENO) == -1) {
             std::cerr << RED << "dup2 issue." << NC << std::endl;
+            exit(EXIT_FAILURE);
         }
         close(outputFd);
         if (execve("cgi_binary/darwin_phpcgi", argv, envp) == -1) {
