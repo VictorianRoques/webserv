@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 02:34:40 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 12:51:04 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ cgiHandler::cgiHandler(Request &req)
 {
     /* Serveur */
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["SCRIPT_NAME"] = "cgi_binary/cgi_tester";
+    _env["SCRIPT_NAME"] = "cgi_binary/darwin_phpcgi";
     _env["SERVER_NAME"] = "localhost";
     _env["SERVER_PORT"] = "8080";
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
@@ -30,12 +30,9 @@ cgiHandler::cgiHandler(Request &req)
     _env["CONTENT_LENGTH"] = req.getContentLength();
     _env["PATH_TRANSLATED"] = req.getFullPath();
     _env["PATH_INFO"] = req.getFullPath().substr(req.getFullPath().rfind("/") + 1);
-    // _env["PATH_INFO"] = "/post.php";
     _env["QUERY_STRING"] = req.getQueryString();
 
     _body = req.getBody();
-    // _pathToBinaryCgi = 
-    // Pass Location au constructor
 }
 
 cgiHandler::cgiHandler(const cgiHandler &cgi) { *this = cgi; }
@@ -106,12 +103,12 @@ int             cgiHandler::startCgi(int fd, int dataFd)
             std::cerr << RED << "dup2 issue." << NC << std::endl;
         }
         close(outputFd);
-        if (execve("cgi_binary/cgi_tester", argv, envp) == -1) {
+        if (execve("cgi_binary/darwin_phpcgi", argv, envp) == -1) {
             std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
             exit(EXIT_FAILURE);
         }
     }
-    wait(&status);
+    // wait(&status);
     if (status != 0) {
         std::cerr << RED << "status: " << status << " | CGI mission abort" << NC << std::endl;
         return -1;

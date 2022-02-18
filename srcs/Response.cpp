@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/17 17:15:25 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/18 13:36:34 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,6 +211,7 @@ void		Response::deleteMethod()
 			return ;
 		}
 		_header.setStatus("204 No Content");
+		_body = "";
 		_fd = -2;
 	}
 	else
@@ -270,6 +271,26 @@ bool             Response::isAllow(std::string method)
 	}
 	return false;
 }
+
+void		Response::makeAnswer(std::string &answer, bool cgi)
+{
+	if (cgi)
+	{
+		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
+    	_body = answer.substr(answer.find("\r\n\r\n") + 4);
+		_header.setBodyLength(_body.length());
+		_header.writeHeader();
+		_response = _header.getHeader() + _body;
+	}
+	else
+	{
+		_header.setBodyLength(answer.length());
+		_header.writeHeader();
+		_response = _header.getHeader() + answer;
+	}
+}
+
+std::string&	Response::getData() 			{ return _response; }
 
 int			Response::upload()
 {

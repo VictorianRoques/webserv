@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/17 17:15:33 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/18 13:36:33 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,8 @@ public:
     int             searchFd(Request &req);
     void            answer();
     void            setLocationConf();
-
+    void            makeAnswer();
+    void            makeAnswer(std::string &body, bool cgi);
     /* HTTP Methods */
     void            getMethod();
     void            postMethod();
@@ -79,6 +80,7 @@ public:
     std::string&    getUploadDest();
     ResponseHeader& getResponseHeader();
     std::string&    getLocation();
+    std::string&    getData();
 
 private:
 
