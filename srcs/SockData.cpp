@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 01:58:34 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 02:53:28 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ void	SockData::setResponse(int fd)
 void	SockData::setInternalError(int fd)
 {
 	int	fd_error_500;
-	if ((fd_error_500 = open("../error_pages/500.html", O_RDONLY)) == ERROR) {
+	if ((fd_error_500 = open("error_pages/500.html", O_RDONLY)) == ERROR) {
 		clearClient(fd);
 		openFailure500(fd);
 		return ;
@@ -148,7 +148,7 @@ void	SockData::setInternalError(int fd)
 void	SockData::setBadRequest(int fd)
 {
 	int	fd_error_400;
-	if ((fd_error_400 = open("../error_pages/400.html", O_RDONLY)) == ERROR) {
+	if ((fd_error_400 = open("error_pages/400.html", O_RDONLY)) == ERROR) {
 		clearClient(fd);
 		openFailure400(fd);
 		return ;
@@ -343,9 +343,7 @@ void	SockData::cgiRequest(int fd)
 		FD_SET(clients_[fd].getBeginPipe(), &writeSet_);
 	}
 	else if (isBeginPipeReady(fd)) {
-		std::cout << "pipe ready" << std::endl;
 		writeToCgi(fd);
-		std::cout << "pipe done" << std::endl;
 		close(clients_[fd].getBeginPipe());
 		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
 		dataFds_[fd] = clients_[fd].getOutputFd();
