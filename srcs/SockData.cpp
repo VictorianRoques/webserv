@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 22:56:19 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 01:58:34 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,6 +179,9 @@ bool	SockData::isReadSet(int fd) const
 bool	SockData::isWriteSet(int fd) const
 	{ return FD_ISSET(fd, &writeSet_); }
 
+bool	SockData::isReadingOver(int ret) const
+	{ return (ret < BUF_SIZE - 1); }
+
 bool	SockData::isBeginPipeReady(int fd)
 	{ return FD_ISSET(clients_[fd].getBeginPipe(), &writeSet_); }
 
@@ -200,6 +203,7 @@ size_t	SockData::getSizeListen(void) const
 
 int		SockData::getSockListen(size_t index) const
 	{ return sockListen_[index].first; }
+
 /* client manager */
 void	SockData::addClient(int fd)
 {
@@ -226,6 +230,10 @@ void	SockData::addClient(int fd)
 			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
 				cnxFailed();
 			}
+			if (setsockopt(newSock, SOL_SOCKET, SO_NOSIGPIPE,
+			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
+				cnxFailed();
+			}
 			FD_SET(newSock, &activeSet_);
 			cnxAccepted(sockClient);
 		}
@@ -242,33 +250,19 @@ void	SockData::recvClient(int fd)
 	}
 	buffer[ret] = '\0';
 	clients_[fd].getTmpRequest() += std::string(buffer);
-	if (ret < BUF_SIZE - 1) {
+	if (isReadingOver(ret)) {
 		clients_[fd].getFinalRequest() += clients_[fd].getTmpRequest();
 		if (!clients_[fd].isChunk()) {
 			if (clients_[fd].isTmpRequestChunk()) {
 				clients_[fd].setChunk(true);
 			}
 			else {
-				msgRecv(fd);
-				setResponse(fd);
-				if (dataFds_[fd] == CGI) {
-					setUpCgi(fd);
-				}
-				else {
-					FD_SET(dataFds_[fd], &activeSet_);
-				}
+				requestReceived(fd);
 				return ;
 			}
 		}
 		if (clients_[fd].isChunkEof()) {
-			msgRecv(fd);
-			setResponse(fd);
-			if (dataFds_[fd] == CGI) {
-				setUpCgi(fd);
-			}
-			else {
-				FD_SET(dataFds_[fd], &activeSet_);
-			}
+			requestReceived(fd);
 			return ;
 		}
 		clients_[fd].getTmpRequest().clear();
@@ -278,9 +272,11 @@ void	SockData::recvClient(int fd)
 void	SockData::sendClient(int fd)
 {
 	if (isFileRequest(fd)) {
+		std::cout << "fileRequest() called" << std::endl;
 		fileRequest(fd);
 	}
 	else if (dataFds_[fd] == CGI) {
+		std::cout << "cgiRequest() called" << std::endl;
 		cgiRequest(fd);
 	}
 	else if (dataFds_[fd] == STR_DATA) {
@@ -301,10 +297,9 @@ void	SockData::fileRequest(int fd)
 	}
 	buffer[ret] = '\0';
 	clients_[fd].getResponseBody() += std::string(buffer, ret);
-	if (ret < BUF_SIZE - 1) {
+	if (isReadingOver(ret)) {
 		if (clients_[fd].isCgi()) {
 			clients_[fd].getResponseHeader().setCgiStatus(clients_[fd].getResponseBody());
-			clients_[fd].setCgi(false);
 			clients_[fd].getResponseBody() = cleanBody(clients_[fd].getResponseBody());
 		}
 		clients_[fd].getResponseHeader().setBodyLength(clients_[fd].getResponseBody().size());
@@ -313,6 +308,14 @@ void	SockData::fileRequest(int fd)
 		if (send(fd, data.c_str(), data.size(), 0) == ERROR) {
 			clearClient(fd);
 			cnxCloseSend(fd);
+		}
+		if (clients_[fd].isCgi()) {
+			std::stringstream	ss;
+			ss << fd;
+			std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
+			close(clients_[fd].getOutputFd());
+			clients_[fd].setCgi(false);
+			// unlink(pathFile.c_str());
 		}
 		clearDataFd(fd);
 		clients_[fd].getResponseBody().clear();
@@ -323,27 +326,20 @@ void	SockData::fileRequest(int fd)
 void	SockData::cgiRequest(int fd)
 {
 	if (!isBeginPipeReady(fd)) {
+		// Need to pass Server to cgiHandler
+		cgiHandler cgi(clients_[fd].getRequest());
+		if (cgi.startCgi(fd, clients_[fd].getEndPipe()) == ERROR) {
+			close(clients_[fd].getEndPipe());
+			close(clients_[fd].getBeginPipe());
+			clearClient(fd);
+			clearDataFd(fd);
+			return ;
+		}
 		std::stringstream	ss;
 		ss << fd;
 		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
-		int fd_output;
-		if ((fd_output = open(pathFile.c_str(), O_CREAT | O_TRUNC, 0666)) == ERROR) {
-			close(clients_[fd].getEndPipe());
-			close(clients_[fd].getBeginPipe());
-			clearClient(fd);
-			clearDataFd(fd);
-			return ;
-		}
-		clients_[fd].setOutputFd(fd_output);
-		// Need to pass Server to cgiHandler
-		cgiHandler cgi(clients_[fd].getRequest());
-		if (cgi.startCgi(clients_[fd].getEndPipe(), clients_[fd].getOutputFd()) == ERROR) {
-			close(clients_[fd].getEndPipe());
-			close(clients_[fd].getBeginPipe());
-			clearClient(fd);
-			clearDataFd(fd);
-			return ;
-		}
+		int outputFd = open(pathFile.c_str(), O_RDONLY);
+		clients_[fd].setOutputFd(outputFd);
 		FD_SET(clients_[fd].getBeginPipe(), &writeSet_);
 	}
 	else if (isBeginPipeReady(fd)) {
@@ -351,8 +347,9 @@ void	SockData::cgiRequest(int fd)
 		writeToCgi(fd);
 		std::cout << "pipe done" << std::endl;
 		close(clients_[fd].getBeginPipe());
-		FD_SET(clients_[fd].getOutputFd(), &activeSet_);
 		FD_CLR(clients_[fd].getBeginPipe(), &writeSet_);
+		dataFds_[fd] = clients_[fd].getOutputFd();
+		FD_SET(clients_[fd].getOutputFd(), &activeSet_);
 	}
 }
 
@@ -362,6 +359,18 @@ void	SockData::cgiRequest(int fd)
 // 	write(fd, data.c_str(), data.size());
 // 	FD_CLR(fd, &writeSet_);
 // }
+
+void	SockData::requestReceived(int fd)
+{
+	msgRecv(fd);
+	setResponse(fd);
+	if (dataFds_[fd] == CGI) {
+		setUpCgi(fd);
+	}
+	else {
+		FD_SET(dataFds_[fd], &activeSet_);
+	}
+}
 
 /* cgi */
 void	SockData::writeToCgi(int fd)
@@ -405,16 +414,16 @@ void	SockData::clearDataFd(int fd)
 {
 	close(dataFds_[fd]);
 	FD_CLR(dataFds_[fd], &activeSet_);
+	FD_CLR(dataFds_[fd], &writeSet_);
 	dataFds_.erase(fd);
 }
 
 void	SockData::clearClient(int fd)
 {
 	close(fd);
-	clients_.erase(fd);
-	dataFds_.erase(fd);
 	FD_CLR(fd, &activeSet_);
 	FD_CLR(fd, &writeSet_);
+	clients_.erase(fd);
 }
 
 void	SockData::closeListen(size_t endInd)

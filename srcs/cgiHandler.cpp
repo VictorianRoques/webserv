@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 17:25:39 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 02:34:40 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,23 +76,16 @@ char**          cgiHandler::keyMapConvert(std::string key)
     return argv;
 }
 
-int             cgiHandler::startCgi(int dataFd, int outputFd)
+int             cgiHandler::startCgi(int fd, int dataFd)
 {
     char        **envp;
     char        **argv;
     pid_t       pid;
     int         status;
 
-    try {
-        envp = envToString();
-        argv = keyMapConvert(_env["PATH_TRANSLATED"]);
-    }
-    catch (std::bad_alloc &e)
-    {
-            std::cerr << RED << e.what() << NC << std::endl;
-    }
+    envp = envToString();
+    argv = keyMapConvert(_env["PATH_TRANSLATED"]);
     /* write in getDataFd() with body ! */
-
     pid = fork();
     if (pid == -1)
     {
@@ -101,21 +94,27 @@ int             cgiHandler::startCgi(int dataFd, int outputFd)
     }
     else if (pid == 0)
     {
-        dup2(dataFd, STDIN_FILENO);
-        dup2(outputFd, STDOUT_FILENO);
+        std::stringstream	ss;
+		ss << fd;
+		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
+		int outputFd = open(pathFile.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666);
+        if (dup2(dataFd, STDIN_FILENO) == -1) {
+            std::cerr << RED << "dup2 issue." << NC << std::endl;
+        }
+        close(dataFd);
+        if (dup2(outputFd, STDOUT_FILENO) == -1) {
+            std::cerr << RED << "dup2 issue." << NC << std::endl;
+        }
+        close(outputFd);
         if (execve("cgi_binary/cgi_tester", argv, envp) == -1) {
             std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
             exit(EXIT_FAILURE);
         }
     }
-    else
-    {
-		close(dataFd);
-        wait(&status);
-        if (status != 0) {
-            std::cerr << RED << "status: " << status << " | CGI mission abort" << NC << std::endl;
-            return -1;
-        }
+    wait(&status);
+    if (status != 0) {
+        std::cerr << RED << "status: " << status << " | CGI mission abort" << NC << std::endl;
+        return -1;
     }
     for (int i = 0; envp[i]; i++)
         delete [] envp[i];

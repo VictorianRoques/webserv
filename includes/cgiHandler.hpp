@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:01 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/17 17:21:33 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/17 23:51:37 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 
 # include "RequestParser.hpp"
 # include "Server.hpp"
-# include <unistd.h>
 # include "utils.hpp"
+# include <unistd.h>
 
 // Open include
 #include <sys/types.h>
@@ -45,7 +45,7 @@ public:
 
     char            **envToString();
     char            **keyMapConvert(std::string key);
-    int             startCgi(int dataFd, int outputFd);
+    int             startCgi(int fd, int dataFd);
 };
 
 #endif

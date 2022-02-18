@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/17 22:47:20 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 00:49:10 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ class SockData {
 		bool		isSockClient(int fd) const;
 		bool		isReadSet(int fd) const;
 		bool		isWriteSet(int fd) const;
+		bool		isReadingOver(int fd) const;
 		bool		isBeginPipeReady(int fd);
 		bool		isEndPipeReady(int fd);
 		bool		isFileRequest(int fd);
@@ -101,6 +102,7 @@ class SockData {
 		void		fileRequest(int fd);
 		void		cgiRequest(int fd);
 		void		strDataRequest(int fd);
+		void		requestReceived(int fd);
 		/* cgi */
 		void		writeToCgi(int fd);
 		void		setUpCgi(int fd);
@@ -109,8 +111,8 @@ class SockData {
 		void		recvClientClose(int fd, int ret);
 		void		clearDataFd(int fd);
 		void		clearClient(int fd);
-		std::string	cleanBody(std::string &responseBody);
 		void		closeListen(size_t endInd);
+		std::string	cleanBody(std::string &responseBody);
 		
 		/* msg connection */
 		void		cnxFailed(void);

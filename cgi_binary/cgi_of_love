@@ -1,13 +1,7 @@
 #!/usr/local/bin/python3
-import subprocess
-import cgi, cgitb
+
 import os
+import subprocess
 
-# header
-contentLength = "Content-Length: " + os.environ["CONTENT_LENGTH"] + "\r"
-pathScript = os.environ["PATH_TRANSLATED"]
-print("HTTP/1.1 200 OK\r")
-print(contentLength)
-
-# body
-subprocess.run(pathScript)
+pathScript = os.environ['PATH_TRANSLATED']
+subprocess.run(['/usr/local/bin/python3', pathScript])
