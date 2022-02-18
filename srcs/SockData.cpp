@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 15:57:45 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 16:03:48 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,7 +315,7 @@ void	SockData::fileRequest(int fd)
 			std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
 			close(clients_[fd].getOutputFd());
 			clients_[fd].setCgi(false);
-			// unlink(pathFile.c_str());
+			unlink(pathFile.c_str());
 		}
 		clearDataFd(fd);
 		clients_[fd].getResponseBody().clear();
