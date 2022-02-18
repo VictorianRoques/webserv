@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 12:51:04 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/18 15:58:18 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int             cgiHandler::startCgi(int fd, int dataFd)
             exit(EXIT_FAILURE);
         }
     }
-    // wait(&status);
+    wait(&status);
     if (status != 0) {
         std::cerr << RED << "status: " << status << " | CGI mission abort" << NC << std::endl;
         return -1;

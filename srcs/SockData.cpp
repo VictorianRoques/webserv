@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 02:53:28 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/18 15:57:45 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -351,12 +351,18 @@ void	SockData::cgiRequest(int fd)
 	}
 }
 
-// void	SockData::strDataRequest(int fd)
-// {
-// 	std::string	data = getResponse();
-// 	write(fd, data.c_str(), data.size());
-// 	FD_CLR(fd, &writeSet_);
-// }
+void	SockData::strDataRequest(int fd)
+{
+	clients_[fd].getResponse().makeAnswer();
+	std::string	data = clients_[fd].getResponse().getData();
+	if (send(fd, data.c_str(), data.size(), 0) == ERROR) {
+		clearClient(fd);
+		clearDataFd(fd);
+		writeFailure(fd);
+		return ;
+	}
+	FD_CLR(fd, &writeSet_);
+}
 
 void	SockData::requestReceived(int fd)
 {
