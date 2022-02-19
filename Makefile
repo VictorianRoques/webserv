@@ -6,7 +6,7 @@
 #    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
-#    Updated: 2022/02/17 17:22:27 by fhamel           ###   ########.fr        #
+#    Updated: 2022/02/19 23:00:04 by fhamel           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -69,7 +69,7 @@ $(D_OBJS)%.o : $(D_SRCS)%.cpp Makefile
 
 $(NAME) : $(OBJS) Makefile
 	@printf "Compiling objects...\n"
-	@$(CC) $(FSANITIZE) $(OBJS) -o $(NAME)
+	@$(CC) $(OBJS) -o $(NAME)
 	@printf "[ $(G)$(NAME)$(W) ] Compiled\n"
 
 clean :
