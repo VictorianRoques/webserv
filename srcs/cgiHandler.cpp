@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 16:42:17 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 22:23:21 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,32 +98,32 @@ int             cgiHandler::startCgi(int fd)
 		int inputFd, outputFd;
         if ((inputFd = open(pathFileIn.c_str(),
         O_RDONLY)) == -1) {
-            std::cerr << RED << "open issue." << NC << std::endl;
+            std::cerr << RED << "CGI: error: opening [.cgi_input]" << NC << std::endl;
             exit(EXIT_FAILURE);
         }
         if ((outputFd = open(pathFileOut.c_str(),
-        O_CREAT | O_TRUNC | O_WRONLY)) == -1) {
-            std::cerr << RED << "open issue." << NC << std::endl;
+        O_CREAT | O_TRUNC | O_WRONLY, 0666)) == -1) {
+            std::cerr << RED << "CGI: error: opening [.cgi_output]" << NC << std::endl;
             exit(EXIT_FAILURE);
         }
         if (dup2(inputFd, STDIN_FILENO) == -1) {
-            std::cerr << RED << "dup2 issue." << NC << std::endl;
+            std::cerr << RED << "CGI: error: dup2" << NC << std::endl;
             exit(EXIT_FAILURE);
         }
         close(inputFd);
         if (dup2(outputFd, STDOUT_FILENO) == -1) {
-            std::cerr << RED << "dup2 issue." << NC << std::endl;
+            std::cerr << RED << "CGI: error: dup2" << NC << std::endl;
             exit(EXIT_FAILURE);
         }
         close(outputFd);
         if (execve("cgi_binary/darwin_phpcgi", argv, envp) == -1) {
-            std::cerr << RED << "Something went wrong with execve." << NC << std::endl;
+            std::cerr << RED << "CGI: error: execve" << NC << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     wait(&status);
     if (status != 0) {
-        std::cerr << RED << "status: " << status << " | CGI mission abort" << NC << std::endl;
+        std::cerr << RED << "status: " << status << " | CGI: abort" << NC << std::endl;
         return -1;
     }
     for (int i = 0; envp[i]; i++)

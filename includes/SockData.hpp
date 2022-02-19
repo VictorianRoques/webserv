@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 19:16:03 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 22:17:07 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,10 +126,7 @@ class SockData {
 
 		/* msg exception */
 		void		exceptionError(int fd, std::exception &e);
-		void		openFailure500(int fd);
-		void		openFailure400(int fd);
-		void		openFailureData(int fd);
-		void		writeFailure(int fd);
+		void		systemFailure(std::string str, int fd);
 
 		/* bad alloc exception */
 		struct badAllocException : public std::exception {

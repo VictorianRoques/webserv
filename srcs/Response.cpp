@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/18 13:36:34 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/19 22:06:27 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,7 +272,7 @@ bool             Response::isAllow(std::string method)
 	return false;
 }
 
-void		Response::makeAnswer(std::string &answer, bool cgi)
+void		Response::makeResponse(std::string &answer, bool cgi)
 {
 	if (cgi)
 	{

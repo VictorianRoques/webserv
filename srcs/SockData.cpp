@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 19:14:46 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 22:20:48 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ void	SockData::setInternalError(int fd)
 	int	fd_error_500;
 	if ((fd_error_500 = open("error_pages/500.html", O_RDONLY)) == ERROR) {
 		clearClient(fd);
-		openFailure500(fd);
+		systemFailure("opening [error_pages/500.html]", fd);
 		return ;
 	}
 	dataFds_[fd] = fd_error_500;
@@ -151,7 +151,7 @@ void	SockData::setBadRequest(int fd)
 	int	fd_error_400;
 	if ((fd_error_400 = open("error_pages/400.html", O_RDONLY)) == ERROR) {
 		clearClient(fd);
-		openFailure400(fd);
+		systemFailure("opening [error_pages/400.html]", fd);
 		return ;
 	}
 	dataFds_[fd] = fd_error_400;
@@ -298,11 +298,8 @@ void	SockData::cgiRequest(int fd)
 		if (write(clients_[fd].getInputFd(),
 		clients_[fd].getRequest().getBody().c_str(),
 		clients_[fd].getRequest().getBody().size()) == ERROR) {
-			close(clients_[fd].getInputFd());
-			unlink(pathFile.c_str());
 			clearClient(fd);
-			clearDataFd(fd);
-			writeFailure(fd);
+			systemFailure("write", fd);
 			return ;
 		}
 		std::cout << RED << "after write" << WHITE << std::endl;
@@ -315,7 +312,7 @@ void	SockData::cgiRequest(int fd)
 		cgiHandler cgi(clients_[fd].getRequest());
 		if (cgi.startCgi(fd) == ERROR) {
 			clearClient(fd);
-			clearDataFd(fd);
+			systemFailure("cgi", fd);
 			return ;
 		}
 		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
@@ -323,7 +320,7 @@ void	SockData::cgiRequest(int fd)
 		open(pathFile.c_str(), O_RDONLY)) == ERROR) {
 			clearClient(fd);
 			clearDataFd(fd);
-			openFailureData(fd);
+			systemFailure("open", fd);
 			return ;
 		}
 		dataFds_[fd] = clients_[fd].getOutputFd();
@@ -344,18 +341,17 @@ void	SockData::fileRequest(int fd)
 	if ((ret = read(dataFds_[fd], buffer, BUF_SIZE - 1)) == ERROR) {
 		clearClient(fd);
 		clearDataFd(fd);
-		openFailureData(fd);
+		systemFailure("read", fd);
 		return ;
 	}
 	buffer[ret] = '\0';
 	clients_[fd].getResponseBody() += std::string(buffer, ret);
 	if (isReadingOver(ret)) {
-		clients_[fd].getResponse().makeAnswer(clients_[fd].getResponseBody(), false);
+		clients_[fd].getResponse().makeResponse(clients_[fd].getResponseBody(), false);
 		clients_[fd].getData() = clients_[fd].getResponse().getData();
 		std::stringstream	ss;
 		ss << fd;
 		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
-		unlink(pathFile.c_str());
 		clearDataFd(fd);
 		clients_[fd].setDataReady(true);
 	}
@@ -374,7 +370,7 @@ void	SockData::requestReceived(int fd)
 		open(pathFile.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666)) == ERROR) {
 			clearClient(fd);
 			clearDataFd(fd);
-			openFailureData(fd);
+			systemFailure("open", fd);
 			return ;
 		}
 		FD_SET(clients_[fd].getInputFd(), &writeSet_);
@@ -389,7 +385,9 @@ void	SockData::sendDataClient(int fd)
 	if (send(fd, clients_[fd].getData().c_str(),
 	clients_[fd].getData().size(), 0) == ERROR) {
 		clearClient(fd);
-		writeFailure(fd);
+		clearDataFd(fd);
+		systemFailure("send", fd);
+		return ;
 	}
 	msgSent(fd);
 	FD_CLR(fd, &writeSet_);
@@ -412,17 +410,26 @@ void	SockData::recvClientClose(int fd, int ret)
 
 void	SockData::clearDataFd(int fd)
 {
-	close(dataFds_[fd]);
 	FD_CLR(dataFds_[fd], &activeSet_);
 	FD_CLR(dataFds_[fd], &writeSet_);
+	close(dataFds_[fd]);
 	dataFds_.erase(fd);
 }
 
 void	SockData::clearClient(int fd)
 {
-	close(fd);
+	std::stringstream	ss;
+	ss << fd;
+	std::string	pathFileIn = "./cgi_binary/.cgi_input_" + ss.str();
+	std::string	pathFileOut = "./cgi_binary/.cgi_output_" + ss.str();;
+	unlink(pathFileIn.c_str());
+	unlink(pathFileOut.c_str());
+	clearDataFd(fd);
+	close(clients_[fd].getInputFd());
+	close(clients_[fd].getOutputFd());
 	FD_CLR(fd, &activeSet_);
 	FD_CLR(fd, &writeSet_);
+	close(fd);
 	clients_.erase(fd);
 }
 
@@ -435,6 +442,12 @@ void	SockData::closeListen(size_t endInd)
 
 void	SockData::resetClient(int fd)
 {
+	std::stringstream	ss;
+	ss << fd;
+	std::string	pathFileIn = "./cgi_binary/.cgi_input_" + ss.str();
+	std::string	pathFileOut = "./cgi_binary/.cgi_output_" + ss.str();;
+	unlink(pathFileIn.c_str());
+	unlink(pathFileOut.c_str());
 	clients_[fd].setChunk(false);
 	clients_[fd].setDataReady(false);
 	clients_[fd].setRequest(Request());
@@ -564,47 +577,11 @@ void	SockData::exceptionError(int fd, std::exception &e)
 	std::cerr << "-----------------------------" << std::endl;
 }
 
-void	SockData::openFailure500(int fd)
+void	SockData::systemFailure(std::string str, int fd)
 {
 	std::cerr << "-----------------------------" << std::endl;
 	std::cerr << red;
-	std::cerr << "Server: couldn't open '../error_pages/500.html'";
-	std::cerr << " | socket fd " << fd;
-	std::cerr << " | closing connection"; 
-	std::cerr << std::endl;
-	std::cerr << white;
-	std::cerr << "-----------------------------" << std::endl;
-}
-
-void	SockData::openFailure400(int fd)
-{
-	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << red;
-	std::cerr << "Server: couldn't open '../error_pages/400.html'";
-	std::cerr << " | socket fd " << fd;
-	std::cerr << " | closing connection"; 
-	std::cerr << std::endl;
-	std::cerr << white;
-	std::cerr << "-----------------------------" << std::endl;
-}
-
-void	SockData::openFailureData(int fd)
-{
-	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << red;
-	std::cerr << "Server: couldn't open data file";
-	std::cerr << " | socket fd " << fd;
-	std::cerr << " | closing connection"; 
-	std::cerr << std::endl;
-	std::cerr << white;
-	std::cerr << "-----------------------------" << std::endl;
-}
-
-void	SockData::writeFailure(int fd)
-{
-	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << red;
-	std::cerr << "Server: couldn't write";
+	std::cerr << "Server: error: " << str;
 	std::cerr << " | socket fd " << fd;
 	std::cerr << " | closing connection"; 
 	std::cerr << std::endl;

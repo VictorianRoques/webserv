@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/18 13:36:33 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/19 22:06:49 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,7 @@ public:
     int             searchFd(Request &req);
     void            answer();
     void            setLocationConf();
-    void            makeAnswer();
-    void            makeAnswer(std::string &body, bool cgi);
+    void            makeResponse(std::string &body, bool cgi);
     /* HTTP Methods */
     void            getMethod();
     void            postMethod();
