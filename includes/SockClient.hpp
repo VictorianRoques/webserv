@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 18:55:37 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 19:12:17 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ class SockClient {
 		void			setIp(char *ip);
 		void			setPort(size_t port);
 		void			setChunk(bool chunk);
-		void			setCgi(bool cgi);
 		void			setDataReady(bool dataReady);
 		void			setRequest(const Request &request);
 		void			setResponse(const Response &response);

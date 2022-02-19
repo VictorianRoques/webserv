@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 19:12:32 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 19:16:03 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,15 +100,15 @@ class SockData {
 		void		fileRequest(int fd);
 		void		cgiRequest(int fd);
 		void		strDataRequest(int fd);
-		void		sendDataClient(int fd);
 		void		requestReceived(int fd);
+		void		sendDataClient(int fd);
 
 		/* utils */
 		void		recvClientClose(int fd, int ret);
 		void		clearDataFd(int fd);
 		void		clearClient(int fd);
 		void		closeListen(size_t endInd);
-		std::string	cleanBody(std::string &responseBody);
+		void		resetClient(int fd);
 		
 		/* msg connection */
 		void		cnxFailed(void);

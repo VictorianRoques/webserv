@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 19:23:42 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 16:42:17 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ int             cgiHandler::startCgi(int fd)
 		ss << fd;
 		std::string	pathFileIn = "./cgi_binary/.cgi_input_" + ss.str();
         std::string pathFileOut = "./cgi_binary/.cgi_output_" + ss.str();
-		int inputFd, outputFd; 
+		int inputFd, outputFd;
         if ((inputFd = open(pathFileIn.c_str(),
         O_RDONLY)) == -1) {
             std::cerr << RED << "open issue." << NC << std::endl;
