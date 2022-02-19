@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 19:12:17 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 22:31:43 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class SockClient {
 		size_t			port_;
 		bool			chunk_;
 		bool			dataReady_;
+		bool			dataCgi_;
 		std::string		tmpRequest_;
 		std::string		finalRequest_;
 		Request			request_;
@@ -50,6 +51,7 @@ class SockClient {
 		void			setPort(size_t port);
 		void			setChunk(bool chunk);
 		void			setDataReady(bool dataReady);
+		void			setDataCgi(bool dataCgi);
 		void			setRequest(const Request &request);
 		void			setResponse(const Response &response);
 		void			setInputFd(int inputFd);
@@ -57,7 +59,8 @@ class SockClient {
 
 		/* checkers */
 		bool			isChunk(void) const;
-		bool			isDataReady() const;
+		bool			isDataReady(void) const;
+		bool			isDataCgi(void) const;
 		bool			isTmpRequestChunk(void) const;
 		bool			isChunkEof(void) const;
 		bool			isDeleteRequest(void) const;

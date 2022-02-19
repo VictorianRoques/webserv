@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 22:17:07 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 22:34:31 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ class SockData {
 		SockData(const SockData &sockData);
 		~SockData(void);
 		SockData	&operator=(const SockData &sockData);
+		
 		/* setters */
 		void		setServers(std::vector<Server> servers);
 		void		setSockListen(std::vector<size_t> ports);
@@ -82,7 +83,6 @@ class SockData {
 		bool		isReadSet(int fd) const;
 		bool		isWriteSet(int fd) const;
 		bool		isReadingOver(int fd) const;
-		bool		isFileRequest(int fd);
 
 		/* getters */
 		fd_set		*getReadSet(void);
@@ -100,8 +100,8 @@ class SockData {
 		void		fileRequest(int fd);
 		void		cgiRequest(int fd);
 		void		strDataRequest(int fd);
-		void		requestReceived(int fd);
 		void		sendDataClient(int fd);
+		void		requestReceived(int fd);
 
 		/* utils */
 		void		recvClientClose(int fd, int ret);
@@ -115,16 +115,15 @@ class SockData {
 		void		cnxRefused(SockClient sockClient);
 		void		cnxAccepted(SockClient sockClient);
 
-		/* msg recv */
+		/* closing connexion */
 		void		cnxCloseRecv(int fd);
-		void		cnxCloseRecv2(int fd);
 		void		cnxCloseSend(int fd);
 
 		/* msg send */
 		void		msgRecv(int fd);
 		void		msgSent(int fd);
 
-		/* msg exception */
+		/* errors */
 		void		exceptionError(int fd, std::exception &e);
 		void		systemFailure(std::string str, int fd);
 

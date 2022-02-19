@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 18:56:08 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/19 22:42:34 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ SockClient	&SockClient::operator=(const SockClient &sockClient)
 	port_ = sockClient.port_;
 	chunk_ = sockClient.chunk_;
 	dataReady_ = sockClient.dataReady_;
+	dataCgi_ = sockClient.dataCgi_;
 	tmpRequest_ = sockClient.tmpRequest_;
 	request_ = sockClient.request_;
 	response_ = sockClient.response_;
@@ -49,6 +50,9 @@ void	SockClient::setChunk(bool chunk)
 void	SockClient::setDataReady(bool dataReady)
 	{ dataReady_ = dataReady; }
 
+void	SockClient::setDataCgi(bool dataCgi)
+	{ dataCgi_ = dataCgi; }
+
 void	SockClient::setRequest(const Request &request)
 	{ request_ = request; }
 
@@ -64,6 +68,9 @@ bool	SockClient::isChunk(void) const
 
 bool	SockClient::isDataReady(void) const
 	{ return dataReady_; }
+
+bool	SockClient::isDataCgi(void) const
+	{ return dataCgi_; }
 
 bool	SockClient::isTmpRequestChunk(void) const
 {
