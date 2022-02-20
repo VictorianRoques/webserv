@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/20 17:45:03 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 18:27:57 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,14 +214,13 @@ void	SockData::addClient(int fd)
 		cnxFailed();
 	}
 	else {
-		std::cerr << "value newSock: " << newSock << std::endl;
 		SockClient	sockClient;
 		sockClient.setIp(inet_ntoa(addrClient.sin_addr));
 		sockClient.setPort(ntohs(addrClient.sin_port));
 		clients_[newSock] = sockClient;
 		if (newSock >= FD_SETSIZE) {
 			cnxRefused(sockClient);
-			clearClient(fd);
+			clearClient(newSock);
 		}
 		else {
 			if (setsockopt(newSock, SOL_SOCKET, SO_RCVTIMEO,
@@ -371,7 +370,6 @@ void	SockData::requestReceived(int fd)
 	msgRecv(fd);
 	setResponse(fd);
 	FD_SET(fd, &writeSet_);
-	std::cerr << red << "dataFds_[" << fd << "]: " << dataFds_[fd] << white << std::endl;
 	if (dataFds_[fd] == CGI) {
 		clients_[fd].setDataCgi(true);
 		std::stringstream	ss;
@@ -408,7 +406,9 @@ void	SockData::clearDataFd(int fd)
 {
 	FD_CLR(dataFds_[fd], &activeSet_);
 	FD_CLR(dataFds_[fd], &writeSet_);
-	close(dataFds_[fd]);
+	if (2 < dataFds_[fd] && dataFds_[fd] < FD_SETSIZE) {
+		close(dataFds_[fd]);
+	}
 	dataFds_.erase(fd);
 }
 
