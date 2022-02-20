@@ -4,4 +4,4 @@ import os
 import subprocess
 
 pathScript = os.environ['PATH_TRANSLATED']
-subprocess.run(['/usr/local/bin/python3', pathScript])
+subprocess.run(['/usr/local/bin/python3', 'www/python/upload.py'])
