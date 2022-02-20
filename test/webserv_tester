@@ -187,11 +187,24 @@ Connection: keep-alive\r\n\r\n')
 #               EXEC_FCTS              #
 ########################################
 
+def up():
+	print('\033[0;34m\n------------------------------------------')
+	print('          UP_TESTER starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(0.5)
+	print('\nUP_TESTER...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('UP_TESTER [ \033[0;32mOK\033[0m ]')
+	else:
+		print('UP_TESTER [ \033[0;31mKO\033[0m ]')
+
 def get():
 	print('\033[0;34m\n------------------------------------------')
 	print('          GET_TESTER starting...')
 	print('------------------------------------------\033[0m')
-	time.sleep(1.5)
+	time.sleep(0.5)
 	get_tester()
 	print('\nGET_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
@@ -205,7 +218,7 @@ def post():
 	print('\033[0;34m\n------------------------------------------')
 	print('          POST_TESTER starting...')
 	print('------------------------------------------\033[0m')
-	time.sleep(1.5)
+	time.sleep(0.5)
 	post_tester()
 	print('\nPOST_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
@@ -219,7 +232,7 @@ def delete():
 	print('\033[0;34m\n------------------------------------------')
 	print('          DELETE_TESTER starting...')
 	print('------------------------------------------\033[0m')
-	time.sleep(1.5)
+	time.sleep(0.5)
 	delete_tester()
 	print('\nDELETE_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
@@ -233,7 +246,7 @@ def stress1():
 	print('\033[0;34m\n------------------------------------------')
 	print('          STRESS_TESTER_1 starting...')
 	print('------------------------------------------\033[0m')
-	time.sleep(1.5)
+	time.sleep(0.5)
 	stress_tester_1()
 	print()
 	print('\nSTRESS_TESTER_1...', end='\r')
@@ -248,7 +261,7 @@ def stress2():
 	print('\033[0;34m\n------------------------------------------')
 	print('          STRESS_TESTER _2 starting...')
 	print('------------------------------------------\033[0m')
-	time.sleep(1.5)
+	time.sleep(0.5)
 	stress_tester_2()
 	print('\nSTRESS_TESTER_2...', end='\r')
 	ret = is_server_up(hostname, port)
@@ -262,7 +275,7 @@ def chunk():
 	print('\033[0;34m\n------------------------------------------')
 	print('          CHUNK_TESTER starting...')
 	print('------------------------------------------\033[0m')
-	time.sleep(1.5)
+	time.sleep(0.5)
 	chunk_tester()
 	print('\nCHUNK_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
@@ -276,7 +289,7 @@ def memory():
 	print('\033[0;34m\n------------------------------------------')
 	print('          MEMORY_TESTER starting...')
 	print('------------------------------------------\033[0m')
-	time.sleep(1.5)
+	time.sleep(0.5)
 	memory_tester()
 	print('\nMEMORY_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
@@ -290,7 +303,7 @@ def leak():
 	print('\033[0;34m\n------------------------------------------')
 	print('          LEAK_TESTER starting...')
 	print('------------------------------------------\033[0m')
-	time.sleep(1.5)
+	time.sleep(0.5)
 	leak_tester()
 	print('\nLEAK_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
@@ -309,6 +322,7 @@ print('[ port: ' + '\033[0;32m' + str(port) + '\033[0m ]')
 test_ = '[ test: ' + '\033[0;32m' + test + '\033[0m ]'
 print(test_)
 single_test = dict()
+single_test['up'] = up
 single_test['get'] = get
 single_test['post'] = post
 single_test['delete'] = delete
@@ -324,7 +338,7 @@ if (test != ''):
 	try:
 		single_test[test]()
 	except:
-		print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory, leak]')
+		print('error: usage: ./webserv port [up, get, post, delete, stress1, stress2, chunk, memory, leak]')
 else:
 	for key in single_test:
 		single_test[key]()

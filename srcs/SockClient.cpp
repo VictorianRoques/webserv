@@ -6,13 +6,13 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 22:42:34 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 02:24:45 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "SockClient.hpp"
 
-SockClient::SockClient(void) : chunk_(false), dataReady_(false)
+SockClient::SockClient(void) : chunk_(false), dataReady_(false), dataCgi_(false)
 	{ return ; }
 
 SockClient::SockClient(const SockClient &sockClient)

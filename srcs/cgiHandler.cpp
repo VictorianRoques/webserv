@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 22:23:21 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 14:13:22 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ int             cgiHandler::startCgi(int fd)
     }
     else if (pid == 0)
     {
+        std::cerr << "HEYHEYHEY" << std::endl;
         std::stringstream	ss;
 		ss << fd;
 		std::string	pathFileIn = "./cgi_binary/.cgi_input_" + ss.str();
@@ -121,7 +122,7 @@ int             cgiHandler::startCgi(int fd)
             exit(EXIT_FAILURE);
         }
     }
-    wait(&status);
+    waitpid(pid, &status, 0);
     if (status != 0) {
         std::cerr << RED << "status: " << status << " | CGI: abort" << NC << std::endl;
         return -1;

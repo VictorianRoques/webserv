@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 22:34:31 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 16:44:32 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,8 @@ class SockData {
 		void		setReadToActive(void);
 		void		setDataFd(int fd, Request &request, Server &server);
 		void		setResponse(int fd);
+		void		setBadRequest(int fd, Request &request);
 		void		setInternalError(int fd);
-		void		setBadRequest(int fd);
 		
 		/* checkers */
 		bool		isSockListen(int fd) const;

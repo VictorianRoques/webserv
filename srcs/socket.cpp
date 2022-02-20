@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 19:04:05 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/18 01:03:00 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 18:00:57 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ void	sockServ(std::vector<Server> servers, std::vector<size_t> ports)
 		sockData.addActiveSet(sockData.getSockListen(i));
 	}
 	while (1) {
+		std::cerr << "select()" << std::endl;
 		sockData.setReadToActive();
 		if (select(FD_SETSIZE,
 		sockData.getReadSet(), sockData.getWriteSet(),
@@ -41,6 +42,10 @@ void	sockServ(std::vector<Server> servers, std::vector<size_t> ports)
 					sockData.sendClient(fd);
 				}
 			}
+		}
+		else {
+			std::cerr << RED << "Server: select: error server down" << NC << std::endl;
+			exit(EXIT_FAILURE);
 		}
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 22:55:26 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 17:45:03 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,13 +121,26 @@ void	SockData::setResponse(int fd)
 			setDataFd(fd, request, *servers_.begin());
 		}
 		else {
-			setBadRequest(fd);
+			setBadRequest(fd, request);
 		}
 	}
 	catch (std::exception &e) {
 		setInternalError(fd);
 		exceptionError(fd, e);
 	}
+}
+
+void	SockData::setBadRequest(int fd, Request &request)
+{
+	int	fd_error_400;
+	if ((fd_error_400 = open("error_pages/400.html", O_RDONLY)) == ERROR) {
+		clearClient(fd);
+		systemFailure("opening [error_pages/400.html]", fd);
+		return ;
+	}
+	dataFds_[fd] = fd_error_400;
+	clients_[fd].setRequest(request);
+	clients_[fd].setResponse(Response());
 }
 
 void	SockData::setInternalError(int fd)
@@ -139,19 +152,8 @@ void	SockData::setInternalError(int fd)
 		return ;
 	}
 	dataFds_[fd] = fd_error_500;
-	FD_SET(fd, &activeSet_);
-}
-
-void	SockData::setBadRequest(int fd)
-{
-	int	fd_error_400;
-	if ((fd_error_400 = open("error_pages/400.html", O_RDONLY)) == ERROR) {
-		clearClient(fd);
-		systemFailure("opening [error_pages/400.html]", fd);
-		return ;
-	}
-	dataFds_[fd] = fd_error_400;
-	FD_SET(fd, &activeSet_);
+	clients_[fd].setRequest(Request());
+	clients_[fd].setResponse(Response());
 }
 
 /*******************************/
@@ -199,9 +201,10 @@ int		SockData::getSockListen(size_t index) const
 /*******************************/
 /*        CLIENT MANAGER       */
 /*******************************/
+
 void	SockData::addClient(int fd)
 {
-	int			newSock;
+	int			newSock = -42;
 	sockaddr_in addrClient;
 	socklen_t	addrClientLen = sizeof(addrClient);
 	struct timeval	tv;
@@ -211,18 +214,20 @@ void	SockData::addClient(int fd)
 		cnxFailed();
 	}
 	else {
+		std::cerr << "value newSock: " << newSock << std::endl;
 		SockClient	sockClient;
 		sockClient.setIp(inet_ntoa(addrClient.sin_addr));
 		sockClient.setPort(ntohs(addrClient.sin_port));
 		clients_[newSock] = sockClient;
 		if (newSock >= FD_SETSIZE) {
-			close(newSock);
 			cnxRefused(sockClient);
+			clearClient(fd);
 		}
 		else {
 			if (setsockopt(newSock, SOL_SOCKET, SO_RCVTIMEO,
 			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
 				cnxFailed();
+				clearClient(newSock);
 			}
 			FD_SET(newSock, &activeSet_);
 			cnxAccepted(sockClient);
@@ -271,7 +276,7 @@ void	SockData::sendClient(int fd)
 	else if (dataFds_[fd] == STR_DATA) {
 		strDataRequest(fd);
 	}
-	else {
+	else if (dataFds_[fd] > 2) {
 		fileRequest(fd);
 	}
 }
@@ -335,6 +340,7 @@ void	SockData::fileRequest(int fd)
 	buffer[ret] = '\0';
 	clients_[fd].getResponseBody() += std::string(buffer, ret);
 	if (isReadingOver(ret)) {
+		close(dataFds_[fd]);
 		clients_[fd].getResponse().makeResponse(
 			clients_[fd].getResponseBody(),
 			clients_[fd].isDataCgi());
@@ -365,6 +371,7 @@ void	SockData::requestReceived(int fd)
 	msgRecv(fd);
 	setResponse(fd);
 	FD_SET(fd, &writeSet_);
+	std::cerr << red << "dataFds_[" << fd << "]: " << dataFds_[fd] << white << std::endl;
 	if (dataFds_[fd] == CGI) {
 		clients_[fd].setDataCgi(true);
 		std::stringstream	ss;
@@ -378,7 +385,7 @@ void	SockData::requestReceived(int fd)
 		}
 		FD_SET(clients_[fd].getInputFd(), &writeSet_);
 	}
-	else if (dataFds_[fd] > CGI) {
+	else if (dataFds_[fd] > 2) {
 		FD_SET(dataFds_[fd], &activeSet_);
 	}
 }
@@ -414,8 +421,6 @@ void	SockData::clearClient(int fd)
 	unlink(pathFileIn.c_str());
 	unlink(pathFileOut.c_str());
 	clearDataFd(fd);
-	close(clients_[fd].getInputFd());
-	close(clients_[fd].getOutputFd());
 	FD_CLR(fd, &activeSet_);
 	FD_CLR(fd, &writeSet_);
 	close(fd);
@@ -487,8 +492,8 @@ void	SockData::cnxAccepted(SockClient sockClient)
 void	SockData::cnxCloseRecv(int fd)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << red;
-	std::cerr << "Server: couldn't receive request from " << clients_[fd].getIp();
+	std::cerr << green;
+	std::cerr << "Server: connexion terminated with EOF " << clients_[fd].getIp();
 	std::cerr << " via port " << clients_[fd].getPort();
 	std::cerr << " | socket fd: " << fd;
 	std::cerr << " | closing connection";
