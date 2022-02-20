@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/19 22:06:49 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 22:04:29 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

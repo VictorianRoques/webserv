@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/19 22:06:27 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 22:35:13 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,8 +100,9 @@ void	Response::answer()
 int		Response::needCgi()
 {
 	if (_extensionCgi.empty() == false &&
-		_path.find(_extensionCgi) != std::string::npos)
+		_request.getPath().find(_extensionCgi) != std::string::npos)
 	{
+		std::cout << "CGI CALL" << std::endl;
 		return (1);
 	}
 	return (0);
@@ -224,19 +225,23 @@ void		Response::postMethod()
 {
  	if (_uploadDest.empty() == false) 
     {
-		int ret = upload();
-		if (ret == 1)
-		{
-			setFdError(400);
-			return ;
-		}
-		if (ret == 2)
-		{
-			setFdError(403);
-			return ;
-		}
-		_body = hrefLocation(_uploadDest);
-		_header.setHeader("201 Created", "text/html", _body.length());
+		// int ret = upload();
+		// if (ret == 1)
+		// {
+		// 	setFdError(400);
+		// 	return ;
+		// }
+		// if (ret == 2)
+		// {
+		// 	setFdError(403);
+		// 	return ;
+		// }
+		// _body = hrefLocation(_uploadDest);
+		// _header.setHeader("201 Created", "text/html", _body.length());
+		_header.setStatus("204 No Content");
+		// set Header 201 Created  + body length
+		_body = "";
+		_fd = -3;
     }
 	else
 	{

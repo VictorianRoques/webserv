@@ -10,6 +10,7 @@ server
 		index index.html;
         client_max_body_size 10m
 		methods GET POST DELETE;
+        cgi_handler .php cgi_binary/cgi_tester;
 	}
 
     location /redirect
@@ -61,7 +62,9 @@ server
 
     location /upload
     {
+        index www/php/upload.php;
         methods POST;
+        cgi_handler .php cgi_binary/cgi_tester;
         upload_dest www/upload;
     }
 }

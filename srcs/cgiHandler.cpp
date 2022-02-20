@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/20 18:03:00 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/20 22:40:22 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,12 @@ cgiHandler::cgiHandler(Request &req)
     _env["PATH_INFO"] = req.getFullPath().substr(req.getFullPath().rfind("/") + 1);
     _env["QUERY_STRING"] = req.getQueryString();
 
+    std::cout << "Path value: " << std::endl;
+    if (req.getPath() == "/www/php/upload.php")
+    {
+        _env["PATH_TRANSLATED"] += "php/upload.php";    
+    }
+    std::cout << _env["PATH_TRANSLATED"] << std::endl;
     _body = req.getBody();
 }
 
