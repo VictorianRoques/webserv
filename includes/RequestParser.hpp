@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:58 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/09 10:42:06 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 16:33:46 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class Request {
 		bool		_tooBig;
 		std::string	_fullPath;
 		std::string	_queryString;
+		std::string	_uploadDest;
 
 		// body (aka payload)
 		std::string	_body;
@@ -85,9 +86,8 @@ class Request {
 		bool		getTooBig();
 		std::string	getFullPath();
 		std::string	getQueryString();
-		
+		std::string	getUploadDest();
 		std::string	getGeneralRoot();
-
 		size_t		getRedirCode();
 
 		//setters
@@ -110,10 +110,9 @@ class Request {
 		void	setChunked(bool chunked);
 		void	setTooBig(bool tooBig);
 		void	setFullPath(std::string fullPath);
-		void	setQueryString(std::string queryString);
-		
+		void	setQueryString(std::string queryString);	
+		void	setUploadDest(std::string uploadDest);	
 		void	setGeneralRoot(std::string generalRoot);
-
 		void	setRedirCode(size_t redirCode);
 
 		// parsing
