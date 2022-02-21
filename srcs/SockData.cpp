@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/20 18:27:57 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/21 14:50:56 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,7 @@ void	SockData::setResponse(int fd)
 			setDataFd(fd, request, *servers_.begin());
 		}
 		else {
+			std::cout << red << "helloooooo" << white << std::endl;
 			setBadRequest(fd, request);
 		}
 	}
@@ -223,7 +224,8 @@ void	SockData::addClient(int fd)
 			clearClient(newSock);
 		}
 		else {
-			if (setsockopt(newSock, SOL_SOCKET, SO_RCVTIMEO,
+			fcntl(fd, F_SETFL, O_NONBLOCK);
+			if (setsockopt(newSock, SOL_SOCKET, SO_NOSIGPIPE,
 			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
 				cnxFailed();
 				clearClient(newSock);
@@ -360,9 +362,16 @@ void	SockData::sendDataClient(int fd)
 		systemFailure("send", fd);
 		return ;
 	}
+	std::cout << "message:\n" << clients_[fd].getData() << std::endl;
 	msgSent(fd);
 	FD_CLR(fd, &writeSet_);
-	resetClient(fd);
+	if (clients_[fd].getRequest().getConnection() == "keep-alive") {
+		resetClient(fd);
+	}
+	else {
+		cnxCloseRecv(fd);
+		clearClient(fd);
+	}
 }
 
 void	SockData::requestReceived(int fd)
