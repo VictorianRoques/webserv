@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 16:11:40 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 17:08:24 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -289,6 +289,8 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 {
 	if (cgi)
 	{
+		if (isUpload())
+			return ;
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
 		_header.setBodyLength(_body.length());
@@ -305,44 +307,54 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 
 std::string&	Response::getData() 			{ return _response; }
 
-int			Response::upload()
+int			Response::isUpload()
 {
+	return (0);
 	std::string contentType = _request.getContentType();
-	std::string body = _request.getBody();
-	size_t foundFileName = body.find("filename=");
+	size_t foundFileName = _body.find("filename=");
     if (foundFileName == std::string::npos || 
 		contentType.find("multipart/form-data") == std::string::npos) 
-        return (1);
-    
-    std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
+        return (0);
+	
+	std::string fileName = _body.substr(foundFileName, _body.find("\n", foundFileName));
     fileName = fileName.substr(0, fileName.find("\n"));
     fileName = fileName.substr(10);
     fileName.erase(fileName.length() - 2);
 	if (fileName.empty())
 		return (1);
-	
-    _uploadDest = _uploadDest + "/" + fileName;
-    std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
-    body = body.substr(body.find("\r\n\r\n") + 4);
-    body = body.substr(0, body.find(boundary));
-    body = body.substr(0, body.length() - 2);
-	
-	/*
-		Open Create file, 201 Created
-		open failed -> 403 
-		Return fd , Florian write body dans ce fd !
-		Return body "Your files have been Upload "
-		+ setHeader()
-	*/
-
-    std::ofstream myfile;
-    myfile.open(_uploadDest.c_str());
-    if (myfile.is_open() == false)
-        return (2);
-    myfile << body.c_str();
-    myfile.close();
-	_location = "http://" + _request.getHost() + "/" + _uploadDest;
-	_location = cleanSlash(_location);
-	_header.setDate();
-    return (0);
+	return (0);
 }
+
+// int			Response::upload()
+// {
+// 	std::string contentType = _request.getContentType();
+// 	std::string body = _request.getBody();
+// 	size_t foundFileName = body.find("filename=");
+//     if (foundFileName == std::string::npos || 
+// 		contentType.find("multipart/form-data") == std::string::npos) 
+//         return (1);
+    
+//     std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
+//     fileName = fileName.substr(0, fileName.find("\n"));
+//     fileName = fileName.substr(10);
+//     fileName.erase(fileName.length() - 2);
+// 	if (fileName.empty())
+// 		return (1);
+	
+//     _uploadDest = _uploadDest + "/" + fileName;
+//     std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
+//     body = body.substr(body.find("\r\n\r\n") + 4);
+//     body = body.substr(0, body.find(boundary));
+//     body = body.substr(0, body.length() - 2);
+	
+//     std::ofstream myfile;
+//     myfile.open(_uploadDest.c_str());
+//     if (myfile.is_open() == false)
+//         return (2);
+//     myfile << body.c_str();
+//     myfile.close();
+// 	_location = "http://" + _request.getHost() + "/" + _uploadDest;
+// 	_location = cleanSlash(_location);
+// 	_header.setDate();
+//     return (0);
+// }
