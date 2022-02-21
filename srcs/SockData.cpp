@@ -402,10 +402,6 @@ void	SockData::sendDataClient(int fd)
 		systemFailure("send", fd);
 		return ;
 	}
-<<<<<<< HEAD
-=======
-	// std::cout << "message:\n" << clients_[fd].getData() << std::endl;
->>>>>>> b696cf3d3998f7329d16dec87d02c288349fe8aa
 	msgSent(fd);
 	FD_CLR(fd, &writeSet_);
 	if (clients_[fd].getRequest().getConnection() == "keep-alive") {
@@ -460,8 +456,8 @@ void	SockData::clearDataFd(int fd)
 		
 		return ;
 	}
-	// FD_CLR(dataFds_[fd], &activeSet_);
-	// FD_CLR(dataFds_[fd], &writeSet_);
+	FD_CLR(dataFds_[fd], &activeSet_);
+	FD_CLR(dataFds_[fd], &writeSet_);
 	if (2 < dataFds_[fd] && dataFds_[fd] < FD_SETSIZE) {
 		close(dataFds_[fd]);
 	}
