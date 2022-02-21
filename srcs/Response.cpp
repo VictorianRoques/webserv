@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 18:57:13 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 19:06:46 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -263,7 +263,7 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 	if (cgi)
 	{
 		_header.setStatus("200 OK");
-		isUpload();
+		isUpload(answer);
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
 		_header.setBodyLength(_body.length());
@@ -278,16 +278,18 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 	}
 }
 
-std::string&	Response::getData() 			{ return _response; }
+std::string&		Response::getData() 			{ return _response; }
 
-void				Response::isUpload()
+void				Response::isUpload(std::string &answer)
 {
+	if (_request.getUploadDest().empty() == true 
+		|| answer.find("File is valid, and was successfully uploaded.") == std::string::npos)
+		return ;
 	std::string contentType = _request.getContentType();
 	size_t foundFileName = _request.getBody().find("filename=");
     if (foundFileName == std::string::npos || 
 		contentType.find("multipart/form-data") == std::string::npos) 
         return ;
-	
 	std::string fileName = _request.getBody().substr(foundFileName, _request.getBody().find("\n", foundFileName));
     fileName = fileName.substr(0, fileName.find("\n"));
     fileName = fileName.substr(10);
