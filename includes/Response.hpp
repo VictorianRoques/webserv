@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 18:24:25 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 18:56:46 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ public:
     bool            isAllow(std::string method);
     std::string		autoIndexBuilder(std::string path);
     int             needCgi();
+    void            isUpload();
     /* Set Fd */
     void            setFdContent();
     void            setFdError(int code);
