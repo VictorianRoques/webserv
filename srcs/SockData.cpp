@@ -1,3 +1,4 @@
+
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -6,7 +7,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:48 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 14:50:56 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/21 16:06:29 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +102,7 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 	dataFds_[fd] = response.searchFd(request);
 	clients_[fd].setRequest(request);
 	clients_[fd].setResponse(response);
+	clients_[fd].setServer(server);
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getFinalRequest().clear();
 	clients_[fd].setChunk(false);
@@ -121,7 +123,6 @@ void	SockData::setResponse(int fd)
 			setDataFd(fd, request, *servers_.begin());
 		}
 		else {
-			std::cout << red << "helloooooo" << white << std::endl;
 			setBadRequest(fd, request);
 		}
 	}
@@ -141,7 +142,8 @@ void	SockData::setBadRequest(int fd, Request &request)
 	}
 	dataFds_[fd] = fd_error_400;
 	clients_[fd].setRequest(request);
-	clients_[fd].setResponse(Response());
+	clients_[fd].setServer(Server());
+	// clients_[fd].setResponse(Response(400));
 }
 
 void	SockData::setInternalError(int fd)
@@ -154,7 +156,8 @@ void	SockData::setInternalError(int fd)
 	}
 	dataFds_[fd] = fd_error_500;
 	clients_[fd].setRequest(Request());
-	clients_[fd].setResponse(Response());
+	clients_[fd].setServer(Server());
+	// clients_[fd].setResponse(Response(500));
 }
 
 /*******************************/
@@ -247,20 +250,25 @@ void	SockData::recvClient(int fd)
 	buffer[ret] = '\0';
 	clients_[fd].getTmpRequest() += std::string(buffer);
 	if (isReadingOver(ret)) {
-		clients_[fd].getFinalRequest() += clients_[fd].getTmpRequest();
 		if (!clients_[fd].isChunk()) {
 			if (clients_[fd].isTmpRequestChunk()) {
 				clients_[fd].setChunk(true);
+				clients_[fd].getFinalRequest() += clients_[fd].getTmpRequest();
 			}
 			else {
+				clients_[fd].getFinalRequest() = clients_[fd].getTmpRequest();
 				requestReceived(fd);
 				return ;
 			}
 		}
 		if (clients_[fd].isChunkEof()) {
 			requestReceived(fd);
+			// set Content-Length to TotalLength
 			return ;
 		}
+		unchunk_t	tmpPair = unchunk(clients_[fd].getTmpRequest());
+		clients_[fd].getTotalLength() += tmpPair.first;
+		clients_[fd].getFinalRequest() += tmpPair.second;
 		clients_[fd].getTmpRequest().clear();
 	}
 }
@@ -305,7 +313,7 @@ void	SockData::cgiRequest(int fd)
 	else if (FD_ISSET(clients_[fd].getInputFd(), &readSet_)) {
 		close(clients_[fd].getInputFd());
 		FD_CLR(clients_[fd].getInputFd(), &activeSet_);
-		cgiHandler cgi(clients_[fd].getRequest());
+		cgiHandler cgi(clients_[fd].getRequest(), clients_[fd].getServer());
 		if (cgi.startCgi(fd) == ERROR) {
 			clearClient(fd);
 			systemFailure("cgi", fd);
@@ -462,6 +470,19 @@ void	SockData::resetClient(int fd)
 	clients_[fd].getData().clear();
 }
 
+SockData::unchunk_t	SockData::unchunk(std::string str) {
+		std::stringstream	s;
+		unsigned int		len_hex;
+		size_t 				pos = str.find("\r\n");
+		if (str.substr(str.length() - 2) != "\r\n") {
+			throw SockData::badChunkRequestException();
+		}
+		str.erase(str.length() - 2, 2);
+		s.clear();
+		s << std::hex << str.substr(0, pos);
+		s >> len_hex;
+		return std::make_pair(std::min(len_hex, static_cast<unsigned int>(str.length() - (pos + 2))), str.substr(pos + 2));
+}
 
 /*******************************/
 /*          SERVER MSG         */

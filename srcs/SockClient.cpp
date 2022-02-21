@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/20 02:24:45 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/21 16:19:38 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,10 @@ SockClient	&SockClient::operator=(const SockClient &sockClient)
 	dataReady_ = sockClient.dataReady_;
 	dataCgi_ = sockClient.dataCgi_;
 	tmpRequest_ = sockClient.tmpRequest_;
+	finalRequest_ = sockClient.finalRequest_;
 	request_ = sockClient.request_;
 	response_ = sockClient.response_;
+	server_ = sockClient.server_;
 	responseBody_ = sockClient.responseBody_;
 	inputFd_ = sockClient.inputFd_;
 	outputFd_ = sockClient.outputFd_;
@@ -58,6 +60,9 @@ void	SockClient::setRequest(const Request &request)
 
 void	SockClient::setResponse(const Response &response)
 	{ response_ = response; }
+
+void	SockClient::setServer(const Server &server)
+	{ server_ = server; }
 
 void	SockClient::setOutputFd(int outputFd)
 	{ outputFd_ = outputFd; }
@@ -155,11 +160,17 @@ std::string	&SockClient::getTmpRequest(void)
 std::string	&SockClient::getFinalRequest(void)
 	{ return finalRequest_; }
 
+unsigned int	&SockClient::getTotalLength(void)
+	{ return totalLength_; }
+
 Request	&SockClient::getRequest(void)
 	{ return request_; }
 
 Response	&SockClient::getResponse(void)
 	{ return response_; }
+
+Server	&SockClient::getServer(void)
+	{ return server_; }
 
 std::string	&SockClient::getResponseBody(void)
 	{ return responseBody_; }

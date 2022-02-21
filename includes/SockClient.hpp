@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/19 22:31:43 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/21 15:57:25 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,10 @@ class SockClient {
 		bool			dataCgi_;
 		std::string		tmpRequest_;
 		std::string		finalRequest_;
+		unsigned int	totalLength_;
 		Request			request_;
 		Response		response_;
+		Server			server_;
 		int				inputFd_;
 		int				outputFd_;
 		std::string		responseBody_;
@@ -54,6 +56,7 @@ class SockClient {
 		void			setDataCgi(bool dataCgi);
 		void			setRequest(const Request &request);
 		void			setResponse(const Response &response);
+		void			setServer(const Server &server);
 		void			setInputFd(int inputFd);
 		void			setOutputFd(int outputFd);
 
@@ -70,8 +73,10 @@ class SockClient {
 		size_t			getPort(void) const;
 		std::string		&getTmpRequest(void);
 		std::string		&getFinalRequest(void);
+		unsigned int	&getTotalLength(void);
 		Request			&getRequest(void);
 		Response		&getResponse(void);
+		Server			&getServer(void);
 		std::string		&getResponseBody(void);
 		std::string		&getData(void);
 		int				&getInputFd(void);

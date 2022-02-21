@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/20 16:44:32 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/21 16:16:14 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,13 @@
 # define BUF_SIZE 1024
 
 class SockData {
+	
+	public:
+	
+		typedef	std::pair<unsigned int, std::string>	unchunk_t;
+	
 	private:
+
 		std::vector<Server>						servers_;
 		std::vector<std::pair<int, size_t> >	sockListen_;
 		std::map<int, int>						dataFds_;
@@ -109,6 +115,7 @@ class SockData {
 		void		clearClient(int fd);
 		void		closeListen(size_t endInd);
 		void		resetClient(int fd);
+		unchunk_t	unchunk(std::string str);
 		
 		/* msg connection */
 		void		cnxFailed(void);
@@ -130,6 +137,10 @@ class SockData {
 		/* bad alloc exception */
 		struct badAllocException : public std::exception {
 			const char	*what(void) const throw() { return "memory overload"; }
+		};
+
+		struct badChunkRequestException : public std::exception {
+			const char	*what() const throw() { return "Chunk request is not ended by a \"\\r\\n\""; }
 		};
 };
 
