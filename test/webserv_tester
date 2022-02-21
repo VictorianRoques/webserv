@@ -133,16 +133,15 @@ def stress_tester_2():
 def chunk_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
-	sock.send(b'POST /send HTTP/1.1\r\n\
+	sock.send(b'POST / HTTP/1.1\r\n\
 Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
 User-Agent: webserv_tester\r\n\
 Content-Type: application/x-www-form-urlencoded\r\n\
 Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\
-Transfer-Encoding: chunked\r\n\r\n')
-	time.sleep(0.1)
-	sock.send(b'1A\r\n\
+Transfer-Encoding: chunked\r\n\r\n\
+1A\r\n\
 name=Toto&email=tot@o&subj\r\n\r\n')
 	time.sleep(0.1)
 	sock.send(b'22\r\n\

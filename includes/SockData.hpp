@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 16:16:14 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/21 18:42:50 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,6 @@ class SockData {
 		void		sendClient(int fd);
 
 		/* requests */
-
 		void		fileRequest(int fd);
 		void		cgiRequest(int fd);
 		void		strDataRequest(int fd);
@@ -116,6 +115,8 @@ class SockData {
 		void		closeListen(size_t endInd);
 		void		resetClient(int fd);
 		unchunk_t	unchunk(std::string str);
+		void		badChunk(int fd);
+		void		modifyChunkRequest(int fd);
 		
 		/* msg connection */
 		void		cnxFailed(void);
@@ -134,7 +135,7 @@ class SockData {
 		void		exceptionError(int fd, std::exception &e);
 		void		systemFailure(std::string str, int fd);
 
-		/* bad alloc exception */
+		/* exceptions */
 		struct badAllocException : public std::exception {
 			const char	*what(void) const throw() { return "memory overload"; }
 		};
@@ -142,6 +143,7 @@ class SockData {
 		struct badChunkRequestException : public std::exception {
 			const char	*what() const throw() { return "Chunk request is not ended by a \"\\r\\n\""; }
 		};
+
 };
 
 #endif
