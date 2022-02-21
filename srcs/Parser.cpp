@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 19:37:20 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/21 18:34:42 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -292,6 +292,7 @@ void	Parser::clear() {
 	_location.clear();
 	_maxBodySize = 1000000;
 	_errorPage.clear();
+	_errorPage["310"] = "error_pages/310.html";
 	_errorPage["400"] = "error_pages/400.html";
 	_errorPage["403"] = "error_pages/403.html";
 	_errorPage["404"] = "error_pages/404.html";

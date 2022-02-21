@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 16:11:40 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 19:06:46 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,9 +108,8 @@ void	Response::answer()
 int		Response::needCgi()
 {
 	if (_extensionCgi.empty() == false &&
-		_request.getPath().find(_extensionCgi) != std::string::npos)
+		_request.getFullPath().find(_extensionCgi) != std::string::npos)
 	{
-		std::cout << "CGI CALL" << std::endl;
 		return (1);
 	}
 	return (0);
@@ -143,10 +142,7 @@ int		Response::initRequest(Request &req)
     }
 	if (_request.getRedirCode() == 310)
 	{
-		_body = "<html><body>Too many Redirects, infinite loop</body></html>";
-		_header.setStatusRedirect("310", _body.length());
-		_code = 310;
-		_fd = -2;
+		setFdError(310);
 		return (1);
 	}
     return (0);
@@ -231,32 +227,9 @@ void		Response::deleteMethod()
 
 void		Response::postMethod()
 {
- 	if (_uploadDest.empty() == false) 
-    {
-		// int ret = upload();
-		// if (ret == 1)
-		// {
-		// 	setFdError(400);
-		// 	return ;
-		// }
-		// if (ret == 2)
-		// {
-		// 	setFdError(403);
-		// 	return ;
-		// }
-		// _body = hrefLocation(_uploadDest);
-		// _header.setHeader("201 Created", "text/html", _body.length());
-		_header.setStatus("204 No Content");
-		// set Header 201 Created  + body length
-		_body = "";
-		_fd = -3;
-    }
-	else
-	{
-		_header.setStatus("204 No Content");
-		_body = "";
-		_fd = -2;
-	}
+	_header.setStatus("204 No Content");
+	_body = "";
+	_fd = -2;
 }
 
 void        Response::setLocationConf()
@@ -289,6 +262,8 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 {
 	if (cgi)
 	{
+		_header.setStatus("200 OK");
+		isUpload(answer);
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
 		_header.setBodyLength(_body.length());
@@ -303,46 +278,65 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 	}
 }
 
-std::string&	Response::getData() 			{ return _response; }
+std::string&		Response::getData() 			{ return _response; }
 
-int			Response::upload()
+void				Response::isUpload(std::string &answer)
 {
+	if (_request.getUploadDest().empty() == true 
+		|| answer.find("File is valid, and was successfully uploaded.") == std::string::npos)
+		return ;
 	std::string contentType = _request.getContentType();
-	std::string body = _request.getBody();
-	size_t foundFileName = body.find("filename=");
+	size_t foundFileName = _request.getBody().find("filename=");
     if (foundFileName == std::string::npos || 
 		contentType.find("multipart/form-data") == std::string::npos) 
-        return (1);
-    
-    std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
+        return ;
+	std::string fileName = _request.getBody().substr(foundFileName, _request.getBody().find("\n", foundFileName));
     fileName = fileName.substr(0, fileName.find("\n"));
     fileName = fileName.substr(10);
     fileName.erase(fileName.length() - 2);
 	if (fileName.empty())
-		return (1);
-	
-    _uploadDest = _uploadDest + "/" + fileName;
-    std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
-    body = body.substr(body.find("\r\n\r\n") + 4);
-    body = body.substr(0, body.find(boundary));
-    body = body.substr(0, body.length() - 2);
-	
-	/*
-		Open Create file, 201 Created
-		open failed -> 403 
-		Return fd , Florian write body dans ce fd !
-		Return body "Your files have been Upload "
-		+ setHeader()
-	*/
-
-    std::ofstream myfile;
-    myfile.open(_uploadDest.c_str());
-    if (myfile.is_open() == false)
-        return (2);
-    myfile << body.c_str();
-    myfile.close();
+		return ;
+	_uploadDest = cleanSlash(_request.getUploadDest() + "/") + fileName;
 	_location = "http://" + _request.getHost() + "/" + _uploadDest;
 	_location = cleanSlash(_location);
+	_header.setLocation(_location);
 	_header.setDate();
-    return (0);
+	_header.setStatus("201 Created");
+	return ;
 }
+
+/* Home Made Upload */
+
+// int			Response::upload()
+// {
+// 	std::string contentType = _request.getContentType();
+// 	std::string body = _request.getBody();
+// 	size_t foundFileName = body.find("filename=");
+//     if (foundFileName == std::string::npos || 
+// 		contentType.find("multipart/form-data") == std::string::npos) 
+//         return (1);
+    
+//     std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
+//     fileName = fileName.substr(0, fileName.find("\n"));
+//     fileName = fileName.substr(10);
+//     fileName.erase(fileName.length() - 2);
+// 	if (fileName.empty())
+// 		return (1);
+	
+//     _uploadDest = _uploadDest + "/" + fileName;
+//     std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
+//     body = body.substr(body.find("\r\n\r\n") + 4);
+//     body = body.substr(0, body.find(boundary));
+//     body = body.substr(0, body.length() - 2);
+	
+//     std::ofstream myfile;
+//     myfile.open(_uploadDest.c_str());
+//     if (myfile.is_open() == false)
+//         return (2);
+//     myfile << body.c_str();
+//     myfile.close();
+// 	_location = "http://" + _request.getHost() + "/" + _uploadDest;
+// 	_location = cleanSlash(_location);
+// 	_header.setDate();
+//     return (0);
+// }
