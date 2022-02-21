@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 18:07:31 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 18:24:27 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,8 +265,6 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 {
 	if (cgi)
 	{
-		if (isUpload())
-			return ;
 		_header.setStatus("200 OK");
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
@@ -283,26 +281,6 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 }
 
 std::string&	Response::getData() 			{ return _response; }
-
-int			Response::isUpload()
-{
-	std::string contentType = _request.getContentType();
-	_body = _request.getBody();
-	size_t foundFileName = _body.find("filename=");
-    if (foundFileName == std::string::npos || 
-		contentType.find("multipart/form-data") == std::string::npos) 
-        return (0);
-	
-	std::string fileName = _body.substr(foundFileName, _body.find("\n", foundFileName));
-    fileName = fileName.substr(0, fileName.find("\n"));
-    fileName = fileName.substr(10);
-    fileName.erase(fileName.length() - 2);
-	if (fileName.empty())
-		return (1);
-	_header.setStatus("204 No Content");
-	return (0);
-}
-
 
 /* Home Made Upload */
 

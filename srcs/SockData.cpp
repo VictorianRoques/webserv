@@ -370,7 +370,7 @@ void	SockData::sendDataClient(int fd)
 		systemFailure("send", fd);
 		return ;
 	}
-	std::cout << "message:\n" << clients_[fd].getData() << std::endl;
+	// std::cout << "message:\n" << clients_[fd].getData() << std::endl;
 	msgSent(fd);
 	FD_CLR(fd, &writeSet_);
 	if (clients_[fd].getRequest().getConnection() == "keep-alive") {
