@@ -164,7 +164,7 @@ size_t	Location::dirUploadDest(vec_str::iterator it, vec_str::iterator vend) {
 	posend = std::min((*it).find_first_of(";", pos), (*it).length());
 	uploadDest = (*it).substr(pos, posend - pos);
 
-	setUploadDest(uploadDest);
+	setUploadDest(makePathAbsolute(uploadDest));
 	(void)vend;
 	return 2;
 }

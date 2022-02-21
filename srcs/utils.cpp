@@ -186,7 +186,7 @@ std::string	findRightPath(std::string path, std::string root, bool autoIndex, st
 
 	path = path.substr(0, path.find("?"));
 	std::string relative = cleanSlash(root + "/" + path);
-		std::cout << "relative : " << relative << std::endl;
+//		std::cout << "relative : " << relative << std::endl;
 	if (pathIsFile(relative) || pathIsDirectory(relative)) {
 		return relative;
 	}
@@ -204,13 +204,13 @@ std::string	findRightPath(std::string path, std::string root, bool autoIndex, st
 		}
 	}
 
-	std::cout << "simple path : " << path << std::endl;
+//	std::cout << "simple path : " << path << std::endl;
 	if (pathIsFile(path) || pathIsDirectory(path)) {
 		return path;
 	}
 
 	path = cleanSlash(getPWD() + "/" + path);
-	std::cout << "pwd + path : " << path << std::endl;
+//	std::cout << "pwd + path : " << path << std::endl;
 	if (pathIsFile(path) || pathIsDirectory(path)) {
 		return path;
 	}
