@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/20 22:40:22 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/21 16:16:37 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,30 +14,22 @@
 
 cgiHandler::cgiHandler() {}
 
-cgiHandler::cgiHandler(Request &req)
+cgiHandler::cgiHandler(Request &req, Server &serv)
 {
+    Location loc = findRightLocation(serv.getLocation(), req);
     /* Serveur */
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["SCRIPT_NAME"] = "cgi_binary/darwin_phpcgi";
-    _env["SERVER_NAME"] = "localhost";
-    _env["SERVER_PORT"] = "8080";
+    _env["SCRIPT_NAME"] = loc.getCgiHandler().second;
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
-
+    _env["UPLOAD_DEST"] = loc.getUploadDest();
     /* Requete */
     _env["REDIRECT_STATUS"] = "200";
     _env["REQUEST_METHOD"] = req.getMethod();
     _env["CONTENT_TYPE"] = req.getContentType();
     _env["CONTENT_LENGTH"] = req.getContentLength();
     _env["PATH_TRANSLATED"] = req.getFullPath();
-    _env["PATH_INFO"] = req.getFullPath().substr(req.getFullPath().rfind("/") + 1);
+    _env["PATH_INFO"] = req.getPath();
     _env["QUERY_STRING"] = req.getQueryString();
-
-    std::cout << "Path value: " << std::endl;
-    if (req.getPath() == "/www/php/upload.php")
-    {
-        _env["PATH_TRANSLATED"] += "php/upload.php";    
-    }
-    std::cout << _env["PATH_TRANSLATED"] << std::endl;
     _body = req.getBody();
 }
 

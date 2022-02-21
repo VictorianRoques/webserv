@@ -34,6 +34,8 @@ void            ResponseHeader::setStatusError(std::string code)
         _status = "404 Not Found";
     else if (code == "405")
         _status = "405 Method Not Allowed";
+    else if (code == "500")
+        _status = "500 Internal Error";
     _contentType = "text/html";
 }
 

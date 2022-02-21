@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/20 22:04:29 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/21 15:53:07 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Response {
 public:
     
     Response();
+    Response(int code);
     Response(Server &serv);
     Response(Server &serv, Request &req);
     Response(const Response &res);
@@ -56,7 +57,6 @@ public:
     int             upload();
     std::string		autoIndexBuilder(std::string path);
     int             needCgi();
-
     /* Set Fd */
     void            setFdContent();
     void            setFdError(int code);

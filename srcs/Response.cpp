@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/20 22:35:13 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/21 16:11:40 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,14 @@
 /**************************************/
 
 Response::Response() {}
+
+Response::Response(int code)
+{
+	if (code == 400)
+		_header.setStatusError("400");
+	else
+		_header.setStatusError("500");
+}
 
 Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()), _code(0) {
 	
