@@ -1,5 +1,5 @@
 <?php
-echo $uploaddir;
+$uploaddir = getenv('UPLOAD_DEST');
 $uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
 
 echo '<pre>';

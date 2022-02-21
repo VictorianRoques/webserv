@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 17:19:06 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 17:32:05 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,6 @@ int		Response::needCgi()
 	if (_extensionCgi.empty() == false &&
 		_request.getFullPath().find(_extensionCgi) != std::string::npos)
 	{
-		std::cout << "CGI CALL" << std::endl;
 		return (1);
 	}
 	return (0);
@@ -302,6 +301,9 @@ int			Response::isUpload()
 		return (1);
 	return (0);
 }
+
+
+/* Home Made Upload */
 
 // int			Response::upload()
 // {
