@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 17:08:24 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 17:19:06 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ void	Response::answer()
 int		Response::needCgi()
 {
 	if (_extensionCgi.empty() == false &&
-		_request.getPath().find(_extensionCgi) != std::string::npos)
+		_request.getFullPath().find(_extensionCgi) != std::string::npos)
 	{
 		std::cout << "CGI CALL" << std::endl;
 		return (1);
@@ -186,6 +186,7 @@ void		Response::setFdContent()
 			return ;
 		}
 		_header.setStatus("200 OK");
+
 		_header.setContentType(_request.getContentType());
 	}
 	else
@@ -231,32 +232,9 @@ void		Response::deleteMethod()
 
 void		Response::postMethod()
 {
- 	if (_uploadDest.empty() == false) 
-    {
-		// int ret = upload();
-		// if (ret == 1)
-		// {
-		// 	setFdError(400);
-		// 	return ;
-		// }
-		// if (ret == 2)
-		// {
-		// 	setFdError(403);
-		// 	return ;
-		// }
-		// _body = hrefLocation(_uploadDest);
-		// _header.setHeader("201 Created", "text/html", _body.length());
-		_header.setStatus("204 No Content");
-		// set Header 201 Created  + body length
-		_body = "";
-		_fd = -3;
-    }
-	else
-	{
-		_header.setStatus("204 No Content");
-		_body = "";
-		_fd = -2;
-	}
+	_header.setStatus("204 No Content");
+	_body = "";
+	_fd = -2;
 }
 
 void        Response::setLocationConf()
