@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 17:32:05 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 18:07:31 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,6 @@ void		Response::setFdContent()
 			return ;
 		}
 		_header.setStatus("200 OK");
-
 		_header.setContentType(_request.getContentType());
 	}
 	else
@@ -268,6 +267,7 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 	{
 		if (isUpload())
 			return ;
+		_header.setStatus("200 OK");
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
 		_header.setBodyLength(_body.length());
@@ -286,8 +286,8 @@ std::string&	Response::getData() 			{ return _response; }
 
 int			Response::isUpload()
 {
-	return (0);
 	std::string contentType = _request.getContentType();
+	_body = _request.getBody();
 	size_t foundFileName = _body.find("filename=");
     if (foundFileName == std::string::npos || 
 		contentType.find("multipart/form-data") == std::string::npos) 
@@ -299,6 +299,7 @@ int			Response::isUpload()
     fileName.erase(fileName.length() - 2);
 	if (fileName.empty())
 		return (1);
+	_header.setStatus("204 No Content");
 	return (0);
 }
 

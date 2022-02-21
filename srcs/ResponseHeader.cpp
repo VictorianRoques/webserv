@@ -1,6 +1,6 @@
 #include "ResponseHeader.hpp"
 
-ResponseHeader::ResponseHeader(): _bodyLength(0) {}
+ResponseHeader::ResponseHeader(): _bodyLength(-1) {}
 ResponseHeader::ResponseHeader(const ResponseHeader &resHeader) { *this = resHeader; }
 ResponseHeader::~ResponseHeader() {}
 
@@ -83,7 +83,7 @@ void            ResponseHeader::writeHeader()
     _header = "HTTP/1.1 " + _status + "\r\n";
     if (_contentType.empty() == false)
         _header += "Content-Type: " + _contentType + "\r\n";
-    if (_bodyLength > 0)
+    if (_bodyLength >= 0)
         _header += "Content-Length: " + sizeToString(_bodyLength) + "\r\n";
     if (_location.empty() == false)
         _header += "Location: " + _location + "\r\n";
