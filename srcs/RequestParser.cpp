@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 18:44:57 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/21 16:36:27 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ Request& Request::operator=(const Request &x) {
 		_tooBig = x._tooBig;
 		_fullPath = x._fullPath;
 		_queryString = x._queryString;
+		_uploadDest = x._uploadDest;
 		_redirCode = x._redirCode;
 	}
 	return *this;
@@ -77,9 +78,8 @@ bool		Request::getChunked() { return _chunked; }
 bool		Request::getTooBig() { return _tooBig; }
 std::string	Request::getFullPath() { return _fullPath; }
 std::string	Request::getQueryString() { return _queryString; }
-
+std::string	Request::getUploadDest() { return _uploadDest; }
 std::string	Request::getGeneralRoot() { return _generalRoot; }
-
 size_t		Request::getRedirCode() { return _redirCode; }
 
 /**************************************/
@@ -105,9 +105,8 @@ void	Request::setChunked(bool chunked) { _chunked = chunked; }
 void	Request::setTooBig(bool tooBig) { _tooBig = tooBig; }
 void	Request::setFullPath(std::string fullPath) { _fullPath = fullPath; }
 void	Request::setQueryString(std::string queryString) { _queryString = queryString; }
-
+void	Request::setUploadDest(std::string uploadDest) { _uploadDest = uploadDest; }
 void	Request::setGeneralRoot(std::string generalRoot) { _generalRoot = generalRoot; }
-
 void	Request::setRedirCode(size_t redirCode) { _redirCode = redirCode; }
 
 /**************************************/
@@ -190,19 +189,15 @@ void	Request::buildFullPath(Location loc) {
 		}
 	}
 	else {
-/**		std::cout << "getUploadDest = " << loc.getUploadDest() << std::endl;
 		if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) { // check if this is an upload
-			if (loc.getUploadDest()[0] == '/') { //absolute
-				_fullPath = loc.getUploadDest();
-			std::cout << "ABSOLUTE\n";
-			}
-			else //relative
-				_fullPath = loc.getRoot() + "/" + loc.getUploadDest();
+				_fullPath = findRightPath(loc.getIndex(), loc.getRoot(), loc.getAutoIndex(), loc.getIndex());
+				_uploadDest = loc.getUploadDest();
+				std::cout << "FULL PATH = " << _fullPath << " et uploadDest = " << _uploadDest;
 		}
-		else {**/
+		else {
 			std::cout << "GET RIGHT PATH" << std::endl;
 			_fullPath = findRightPath(_path, loc.getRoot(), loc.getAutoIndex(), loc.getIndex());
-//		}
+		}
 	}
 	_fullPath = cleanSlash(_fullPath);
 	return ;
