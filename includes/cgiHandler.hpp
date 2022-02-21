@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:01 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/18 16:14:40 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/21 16:22:23 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ public:
 
     cgiHandler();
     ~cgiHandler();
-    cgiHandler(Request &req);
+    cgiHandler(Request &req, Server &serv);
     cgiHandler(const cgiHandler &cgi);
     cgiHandler&     operator=(const cgiHandler &cgi);
 

@@ -1,9 +1,8 @@
 <?php
-$uploaddir = '/Users/viroques/Documents/webserv/www/upload/';
+$uploaddir =  getenv('UPLOAD_DEST');
+echo $uploaddir;
 $uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
 
-$ip = getenv('UPLOAD_DEST') . "\n";
-echo $ip;
 echo '<pre>';
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
     echo "File is valid, and was successfully uploaded.\n";

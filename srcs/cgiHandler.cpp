@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 16:16:37 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 16:25:12 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ cgiHandler::cgiHandler(Request &req, Server &serv)
     _env["SCRIPT_NAME"] = loc.getCgiHandler().second;
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
     _env["UPLOAD_DEST"] = loc.getUploadDest();
+    std::cout << "UPLOAD DEST: " <<  _env["UPLOAD_DEST"] << std::endl;
     /* Requete */
     _env["REDIRECT_STATUS"] = "200";
     _env["REQUEST_METHOD"] = req.getMethod();
