@@ -17,7 +17,7 @@ int     main(int ac , char **av)
         {
             parser.tokenizer(av);
             // TESTING
-            parser.print_test();
+            parser.print();
         }
         catch (std::exception &e)
         {

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 16:13:52 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 16:24:16 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -449,7 +449,7 @@ void	Parser::tokenizer(char **av) {
 }
 
 // TESTING FUNCTION
-void	Parser::print_test() {
+void	Parser::print() {
 	std::vector<Server>::iterator it;
 	
 	it = _servers_g.begin();

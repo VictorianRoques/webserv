@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 13:41:49 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 16:16:25 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ void	Location::setGeneralRoot(std::string generalRoot) { _generalRoot = generalR
 **/
 size_t Location::dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend) {
 	setMaxBodySize(*it);
-	(void)vend;
+	static_cast<void>(vend);
 	return 2;
 }
 
@@ -135,9 +135,6 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	pos = (*it).find_first_not_of(";");
 	posend = std::min((*it).find_first_of(";", pos), (*it).length());
 	root = (*it).substr(pos, posend - pos);
-
-	//remove useless backwards (would puzzle the cgi)
-//	root = removeBackwards(root);
 
 	setRoot(root);
 	if (getLocationMatch() == "/") {
@@ -164,7 +161,7 @@ size_t	Location::dirUploadDest(vec_str::iterator it, vec_str::iterator vend) {
 	uploadDest = (*it).substr(pos, posend - pos);
 
 	setUploadDest(makePathAbsolute(uploadDest));
-	(void)vend;
+	static_cast<void>(vend);
 	return 2;
 }
 
@@ -178,7 +175,7 @@ size_t	Location::dirAutoIndex(vec_str::iterator it, vec_str::iterator vend) {
 		setAutoIndex(false);
 	else
 		throw	WrongValue_AutoIndexException();
-	(void)vend;
+	static_cast<void>(vend);
 	return 2;
 }
 
@@ -198,7 +195,7 @@ size_t	Location::dirIndex(vec_str::iterator it, vec_str::iterator vend) {
 	index = (*it).substr(pos, posend - pos);
 
 	setIndex(index);
-	(void)vend;
+	static_cast<void>(vend);
 	return 2;
 }
 
@@ -216,7 +213,7 @@ size_t	Location::dirRedirection(vec_str::iterator it, vec_str::iterator vend) {
 		throw NonValidRedirectionException();
 	_redirection.first = code;
 	_redirection.second = uri.substr(0, pos);
-	(void)vend;
+	static_cast<void>(vend);
 	return 3;
 }
 
@@ -229,7 +226,7 @@ size_t	Location::dirCgiHandler(vec_str::iterator it, vec_str::iterator vend) {
 	_cgiHandler.first = *it;
 	size_t	pos = (*(it + 1)).find(";");
 	_cgiHandler.second = (*(it + 1)).substr(0, pos);
-	(void)vend;
+	static_cast<void>(vend);
 	return 3;
 }
 

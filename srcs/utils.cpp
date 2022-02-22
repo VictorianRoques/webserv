@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 16:11:07 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 16:20:04 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,17 +185,15 @@ std::string		hrefLocation(std::string location)
 std::string	findRightPath(std::string path, std::string root, bool autoIndex, std::string index) {
 
 	path = path.substr(0, path.find("?"));
+	// case 1: path is relative
 	std::string relative = cleanSlash(root + "/" + path);
-//		std::cout << "relative : " << relative << std::endl;
 	if (pathIsFile(relative) || pathIsDirectory(relative)) {
 		return relative;
 	}
 	
+	// case 2: autoIndex: off
 	if (autoIndex == false) {
 	std::string relative2 = cleanSlash(root + "/");
-//	std::cout << "Is file ? " << pathIsFile(relative2) << std::endl;
-//		std::cout << "Is directory ? " << pathIsDirectory(relative2) << std::endl;
-		std::cout << "relative2 : " << relative2 << std::endl;
 		if (pathIsFile(relative2))
 			return relative2;
 		else if (pathIsDirectory(relative2)) {
@@ -204,16 +202,15 @@ std::string	findRightPath(std::string path, std::string root, bool autoIndex, st
 		}
 	}
 
-//	std::cout << "simple path : " << path << std::endl;
+	// case 3: path is absolute
 	if (pathIsFile(path) || pathIsDirectory(path)) {
 		return path;
 	}
 
-	path = cleanSlash(getPWD() + "/" + path);
-//	std::cout << "pwd + path : " << path << std::endl;
+/**	path = cleanSlash(getPWD() + "/" + path);
 	if (pathIsFile(path) || pathIsDirectory(path)) {
 		return path;
-	}
+	}**/
 
 	return relative;
 }
