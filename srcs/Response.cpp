@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/22 02:09:14 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/22 11:11:47 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,7 +228,6 @@ void		Response::deleteMethod()
 void		Response::postMethod()
 {
 	_header.setStatus("204 No Content");
-	_header.setBodyLength(0); // Possible ?
 	_body = "";
 	_fd = -2;
 }
