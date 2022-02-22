@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 13:36:17 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 16:13:52 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ size_t	Parser::dirListen(vec_str::iterator it, vec_str::iterator vend) {
 **/
 size_t Parser::dirMaxBodySize(vec_str::iterator it, vec_str::iterator vend) {
 	setMaxBodySize(*it);
-	(void)vend;
+	static_cast<void>(vend);
 	return 2;
 }
 
@@ -192,8 +192,8 @@ size_t	Parser::dirErrorPage(vec_str::iterator it, vec_str::iterator vend) {
 **/
 size_t	Parser::dirOpen(vec_str::iterator it, vec_str::iterator vend) {
 	throw LonelyBracketException();
-	(void)it;
-	(void)vend;
+	static_cast<void>(it);
+	static_cast<void>(vend);
 	return 1;
 }
 
@@ -208,8 +208,8 @@ size_t	Parser::dirClose(vec_str::iterator it, vec_str::iterator vend) {
 		_in_location = false;
 	else 
 		_in_server = false;
-	(void)it;
-	(void)vend;
+	static_cast<void>(it);
+	static_cast<void>(vend);
 	return 1;
 }
 
@@ -310,8 +310,6 @@ void	Parser::clear() {
 void	Parser::buildErrorPageContent() {
 	map_str::iterator it = _errorPage.begin();
 	for (; it != _errorPage.end(); it++) {
-//		_errorPageContent[it->first] = getFileContent(it->second);
-//		std::cout << getFileContent(it->second);
 		_errorPageContent[it->first] = getFileContent(it->second);
 	}
 }
@@ -352,8 +350,8 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 	if (it != vend && *it != "{")
 		throw MissingBracketException();
 
-	(void)it;
-	(void)vend;
+	static_cast<void>(it);
+	static_cast<void>(vend);
 	return 2;
 }
 
@@ -445,8 +443,6 @@ void	Parser::tokenizer(char **av) {
 		}
 	}
 	file.close();
-//	if (file.close())
-//		throw FailedToCloseException();
 	// (used for testing)
 	//ft_putvec(tok, "\n");
 	interpreter(tok);
