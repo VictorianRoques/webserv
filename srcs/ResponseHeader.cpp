@@ -1,6 +1,6 @@
 #include "ResponseHeader.hpp"
 
-ResponseHeader::ResponseHeader(): _bodyLength(-1) {}
+ResponseHeader::ResponseHeader(): _bodyLength(0) {}
 ResponseHeader::ResponseHeader(const ResponseHeader &resHeader) { *this = resHeader; }
 ResponseHeader::~ResponseHeader() {}
 

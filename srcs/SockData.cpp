@@ -127,6 +127,20 @@ void	SockData::setResponse(int fd)
 	}
 }
 
+void	SockData::setBadRequest(int fd, Request &request)
+{
+	int	fd_error_400;
+	if ((fd_error_400 = open("error_pages/400.html", O_RDONLY)) == ERROR) {
+		clearClient(fd);
+		systemFailure("opening [error_pages/400.html]", fd);
+		return ;
+	}
+	dataFds_[fd] = fd_error_400;
+	clients_[fd].setRequest(request);
+	clients_[fd].setResponse(Response(400));
+	clients_[fd].setServer(Server());
+}
+
 void	SockData::setInternalError(int fd)
 {
 	int	fd_error_500;
@@ -237,54 +251,6 @@ void	SockData::modifyChunkRequest(int fd) {
 	clients_[fd].getFinalRequest().erase(pos, transferEncoding.size());
 }
 
-void	SockData::normalRequest(int fd)
-{
-	clients_[fd].getFinalRequest() = clients_[fd].getTmpRequest();
-
-	requestReceived(fd);
-}
-
-void	SockData::startChunkRequest(int fd)
-{
-	clients_[fd].setChunk(true);
-	size_t	end = clients_[fd].getTmpRequest().find("\r\n\r\n");
-	if (end == std::string::npos) {
-		clients_[fd].getFinalRequest() = clients_[fd].getTmpRequest();
-		requestReceived(fd);
-	}
-	else {
-		clients_[fd].getFinalRequest() += clients_[fd].getTmpRequest().substr(0, end + 4);
-		clients_[fd].getTmpRequest() = clients_[fd].getTmpRequest().substr(end + 4);
-	}
-}
-
-void	SockData::endChunkRequest(int fd)
-{
-	try {
-		modifyChunkRequest(fd);
-		requestReceived(fd);
-	}
-	catch (std::exception &e) {
-		exceptionError(fd, e);
-		requestReceived(fd);
-		return ;
-	}
-}
-
-void	SockData::concatChunks(int fd)
-{
-	try {
-		unchunk_t	tmpPair = unchunk(clients_[fd].getTmpRequest());
-		clients_[fd].getTotalLength() += tmpPair.first;
-		clients_[fd].getFinalRequest() += tmpPair.second;
-		clients_[fd].getTmpRequest().clear();
-	}
-	catch (std::exception &e) {
-		exceptionError(fd, e);
-		requestReceived(fd);
-	}
-}
-
 void	SockData::recvClient(int fd)
 {
 	char		buffer[BUF_SIZE];
@@ -298,18 +264,44 @@ void	SockData::recvClient(int fd)
 	if (isReadingOver(ret)) {
 		if (!clients_[fd].isChunk()) {
 			if (clients_[fd].isTmpRequestChunk()) {
-				startChunkRequest(fd);
+				clients_[fd].setChunk(true);
+				size_t	end = clients_[fd].getTmpRequest().find("\r\n\r\n");
+				if (end == std::string::npos) {
+					clients_[fd].getFinalRequest() = clients_[fd].getTmpRequest();
+					requestReceived(fd);
+				}
+				else {
+					clients_[fd].getFinalRequest() += clients_[fd].getTmpRequest().substr(0, end + 4);
+					clients_[fd].getTmpRequest() = clients_[fd].getTmpRequest().substr(end + 4);
+				}
 			}
 			else {
-				normalRequest(fd);
+				clients_[fd].getFinalRequest() = clients_[fd].getTmpRequest();
+				requestReceived(fd);
 				return ;
 			}
 		}
 		if (clients_[fd].isChunkEof()) {
-			endChunkRequest(fd);
+			try {
+				modifyChunkRequest(fd);
+				requestReceived(fd);
+			}
+			catch (std::exception &e) {
+				exceptionError(fd, e);
+				requestReceived(fd);
+			}
 			return ;
 		}
-		concatChunks(fd);
+		try {
+			unchunk_t	tmpPair = unchunk(clients_[fd].getTmpRequest());
+			clients_[fd].getTotalLength() += tmpPair.first;
+			clients_[fd].getFinalRequest() += tmpPair.second;
+			clients_[fd].getTmpRequest().clear();
+		}
+		catch (std::exception &e) {
+			exceptionError(fd, e);
+			requestReceived(fd);
+		}
 	}
 }
 
@@ -335,6 +327,7 @@ void	SockData::sendClient(int fd)
 /*******************************/
 void	SockData::cgiRequest(int fd)
 {
+	// Need to pass Server to cgiHandler
 	std::stringstream	ss;
 	ss << fd;
 	if (FD_ISSET(clients_[fd].getInputFd(), &writeSet_)) {
@@ -459,10 +452,12 @@ void	SockData::recvClientClose(int fd, int ret)
 
 void	SockData::clearDataFd(int fd)
 {
-	if (0 <= dataFds_[fd] && dataFds_[fd] < FD_SETSIZE) {
-		FD_CLR(dataFds_[fd], &activeSet_);
-		FD_CLR(dataFds_[fd], &writeSet_);
+	if (dataFds_.empty()) {
+		
+		return ;
 	}
+	FD_CLR(dataFds_[fd], &activeSet_);
+	FD_CLR(dataFds_[fd], &writeSet_);
 	if (2 < dataFds_[fd] && dataFds_[fd] < FD_SETSIZE) {
 		close(dataFds_[fd]);
 	}
@@ -478,10 +473,8 @@ void	SockData::clearClient(int fd)
 	unlink(pathFileIn.c_str());
 	unlink(pathFileOut.c_str());
 	clearDataFd(fd);
-	if (0 <= fd && fd < FD_SETSIZE) {
-		FD_CLR(fd, &activeSet_);
-		FD_CLR(fd, &writeSet_);
-	}
+	FD_CLR(fd, &activeSet_);
+	FD_CLR(fd, &writeSet_);
 	close(fd);
 	clients_.erase(fd);
 }
@@ -504,6 +497,8 @@ void	SockData::resetClient(int fd)
 	clients_[fd].setChunk(false);
 	clients_[fd].setDataReady(false);
 	clients_[fd].setDataCgi(false);
+	clients_[fd].setRequest(Request());
+	clients_[fd].setResponse(Response());
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getFinalRequest().clear();
 	clients_[fd].getTotalLength() = 0;
@@ -512,20 +507,29 @@ void	SockData::resetClient(int fd)
 }
 
 SockData::unchunk_t	SockData::unchunk(std::string str) {
-	std::stringstream	s;
-	unsigned int		lenHex;
-	size_t 				pos = str.find("\r\n");
-	if (str.empty() || str.substr(str.length() - 2) != "\r\n") {
-		throw SockData::badChunkRequestException();
-	}
-	str.erase(str.length() - 2, 2);
-	s.clear();
-	s << std::hex << str.substr(0, pos);
-	s >> lenHex;
-	std::pair<unsigned int, std::string>	retPair;
-	retPair.first = std::min(lenHex, static_cast<unsigned int>(str.length() - (pos + 2)));
-	retPair.second = str.substr(pos + 2);
-	return retPair;
+		std::stringstream	s;
+		unsigned int		len_hex;
+		size_t 				pos = str.find("\r\n");
+		if (str.empty() || str.substr(str.length() - 2) != "\r\n") {
+			throw SockData::badChunkRequestException();
+		}
+		str.erase(str.length() - 2, 2);
+		s.clear();
+		s << std::hex << str.substr(0, pos);
+		s >> len_hex;
+		return std::make_pair(std::min(len_hex, static_cast<unsigned int>(str.length() - (pos + 2))), str.substr(pos + 2));
+}
+
+void	SockData::badChunk(int fd)
+{
+	Request	request = requestParser(clients_[fd].getFinalRequest(), servers_);
+	msgRecv(fd);
+	clients_[fd].setRequest(request);
+	clients_[fd].setResponse(Response(400));
+	clients_[fd].setServer(Server());
+	setBadRequest(fd, request);
+	FD_SET(fd, &writeSet_);
+	FD_SET(dataFds_[fd], &readSet_);
 }
 
 /*******************************/
@@ -535,30 +539,30 @@ SockData::unchunk_t	SockData::unchunk(std::string str) {
 void	SockData::cnxFailed(void)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << RED;
+	std::cerr << red;
 	std::cerr << "Server: connection with client failed";
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
 }
 
 void	SockData::cnxRefused(SockClient sockClient)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << RED;
+	std::cerr << red;
 	std::cerr << "Server: connection refused from " << sockClient.getIp();
 	std::cerr << " via port " << sockClient.getPort();
 	std::cerr << ": too many clients connected" << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
 }
 
 void	SockData::cnxAccepted(SockClient sockClient)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << GREEN;
+	std::cerr << green;
 	std::cerr << "Server: connection from " << sockClient.getIp();
 	std::cerr << " via port " << sockClient.getPort() << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
 }
 
@@ -566,13 +570,13 @@ void	SockData::cnxAccepted(SockClient sockClient)
 void	SockData::cnxCloseRecv(int fd)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << GREEN;
+	std::cerr << green;
 	std::cerr << "Server: connexion terminated with EOF " << clients_[fd].getIp();
 	std::cerr << " via port " << clients_[fd].getPort();
 	std::cerr << " | socket fd: " << fd;
 	std::cerr << " | closing connection";
 	std::cerr << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
 }
 
@@ -580,13 +584,13 @@ void	SockData::cnxCloseRecv(int fd)
 void	SockData::cnxCloseSend(int fd)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << RED;
+	std::cerr << red;
 	std::cerr << "Server: couldn't send response to " << clients_[fd].getIp();
 	std::cerr << " on port " << clients_[fd].getPort();
 	std::cerr << " | socket fd: " << fd;
 	std::cerr << " | closing connection";
 	std::cerr << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
 }
 
@@ -594,29 +598,29 @@ void	SockData::cnxCloseSend(int fd)
 void	SockData::msgRecv(int fd)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << PURPLE;
+	std::cerr << blue;
 	std::cerr << "Server: new message from " << clients_[fd].getIp();
 	std::cerr << " on port " << clients_[fd].getPort();
 	std::cerr << " | socket fd: " << fd;
 	std::cerr << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << PURPLE;
+	std::cerr << blue;
 	std::cerr << "Message: " << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << clients_[fd].getFinalRequest() << std::endl;
+	// std::cerr << clients_[fd].getFinalRequest() << std::endl;
 }
 
 void	SockData::msgSent(int fd)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << PURPLE;
+	std::cerr << blue;
 	std::cerr << "Server: message successfully sent to " << clients_[fd].getIp();
 	std::cerr << " on port " << clients_[fd].getPort();
 	std::cerr << " | socket fd: " << fd;
 	std::cerr << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
 }
 
@@ -624,23 +628,23 @@ void	SockData::msgSent(int fd)
 void	SockData::exceptionError(int fd, std::exception &e)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << RED;
+	std::cerr << red;
 	std::cerr << "Server: " << e.what() << ": " << clients_[fd].getIp();
 	std::cerr << " on port " << clients_[fd].getPort();
 	std::cerr << " | socket fd: " << fd;
 	std::cerr << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
 }
 
 void	SockData::systemFailure(std::string str, int fd)
 {
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << RED;
+	std::cerr << red;
 	std::cerr << "Server: error: " << str;
 	std::cerr << " | socket fd " << fd;
 	std::cerr << " | closing connection"; 
 	std::cerr << std::endl;
-	std::cerr << NC;
+	std::cerr << white;
 	std::cerr << "-----------------------------" << std::endl;
 }

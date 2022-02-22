@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/22 11:11:47 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/22 15:07:01 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,8 @@ int		Response::initRequest(Request &req)
         else
             _path = _root + "/" + _index;
     }
-    if ((size_t)_request.getBody().size() > (size_t)_serv.getMaxBodySize())
+    if (static_cast<size_t>(_request.getBody().size()) > static_cast<size_t>(_serv.getMaxBodySize())
+		|| static_cast<size_t>(_request.getBody().size()) > static_cast<size_t>(_loc.getMaxBodySize()))
     {
 		setFdError(413);
         return (1);
@@ -159,14 +160,14 @@ void	Response::setFdError(int code)
 		if (_fd < 0)
 		{
 			_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-			_header.setHeader("500 Internal Servor Error", "text/html", _body.length());
+			_header.setHeader("500 Internal Servor Error", "text/html", _body.size());
 			_fd = -2;
 		}
 	}
 	else
 	{
 		_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
-		_header.setHeader("500 Internal Servor Error", "text/html", _body.length());
+		_header.setHeader("500 Internal Servor Error", "text/html", _body.size());
 		_fd = -2;
 	}
 }
@@ -195,7 +196,7 @@ void		Response::getMethod()
 	if (_autoIndex == true && pathIsDirectory(_path))
 	{
 		_body = autoIndexBuilder(_path);
-		_header.setHeader("200 OK", "text/html", _body.length());
+		_header.setHeader("200 OK", "text/html", _body.size());
 		_fd = -2;
 	}
 	else
@@ -243,6 +244,7 @@ void        Response::setLocationConf()
 	_autoIndex = loc.getAutoIndex();
 	_allowMethods = loc.getMethods();
 	_uploadDest = loc.getUploadDest();
+	_loc = loc;
 }
 
 
@@ -266,13 +268,13 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 		isUpload(answer);
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
-		_header.setBodyLength(_body.length());
+		_header.setBodyLength(_body.size());
 		_header.writeHeader();
 		_response = _header.getHeader() + _body;
 	}
 	else
 	{
-		_header.setBodyLength(answer.length());
+		_header.setBodyLength(answer.size());
 		_header.writeHeader();
 		_response = _header.getHeader() + answer;
 	}
@@ -293,7 +295,7 @@ void				Response::isUpload(std::string &answer)
 	std::string fileName = _request.getBody().substr(foundFileName, _request.getBody().find("\n", foundFileName));
     fileName = fileName.substr(0, fileName.find("\n"));
     fileName = fileName.substr(10);
-    fileName.erase(fileName.length() - 2);
+    fileName.erase(fileName.size() - 2);
 	if (fileName.empty())
 		return ;
 	_uploadDest = cleanSlash(_request.getUploadDest() + "/") + fileName;
@@ -319,7 +321,7 @@ void				Response::isUpload(std::string &answer)
 //     std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
 //     fileName = fileName.substr(0, fileName.find("\n"));
 //     fileName = fileName.substr(10);
-//     fileName.erase(fileName.length() - 2);
+//     fileName.erase(fileName.size() - 2);
 // 	if (fileName.empty())
 // 		return (1);
 	
@@ -327,7 +329,7 @@ void				Response::isUpload(std::string &answer)
 //     std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
 //     body = body.substr(body.find("\r\n\r\n") + 4);
 //     body = body.substr(0, body.find(boundary));
-//     body = body.substr(0, body.length() - 2);
+//     body = body.substr(0, body.size() - 2);
 	
 //     std::ofstream myfile;
 //     myfile.open(_uploadDest.c_str());
