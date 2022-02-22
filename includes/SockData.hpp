@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 18:47:53 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 18:42:50 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/21 23:51:09 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,10 @@ class SockData {
 		unchunk_t	unchunk(std::string str);
 		void		badChunk(int fd);
 		void		modifyChunkRequest(int fd);
+		void		normalRequest(int fd);
+		void		startChunkRequest(int fd);
+		void		endChunkRequest(int fd);
+		void		concatChunks(int fd);
 		
 		/* msg connection */
 		void		cnxFailed(void);

@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 19:04:05 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/20 18:23:02 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/22 02:18:04 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ void	sockServ(std::vector<Server> servers, std::vector<size_t> ports)
 		if (select(FD_SETSIZE,
 		sockData.getReadSet(), sockData.getWriteSet(),
 		NULL, NULL) != ERROR) {
+			std::cout << "select()" << std::endl;
 			for (int fd = 0; fd < FD_SETSIZE; ++fd) {
 				if (sockData.isReadSet(fd)) {
 					if (sockData.isSockListen(fd)) {

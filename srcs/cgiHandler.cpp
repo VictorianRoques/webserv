@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 17:55:33 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/21 22:56:43 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,9 +121,15 @@ int             cgiHandler::startCgi(int fd)
     }
     waitpid(pid, &status, 0);
     if (status != 0) {
-        std::cerr << RED << "status: " << status << " | CGI: abort" << NC << std::endl;
+        std::cout << "-----------------------------" << std::endl;
+        std::cerr << RED << "Server: status: " << status;
+        std::cerr << " | CGI ABORT" << NC << std::endl;
+        std::cout << "-----------------------------" << std::endl;
         return -1;
     }
+    std::cout << "-----------------------------" << std::endl;
+    std::cout << GREEN << "Server: CGI CALLED" << NC << std::endl;
+    std::cout << "-----------------------------" << std::endl;
     for (int i = 0; envp[i]; i++)
         delete [] envp[i];
     delete[] envp;
