@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 14:32:20 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 15:49:46 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,20 +31,18 @@ char const *Parser::ErrorPagePathException::what() const throw() { return "error
 bool	Parser::serverNameChecker() {
 	std::string			correct;
 	std::stringstream	out;
-	size_t	i, end;
+	vec_str				v;
 
 	out << *getPort().begin();
-	vec_str::iterator it = getServerName().begin();
-	i = 0;
-	end = getServerName().size();
-	for (; i < end; i++) {
+	vec_str::iterator it =_serverName.begin();
+	for (; it < _serverName.end(); it++) {
 		correct = *it;
 		correct += ":";
 		correct += out.str();
-		_serverName.push_back(correct);
-		_serverName.push_back("www." + correct);
-		it++;
+		v.push_back(correct);
+		v.push_back("www." + correct);
 	}
+	_serverName.insert(_serverName.begin(), v.begin(), v.end());
 	return true;
 }
 
