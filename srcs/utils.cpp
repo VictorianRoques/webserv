@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 18:04:14 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 18:25:16 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ std::string	findRightPath(std::string path, std::string root, bool autoIndex, st
 	
 	// case 1: autoIndex: off
 	if (autoIndex == false) {
-	std::string relative2 = cleanSlash(root + "/");
+	std::string relative2 = cleanSlash(root + "/" + path);
 		if (pathIsFile(relative2))
 			return relative2;
 		else if (pathIsDirectory(relative2)) {
