@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 17:50:37 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 14:32:20 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,19 +26,25 @@ char const *Parser::ErrorPagePathException::what() const throw() { return "error
 /**************************************/
 
 /**
- * serverNameChecker(): returns true is serverName contains a correct server name : localhost:<server_port>
+ * serverNameChecker(): makes sure the serverName has the right format : <address>:<port> or www.<address>:<port>
 **/
 bool	Parser::serverNameChecker() {
 	std::string			correct;
 	std::stringstream	out;
+	size_t	i, end;
 
-	if (_serverName.size() > 0 && !vector_contains_str(getServerName(), "localhost") && !vector_contains_str(getServerName(), "www.localhost"))
-		return false;
-	correct = "localhost:";
 	out << *getPort().begin();
-	correct += out.str();
-	_serverName.push_back(correct);
-	_serverName.push_back("www." + correct);
+	vec_str::iterator it = getServerName().begin();
+	i = 0;
+	end = getServerName().size();
+	for (; i < end; i++) {
+		correct = *it;
+		correct += ":";
+		correct += out.str();
+		_serverName.push_back(correct);
+		_serverName.push_back("www." + correct);
+		it++;
+	}
 	return true;
 }
 
@@ -74,8 +80,7 @@ bool	Parser::errorPageChecker() {
 void	Parser::serverChecker() {
 
 	// check server name
-	if (!serverNameChecker())
-		throw WrongServerNameException();
+	serverNameChecker();
 
 	if (!locationChecker())
 		throw MissingDefaultLocationException();

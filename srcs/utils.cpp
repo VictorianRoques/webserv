@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 19:32:18 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 13:38:12 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,6 +239,9 @@ long long maxBodyAtoi(std::string maxBodySize) {
 	size_t pos;
 	size_t pos2;
 	long long	ret;
+	size_t K = 1000;
+	size_t M = K * K;
+	size_t G = K * M;
 
 	pos = maxBodySize.find_first_of("0123456789");
 	pos2 = maxBodySize.find_first_not_of("0123456789", pos);
@@ -263,11 +266,11 @@ long long maxBodyAtoi(std::string maxBodySize) {
 	pos = maxBodySize.length() - 1; //last element of maxSizeBody
 
 	if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k')
-		ret *= 1024;
+		ret *= K;
 	else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm')
-		ret *= 1048576;
+		ret *= M;
 	else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
-		ret *= 1073741824;
+		ret *= G;
 	else if (!isdigit(maxBodySize.at(pos)))
 		throw WrongFormatMaxBodySizeException();
 

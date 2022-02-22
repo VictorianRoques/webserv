@@ -151,7 +151,7 @@ ject=oekwopkf&message=eofkewpokfew\r\n\r\n')
 	ret = sock.recv(2048)
 	print(ret)
 
-def memory_tester():
+def large_payload_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
 	sock.send(b'POST / HTTP/1.1\r\n\
@@ -161,11 +161,12 @@ Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\
 Transfer-Encoding: chunked\r\n\r\n')
+	time.sleep(0.005)
 	for i in range(3965 * 3):
-		time.sleep(0.001)
+		time.sleep(0.005)
 		sock.send(b'3E8\r\n\
 Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egestas non risus et vehicula. Nam ac mauris odio. Maecenas convallis mi vel justo vehicula, a interdum leo porta. Mauris consequat nec urna sed aliquet. Aliquam aliquet, dui id hendrerit auctor, turpis ante facilisis sapien, sit amet interdum nibh ipsum et ex. Etiam vulputate in libero quis viverra. Nunc sit amet ipsum id ipsum scelerisque efficitur. Vivamus in sapien id tortor dapibus accumsan. Cras eleifend, est et vestibulum efficitur, lorem velit pulvinar mi, nec vehicula ligula nisl quis tortor. In sagittis sapien sit amet enim rutrum varius. Maecenas cursus justo a sapien blandit, sit amet tincidunt sem lacinia. Suspendisse bibendum tristique orci, et ornare massa mollis sit amet. Aenean dictum, turpis vitae varius auctor, arcu mi malesuada libero, et ullamcorper dolor justo in turpis. Pellentesque vestibulum porttitor porta. Phasellus consequat placerat tristique. Phasellus consequat placerat tristique...\r\n\r\n')
-	time.sleep(0.001)
+	time.sleep(0.005)
 	sock.send(b'0\r\n\r\n')
 	ret = sock.recv(4096)
 	print(ret)
@@ -284,12 +285,12 @@ def chunk():
 	else:
 		print('CHUNK_TESTER [ \033[0;31mKO\033[0m ]')
 
-def memory():
+def large_payload():
 	print('\033[0;34m\n------------------------------------------')
 	print('          MEMORY_TESTER starting...')
 	print('------------------------------------------\033[0m')
 	time.sleep(0.5)
-	memory_tester()
+	large_payload_tester()
 	print('\nMEMORY_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
 	time.sleep(0.5)
@@ -328,7 +329,7 @@ single_test['delete'] = delete
 single_test['stress1'] = stress1
 single_test['stress2'] = stress2
 single_test['chunk'] = chunk
-single_test['memory'] = memory
+single_test['large_payload'] = large_payload
 single_test['leak'] = leak
 
 time.sleep(1)
@@ -337,7 +338,7 @@ if (test != ''):
 	try:
 		single_test[test]()
 	except:
-		print('error: usage: ./webserv port [up, get, post, delete, stress1, stress2, chunk, memory, leak]')
+		print('error: usage: ./webserv port [up, get, post, delete, stress1, stress2, chunk, large_payload, leak]')
 else:
 	for key in single_test:
 		single_test[key]()

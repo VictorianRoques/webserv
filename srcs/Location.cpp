@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 18:43:59 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 13:41:49 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ char const *Location::WrongLocationMatchException::what() const throw() { return
 Location::Location():
 	_root("/"),
 	_autoIndex(true),
+	_maxBodySize(1000000),
 	_rootSpecified(false)
 {}
 
@@ -68,6 +69,7 @@ Location&	Location::operator=(const Location &x) {
 		_matchModifier = x.getMatchModifier();
 		_locationMatch = x.getLocationMatch();
 		_rootSpecified = x._rootSpecified;
+		_maxBodySize = x.getMaxBodySize();
 	}
 	return *this;
 }
@@ -143,10 +145,7 @@ size_t	Location::dirRoot(vec_str::iterator it, vec_str::iterator vend) {
 	}
 
 	// turn relative path into absolute
-//	if (getRoot().find("..") != std::string::npos)
-//		throw NonValidRootException();
-//	else if (getRoot()[0] != '/')
-		setRoot(cleanSlash(getPWD() + "/" + getRoot()));
+	setRoot(cleanSlash(getPWD() + "/" + getRoot()));
 	(void)vend;
 	return 2;
 }
