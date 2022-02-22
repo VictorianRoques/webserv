@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 19:02:40 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/22 15:04:34 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ private:
     std::string                 _body;
     std::string                 _response;
     Server                      _serv;
+    Location                    _loc;
     map_str                     _errorPage;
     std::string                 _pathCgi;
     std::string                 _extensionCgi;
