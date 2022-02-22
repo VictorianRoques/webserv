@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 18:42:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 17:39:46 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 23:41:46 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,9 @@ std::string autoIndexVarSize(struct stat buf) {
 		size_t				size = buf.st_size;
 		std::stringstream	ss;
 		std::string			putSize;
-		size_t				giga = 1073741824;
-		size_t				mega = 1048576;
-		size_t				kilo = 1024;
+		size_t				kilo = 1000;
+		size_t				mega = kilo * kilo;
+		size_t				giga = mega * kilo;
 
 		if (size >= giga) {
 			size /= giga;

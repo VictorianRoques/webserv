@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 23:26:43 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 23:43:15 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,36 +174,29 @@ void	Request::isChunked() {
  **/
 void	Request::buildFullPath(Location loc) {
 
-	std::cout << "PATHOOOOOOOOOOO;" << _path << " and root = " << loc.getRoot() << std::endl;
 	_fullPath = _path.substr(0, _path.find("?"));
 	
 	//special cases
 	if (_fullPath == "/") {
 		_fullPath = loc.getRoot();
-		std::cout << "path == \"/\" : " << _fullPath << std::endl;
 	}
 	if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) {
 		_uploadDest = loc.getUploadDest();
-		std::cout << "Upload Dest = " << _uploadDest << std::endl;
 	}
 	// general cases
 	std::string lm = loc.getLocationMatch();
 	size_t pos;
 	if (lm != "/" && (pos = _fullPath.find(lm)) != std::string::npos) {
 		_fullPath.replace(pos, lm.length(), loc.getRoot() + "/");
-		std::cout << "LM LOCATED : FUll PATH = " <<  _fullPath << std::endl;
 	}
 	if (loc.getAutoIndex() == false && pathIsDirectory(_fullPath)) {
 		_fullPath += "/" + loc.getIndex();
-		std::cout << "Autoindex off : FUll PATH = " <<  _fullPath << std::endl;
 	}
 	if (_fullPath[0] != '/') {
 		_fullPath = getPWD() + "/" + _fullPath;
-		std::cout << "relative path : FUll PATH = " <<  _fullPath << std::endl;
 	}
 	if (!pathIsDirectory(_fullPath) && !pathIsFile(_fullPath)) {
 		_fullPath = loc.getRoot() + "/" + _fullPath;
-		std::cout << "path does not exist: " << _fullPath << std::endl;
 	}
 
 	_fullPath = cleanSlash(_fullPath);
