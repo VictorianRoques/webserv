@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 14:48:21 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/22 13:24:31 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,7 +287,7 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Chunked: " << NC << (_chunked ? "Yes" : "No") << std::endl;
 	std::cout << COLOR_REQ << "Redir Code: " << NC << _redirCode << std::endl;
 	std::cout << std::endl;
-	// std::cout << COLOR_REQ << "Body: " << NC << _body << std::endl;
+	std::cout << COLOR_REQ << "Body: " << NC << _body << std::endl;
 }
 
 /**

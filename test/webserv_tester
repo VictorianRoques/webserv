@@ -55,7 +55,7 @@ Connection: keep-alive\r\n\r\n')
 		print('error: request GET failed')
 		exit(2)
 
-def post1_tester():
+def post_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
 	sock.settimeout(3)
@@ -68,26 +68,6 @@ Connection: keep-alive\r\n\
 \r\n\
 Hello World!\r\n\
 \r\n')
-	try:
-		ret = sock.recv(4096)
-		print(ret)
-	except:
-		print('error: request POST failed')
-		exit(2)
-
-def post2_tester():
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.connect((hostname, port))
-	sock.settimeout(3)
-	sock.send(b'POST / HTTP/1.1\r\n\
-	Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
-	User-Agent: webserv_tester\r\n\
-	Content-Type: application/x-www-form-urlencoded\r\n\
-	Content-Length: 12\r\n\
-	Connection: keep-alive\r\n\
-	\r\n\
-	name=Bar&message=Foo\r\n\
-	\r\n')
 	try:
 		ret = sock.recv(4096)
 		print(ret)
@@ -321,6 +301,20 @@ def large_payload():
 	else:
 		print('MEMORY_TESTER [ \033[0;31mKO\033[0m ]')
 
+def leak():
+	print('\033[0;34m\n------------------------------------------')
+	print('          LEAK_TESTER starting...')
+	print('------------------------------------------\033[0m')
+	time.sleep(0.5)
+	leak_tester()
+	print('\nLEAK_TESTER...', end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('LEAK_TESTER [ \033[0;32mOK\033[0m ]')
+	else:
+		print('LEAK_TESTER [ \033[0;31mKO\033[0m ]')
+
 ########################################
 #                  RUN                 #
 ########################################
@@ -338,6 +332,7 @@ single_test['stress1'] = stress1
 single_test['stress2'] = stress2
 single_test['chunk'] = chunk
 single_test['large_payload'] = large_payload
+single_test['leak'] = leak
 
 time.sleep(1)
 
@@ -345,7 +340,7 @@ if (test != ''):
 	try:
 		single_test[test]()
 	except:
-		print('error: usage: ./webserv port [up, get, post, delete, stress1, stress2, chunk, large_payload]')
+		print('error: usage: ./webserv port [up, get, post, delete, stress1, stress2, chunk, large_payload, leak]')
 else:
 	for key in single_test:
 		single_test[key]()
