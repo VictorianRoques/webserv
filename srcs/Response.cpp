@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/22 14:38:18 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/22 16:13:31 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,8 @@ int		Response::initRequest(Request &req)
         else
             _path = _root + "/" + _index;
     }
-    if ((size_t)_request.getBody().size() > (size_t)_serv.getMaxBodySize())
+    if (static_cast <size_t>(_request.getBody().size()) > static_cast <size_t> (_serv.getMaxBodySize())
+		|| static_cast <size_t>(_request.getBody().size()) > static_cast <size_t> (_loc.getMaxBodySize()))
     {
 		setFdError(413);
         return (1);
@@ -243,6 +244,7 @@ void        Response::setLocationConf()
 	_autoIndex = loc.getAutoIndex();
 	_allowMethods = loc.getMethods();
 	_uploadDest = loc.getUploadDest();
+	_loc = loc;
 }
 
 

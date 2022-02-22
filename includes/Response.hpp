@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 19:02:40 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/22 16:11:50 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,7 @@ private:
     std::string                 _location;
     int                         _code;
     int                         _fd;
+    Location                    _loc;
     
     std::map<std::string, void (Response::*)()> _methods;  
 };
