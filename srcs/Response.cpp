@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/22 16:13:31 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/22 16:33:39 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ Response::Response(int code)
 }
 
 Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()), _code(0) {
-	
 	_methods["GET"] = &Response::getMethod;
 	_methods["POST"] = &Response::postMethod;
 	_methods["DELETE"] = &Response::deleteMethod;
@@ -236,7 +235,6 @@ void		Response::postMethod()
 void        Response::setLocationConf()
 {
 	Location loc = findRightLocation(_serv.getLocation(), _request);
-
 	_pathCgi = loc.getCgiHandler().second;
 	_extensionCgi = loc.getCgiHandler().first;
 	_index = loc.getIndex();
@@ -269,7 +267,6 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
 		_header.setBodyLength(_body.size());
-		std::cout << "size: " << _body.size();
 		_header.writeHeader();
 		_response = _header.getHeader() + _body;
 	}
