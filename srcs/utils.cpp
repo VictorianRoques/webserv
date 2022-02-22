@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 18:25:16 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 22:41:36 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,6 +241,7 @@ long long maxBodyAtoi(std::string maxBodySize) {
 	size_t K = 1000;
 	size_t M = K * K;
 	size_t G = K * M;
+	std::stringstream s;
 
 	pos = maxBodySize.find_first_of("0123456789");
 	pos2 = maxBodySize.find_first_not_of("0123456789", pos);
@@ -250,8 +251,11 @@ long long maxBodyAtoi(std::string maxBodySize) {
 //	if (ret > MAX_LONG_LONG)
 //		throw TooBigMaxBodySizeException();
 
-	ret = static_cast<long long>(std::atoi(maxBodySize.c_str()));
-
+//	ret = static_cast<long long>(std::atoi(maxBodySize.c_str()));
+	s.clear();
+	s << maxBodySize;
+	s >> ret;
+	
 	pos = maxBodySize.length() - 1; //last element of maxSizeBody
 
 	if (maxBodySize.at(pos) == ';')
