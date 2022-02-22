@@ -111,9 +111,7 @@ void	SockData::setDataFd(int fd, Request &request, Server &server)
 void	SockData::setResponse(int fd)
 {
 	try {
-		std::cout << clients_[fd].getFinalRequest() << std::endl;
 		Request	request = requestParser(clients_[fd].getFinalRequest(), servers_);
-		std::cout << "11" << std::endl;
 		std::vector<Server>::iterator	it = servers_.begin(), ite = servers_.end();
 		for (; it != ite; ++it) {
 			if (vector_contains_str(it->getServerName(), request.getHost())) {
@@ -124,7 +122,6 @@ void	SockData::setResponse(int fd)
 		setDataFd(fd, request, *servers_.begin());
 	}
 	catch (std::exception &e) {
-		std::cerr << "testtest" << std::endl;
 		setInternalError(fd);
 		exceptionError(fd, e);
 	}
@@ -243,7 +240,7 @@ void	SockData::modifyChunkRequest(int fd) {
 void	SockData::normalRequest(int fd)
 {
 	clients_[fd].getFinalRequest() = clients_[fd].getTmpRequest();
-	std::cout << "finalRequest:\n" << clients_[fd].getFinalRequest() << std::endl;
+
 	requestReceived(fd);
 }
 
@@ -277,14 +274,12 @@ void	SockData::endChunkRequest(int fd)
 void	SockData::concatChunks(int fd)
 {
 	try {
-		std::cout << "1" << std::endl;
 		unchunk_t	tmpPair = unchunk(clients_[fd].getTmpRequest());
 		clients_[fd].getTotalLength() += tmpPair.first;
 		clients_[fd].getFinalRequest() += tmpPair.second;
 		clients_[fd].getTmpRequest().clear();
 	}
 	catch (std::exception &e) {
-		std::cout << "3" << std::endl;
 		exceptionError(fd, e);
 		requestReceived(fd);
 	}
@@ -306,13 +301,11 @@ void	SockData::recvClient(int fd)
 				startChunkRequest(fd);
 			}
 			else {
-				std::cout << "9" << std::endl;
 				normalRequest(fd);
 				return ;
 			}
 		}
 		if (clients_[fd].isChunkEof()) {
-			std::cout << "10" << std::endl;
 			endChunkRequest(fd);
 			return ;
 		}
@@ -330,7 +323,6 @@ void	SockData::sendClient(int fd)
 		cgiRequest(fd);
 	}
 	else if (dataFds_[fd] == STR_DATA) {
-		std::cout << "6" << std::endl;
 		strDataRequest(fd);
 	}
 	else if (dataFds_[fd] > 2) {
@@ -381,9 +373,6 @@ void	SockData::cgiRequest(int fd)
 void	SockData::strDataRequest(int fd)
 {
 	clients_[fd].getData() = clients_[fd].getResponse().getData();
-	std::cout << "7" << std::endl;
-	std::cout << "strDataRequest() -> getData():\n";
-	std::cout << clients_[fd].getData() << std::endl;
 	clients_[fd].setDataReady(true);
 }
 
@@ -414,7 +403,6 @@ void	SockData::fileRequest(int fd)
 
 void	SockData::sendDataClient(int fd)
 {
-	std::cout << "8" << std::endl;
 	if (send(fd, clients_[fd].getData().c_str(),
 	clients_[fd].getData().size(), 0) == ERROR) {
 		clearClient(fd);
@@ -436,7 +424,6 @@ void	SockData::requestReceived(int fd)
 {
 	msgRecv(fd);
 	setResponse(fd);
-	std::cout << "data fd: " << dataFds_[fd] << std::endl;
 	FD_SET(fd, &writeSet_);
 	if (dataFds_[fd] == CGI) {
 		clients_[fd].setDataCgi(true);
@@ -452,10 +439,8 @@ void	SockData::requestReceived(int fd)
 		FD_SET(clients_[fd].getInputFd(), &writeSet_);
 	}
 	else if (dataFds_[fd] > 2) {
-		std::cout << "4" << std::endl;
 		FD_SET(dataFds_[fd], &activeSet_);
 	}
-	std::cout << "5" << std::endl;
 }
 
 /*******************************/
