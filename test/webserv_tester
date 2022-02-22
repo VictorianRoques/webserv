@@ -141,14 +141,14 @@ Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\
 Transfer-Encoding: chunked\r\n\r\n\
-1A\r\n\
-name=Toto&email=tot@o&subj\r\n\r\n')
-	time.sleep(0.1)
-	sock.send(b'22\r\n\
-ject=oekwopkf&message=eofkewpokfew\r\n\r\n')
-	time.sleep(0.1)
+9\r\n\
+name=Foo&\r\n\r\n')
+	time.sleep(0.01)
+	sock.send(b'B\r\n\
+message=Bar\r\n\r\n')
+	time.sleep(0.01)
 	sock.send(b'0\r\n\r\n')
-	ret = sock.recv(2048)
+	ret = sock.recv(4096)
 	print(ret)
 
 def large_payload_tester():
@@ -160,7 +160,9 @@ User-Agent: webserv_tester\r\n\
 Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\
-Transfer-Encoding: chunked\r\n\r\n')
+Transfer-Encoding: chunked\r\n\r\n\
+4\r\n\
+yoyo\r\n\r\n')
 	time.sleep(0.005)
 	for i in range(3965 * 3):
 		time.sleep(0.005)
@@ -287,11 +289,11 @@ def chunk():
 
 def large_payload():
 	print('\033[0;34m\n------------------------------------------')
-	print('          MEMORY_TESTER starting...')
+	print('     LARGE_PAYLOAD_TESTER starting...')
 	print('------------------------------------------\033[0m')
 	time.sleep(0.5)
 	large_payload_tester()
-	print('\nMEMORY_TESTER...', end='\r')
+	print('\nLARGE_PAYLOAD_TESTER...', end='\r')
 	ret = is_server_up(hostname, port)
 	time.sleep(0.5)
 	if ret:
