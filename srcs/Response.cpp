@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/21 19:06:46 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/22 14:35:14 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,7 +266,8 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 		isUpload(answer);
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
-		_header.setBodyLength(_body.length());
+		_header.setBodyLength(_body.size());
+		std::cout << "size: " << _body.size();
 		_header.writeHeader();
 		_response = _header.getHeader() + _body;
 	}
