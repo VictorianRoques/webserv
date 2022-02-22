@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 17:09:39 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 18:04:14 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,21 +185,23 @@ std::string		hrefLocation(std::string location)
 std::string	findRightPath(std::string path, std::string root, bool autoIndex, std::string index) {
 
 	path = path.substr(0, path.find("?"));
-	// case 1: path is relative
-	std::string relative = cleanSlash(root + "/" + path);
-	if (pathIsFile(relative) || pathIsDirectory(relative)) {
-		return relative;
-	}
 	
-	// case 2: autoIndex: off
+	// case 1: autoIndex: off
 	if (autoIndex == false) {
 	std::string relative2 = cleanSlash(root + "/");
 		if (pathIsFile(relative2))
 			return relative2;
 		else if (pathIsDirectory(relative2)) {
+			std::cout << "is directory" << std::endl;
 			relative2 += "/" + index;
 			return relative2;
 		}
+	}
+
+	// case 2: path is relative
+	std::string relative = cleanSlash(root + "/" + path);
+	if (pathIsFile(relative) || pathIsDirectory(relative)) {
+		return relative;
 	}
 
 	// case 3: path is absolute
