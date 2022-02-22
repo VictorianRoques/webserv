@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 16:20:04 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 17:09:39 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,9 +307,5 @@ std::string	getFileContent(std::string path) {
 	}
 
 	file.close();
-//	if (file.close())
-//		throw FailedToCloseExcpetion();
-
-//	std::cout << "RET: " << ret << std::endl;
 	return ret;
 }
