@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:16:26 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/10 19:26:52 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 16:41:18 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ class Parser: public Server {
 		size_t	dirClose(vec_str::iterator it, vec_str::iterator vend);
 		size_t	dirOpen(vec_str::iterator it, vec_str::iterator vend);
 
-		void	print_test();
+		void	print();
 	
 		// CHECKERS
 		void	serverChecker();
