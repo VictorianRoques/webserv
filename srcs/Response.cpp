@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/22 16:33:39 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/22 16:54:19 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,13 +127,6 @@ int		Response::initRequest(Request &req)
 		return (1);
     }
     setLocationConf();
-    if (req.getPath() == "/")
-    {
-		if (_autoIndex == true)
-            _path.erase(_path.size() - 1);
-        else
-            _path = _root + "/" + _index;
-    }
     if (static_cast <size_t>(_request.getBody().size()) > static_cast <size_t> (_serv.getMaxBodySize())
 		|| static_cast <size_t>(_request.getBody().size()) > static_cast <size_t> (_loc.getMaxBodySize()))
     {
