@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 15:49:46 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/22 17:12:57 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ char const *Parser::ErrorPagePathException::what() const throw() { return "error
 /**************************************/
 
 /**
- * serverNameChecker(): makes sure the serverName has the right format : <address>:<port> or www.<address>:<port>
+ * serverNameChecker(): makes sure the serverName has the right format : <address>:<port>
 **/
 bool	Parser::serverNameChecker() {
 	std::string			correct;
@@ -40,7 +40,6 @@ bool	Parser::serverNameChecker() {
 		correct += ":";
 		correct += out.str();
 		v.push_back(correct);
-		v.push_back("www." + correct);
 	}
 	_serverName.insert(_serverName.begin(), v.begin(), v.end());
 	return true;

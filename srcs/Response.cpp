@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/22 14:38:18 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/22 16:54:19 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ Response::Response(int code)
 }
 
 Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()), _code(0) {
-	
 	_methods["GET"] = &Response::getMethod;
 	_methods["POST"] = &Response::postMethod;
 	_methods["DELETE"] = &Response::deleteMethod;
@@ -128,14 +127,8 @@ int		Response::initRequest(Request &req)
 		return (1);
     }
     setLocationConf();
-    if (req.getPath() == "/")
-    {
-		if (_autoIndex == true)
-            _path.erase(_path.size() - 1);
-        else
-            _path = _root + "/" + _index;
-    }
-    if ((size_t)_request.getBody().size() > (size_t)_serv.getMaxBodySize())
+    if (static_cast <size_t>(_request.getBody().size()) > static_cast <size_t> (_serv.getMaxBodySize())
+		|| static_cast <size_t>(_request.getBody().size()) > static_cast <size_t> (_loc.getMaxBodySize()))
     {
 		setFdError(413);
         return (1);
@@ -235,7 +228,6 @@ void		Response::postMethod()
 void        Response::setLocationConf()
 {
 	Location loc = findRightLocation(_serv.getLocation(), _request);
-
 	_pathCgi = loc.getCgiHandler().second;
 	_extensionCgi = loc.getCgiHandler().first;
 	_index = loc.getIndex();
@@ -243,6 +235,7 @@ void        Response::setLocationConf()
 	_autoIndex = loc.getAutoIndex();
 	_allowMethods = loc.getMethods();
 	_uploadDest = loc.getUploadDest();
+	_loc = loc;
 }
 
 
@@ -267,7 +260,6 @@ void		Response::makeResponse(std::string &answer, bool cgi)
 		_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     	_body = answer.substr(answer.find("\r\n\r\n") + 4);
 		_header.setBodyLength(_body.size());
-		std::cout << "size: " << _body.size();
 		_header.writeHeader();
 		_response = _header.getHeader() + _body;
 	}
