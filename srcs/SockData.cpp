@@ -144,7 +144,7 @@ void	SockData::addClient(int fd)
 	sockaddr_in addrClient;
 	socklen_t	addrClientLen = sizeof(addrClient);
 	struct timeval	tv;
-	tv.tv_sec = 5; tv.tv_usec = 0;
+	tv.tv_sec = 10; tv.tv_usec = 0;
 	if ((newSock = accept(fd, reinterpret_cast<sockaddr*>(&addrClient),
 	&addrClientLen)) == ERROR) {
 		cnxFailed();
