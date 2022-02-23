@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 18:33:48 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 20:18:28 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,10 +137,10 @@ void	Response::answer()
 		&& isAllow(_request.getMethod()))
 	{
 		(this->*_methods[_request.getMethod()])();
-		writeAnswer();
 	}
     else
 		sendPage(405);
+	writeAnswer();
 }
 
 void	Response::sendPage(int code)

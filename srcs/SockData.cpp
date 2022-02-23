@@ -213,12 +213,15 @@ void	SockData::sendClient(int fd)
 	if (send(fd, clients_[fd].getData().c_str(),
 	clients_[fd].getData().size(), 0) == ERROR) {
 		systemFailure("send", fd);
+		FD_CLR(fd, &writeSet_);
 		clearClient(fd);
+		return ;
 	}
+	msgSent(fd);
 	FD_CLR(fd, &writeSet_);
 	if (clients_[fd].getRequest().getConnection() == "keep-alive") {
 		resetClient(fd);
-		return;
+		return ;
 	}
 	clearClient(fd);
 }

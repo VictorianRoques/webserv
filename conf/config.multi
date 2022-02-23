@@ -3,13 +3,13 @@ server
 	listen 127.0.0.1:8080;
 	server_name localhost;
 	client_max_body_size 10m;
+    error_page 404 error_pages/403.html;
 
 	location /
 	{
 		root www;
-        autoindex off;
 		index index.html;
-        client_max_body_size 10m
+        client_max_body_size 2;
 		methods GET POST DELETE;
         cgi_handler .php cgi_binary/darwin_phpcgi;
 	}
@@ -18,7 +18,7 @@ server
 server
 {
     listen 8081;
-	server_name localhost example.com;
+	server_name example.com;
 	client_max_body_size 10m;
 
 	location /

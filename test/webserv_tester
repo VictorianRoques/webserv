@@ -10,7 +10,7 @@ import sys
 ########################################
 
 if len(sys.argv) != 3:
-	sys.exit('error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload, redirect')
+	sys.exit('Error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload, redirect')
 
 hostname = 'localhost'
 port = int(sys.argv[1])
@@ -61,7 +61,7 @@ Hello World!\r\n\
 	print(ret)
 
 def delete_tester():
-	pathDelete = input('enter path to file you want to delete: ')
+	pathDelete = input('Enter path to file you want to delete: ')
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
 	sock.settimeout(3)
@@ -82,15 +82,17 @@ User-Agent: webserv_tester\r\n\
 Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\r\n')
-		socks[i].recv(4096)
-		strg = 'socket ' + str(i) + ': data received from server'
-		lock.acquire()
-		print("                                                  ", end='\r')
-		print(strg, end='\r')
-		lock.release()
-		strg = 'socket ' + str(i) + ': cannot receive data from server'
-		print("                                                  ", end='\r')
-		print(strg, end='\r')
+		try:
+			socks[i].recv(4096)
+			strg = 'socket ' + str(i) + ': data received from server'
+			lock.acquire()
+			print("                                                  ", end='\r')
+			print(strg, end='\r')
+			lock.release()
+		except:
+			strg = 'socket ' + str(i) + ': cannot receive data from server'
+			print("                                                  ", end='\r')
+			print(strg, end='\r')
 
 def stress2_tester():
 	thread1 = threading.Thread(target=stress1_tester)
@@ -176,9 +178,8 @@ Connection: keep-alive\r\n\r\n')
 #               EXEC_FCTS              #
 ########################################
 
-names = ['is_server_up',
-'get',
-'pos_text',
+names = ['get',
+'post_text',
 'delete',
 'stress1',
 'stress2',
@@ -187,32 +188,28 @@ names = ['is_server_up',
 'redirect']
 
 tester = dict()
-tester[names[0]] = is_server_up
-tester[names[1]] = get_tester
-tester[names[2]] = post_text_tester
-tester[names[3]] = delete_tester
-tester[names[4]] = stress1_tester
-tester[names[5]] = stress2_tester
-tester[names[6]] = chunk_tester
-tester[names[7]] = large_payload_tester
-tester[names[8]] = redirect_tester
+tester[names[0]] = get_tester
+tester[names[1]] = post_text_tester
+tester[names[2]] = delete_tester
+tester[names[3]] = stress1_tester
+tester[names[4]] = stress2_tester
+tester[names[5]] = chunk_tester
+tester[names[6]] = large_payload_tester
+tester[names[7]] = redirect_tester
 
 def exec_tester(name):
 	print('\033[1;34m\n--------------------------------')
 	print('    ' + name.upper() + ' starting...')
 	print('--------------------------------\033[0m')
 	time.sleep(0.5)
-	try:
-		tester[name]()
-		print('\n' + name.upper(), end='\r')
-		ret = is_server_up(hostname, port)
-		time.sleep(0.5)
-		if ret:
-			print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-		else:
-			print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
-	except:
-		print('[ \033[1;31m error: ' + name + '\033[0m ]')
+	tester[name]()
+	print('\n' + name.upper(), end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('SERVER' + ' [ \033[1;32mUP\033[0m ]')
+	else:
+		print('SERVER' + ' [ \033[1;31mDOWN\033[0m ]')
 
 ########################################
 #                  RUN                 #
@@ -227,7 +224,10 @@ if __name__ == '__main__':
 	time.sleep(1)
 
 	if (test != 'all'):
-		exec_tester(test)
+		try:
+			exec_tester(test)
+		except:
+			print('\033[1;31mError: exec_tester\033[0m')
 	else:
 		for name in names:
 			exec_tester(name)

@@ -29,11 +29,15 @@ server
         return 308 /loop1/;
     }
 
-    location /message/
+    location /test/ 
     {
-        root www;
-        index post.html;
-        autoindex off;
+        root test;
+        methods GET;
+    }
+
+    location /www/
+    {
+        root test;
         methods GET;
     }
 
