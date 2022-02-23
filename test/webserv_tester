@@ -5,25 +5,18 @@ import time
 import threading
 import sys
 
-lock = threading.Lock()
-
 ########################################
 #               VARIABLES              #
 ########################################
 
+if len(sys.argv) != 3:
+	sys.exit('error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload')
+
 hostname = 'localhost'
-port = 8080
-test = ""
-if len(sys.argv) < 2:
-	print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory, leak')
-	exit(1)
-elif len(sys.argv) == 2:
-	port = int(sys.argv[1])
-elif len(sys.argv) == 3:
-	test = str(sys.argv[2])
-elif len(sys.argv) > 3:
-	print('error: too many arguments')
-	exit(1)
+port = int(sys.argv[1])
+test = str(sys.argv[2])
+
+lock = threading.Lock()
 
 ########################################
 #               FUNCTIONS              #
@@ -32,9 +25,9 @@ elif len(sys.argv) > 3:
 def is_server_up(hostname, port):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.settimeout(3)
+	sock.connect((hostname, port))
+	sock.send(b'Check if server is up')
 	try:
-		sock.connect((hostname, port))
-		sock.send(b'Check if server is up')
 		sock.recv(4096)
 		return True
 	except:
@@ -48,14 +41,10 @@ def get_tester():
 Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
 User-Agent: webserv_tester\r\n\
 Connection: keep-alive\r\n\r\n')
-	try:
-		ret = sock.recv(4096)
-		print(ret)
-	except:
-		print('error: request GET failed')
-		exit(2)
+	ret = sock.recv(4096)
+	print(ret)
 
-def post_tester():
+def post_text_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
 	sock.settimeout(3)
@@ -68,26 +57,19 @@ Connection: keep-alive\r\n\
 \r\n\
 Hello World!\r\n\
 \r\n')
-	try:
-		ret = sock.recv(4096)
-		print(ret)
-	except:
-		print('error: request POST failed')
-		exit(2)
+	ret = sock.recv(4096)
+	print(ret)
 
 def delete_tester():
+	pathDelete = input('enter path to file you want to delete: ')
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((hostname, port))
 	sock.settimeout(3)
-	sock.send(b'DELETE /upload/bigTxt HTTP/1.1\r\n\r\n')
-	try:
-		ret = sock.recv(4096)
-		print(ret)
-	except:
-		print('error: request DELETE failed')
-		exit(2)
+	sock.send(b'DELETE ' + bytes(pathDelete, 'utf-8') + b' HTTP/1.1\r\n\r\n')
+	ret = sock.recv(4096)
+	print(ret)
 
-def stress_tester_1():
+def stress1_tester():
 	socks = []
 	for i in range(1500):
 		time.sleep(0.005)
@@ -100,35 +82,29 @@ User-Agent: webserv_tester\r\n\
 Accept-Encoding: *\r\n\
 Accept: */*\r\n\
 Connection: keep-alive\r\n\r\n')
-		try:
-			socks[i].recv(4096)
-			strg = 'socket ' + str(i) + ': data received from server'
-			lock.acquire()
-			print("                                                  ", end='\r')
-			print(strg, end='\r')
-			lock.release()
-		except:
-			strg = 'socket ' + str(i) + ': cannot receive data from server'
-			print("                                                  ", end='\r')
-			print(strg, end='\r')
-
-def stress_tester_2():
-	try:
-		thread1 = threading.Thread(target=stress_tester_1)
-		thread2 = threading.Thread(target=stress_tester_1)
-		print('Thread 1 starting...')
-		thread1.start()
-		time.sleep(3)
+		socks[i].recv(4096)
+		strg = 'socket ' + str(i) + ': data received from server'
 		lock.acquire()
-		print('                                                  ', end='\r')
-		print('Thread 2 starting...')
+		print("                                                  ", end='\r')
+		print(strg, end='\r')
 		lock.release()
-		thread2.start()
-		thread1.join()
-		thread2.join()
-	except:
-		print('error: thread failure')
-		exit(1)
+		strg = 'socket ' + str(i) + ': cannot receive data from server'
+		print("                                                  ", end='\r')
+		print(strg, end='\r')
+
+def stress2_tester():
+	thread1 = threading.Thread(target=stress1_tester)
+	thread2 = threading.Thread(target=stress1_tester)
+	print('Thread 1 starting...')
+	thread1.start()
+	time.sleep(3)
+	lock.acquire()
+	print('                                                  ', end='\r')
+	print('Thread 2 starting...')
+	lock.release()
+	thread2.start()
+	thread1.join()
+	thread2.join()
 
 def chunk_tester():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -173,174 +149,60 @@ Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egesta
 	ret = sock.recv(4096)
 	print(ret)
 
-def leak_tester():
-	for i in range(10000):
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect((hostname, port))
-		sock.send(b'GET / HTTP/1.1\r\n\
-Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
-User-Agent: webserv_tester\r\n\
-Connection: keep-alive\r\n\r\n')
-		time.sleep(0.001)
-
-
-
 ########################################
 #               EXEC_FCTS              #
 ########################################
 
-def up():
-	print('\033[0;34m\n------------------------------------------')
-	print('          UP_TESTER starting...')
-	print('------------------------------------------\033[0m')
-	time.sleep(0.5)
-	print('\nUP_TESTER...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('UP_TESTER [ \033[0;32mOK\033[0m ]')
-	else:
-		print('UP_TESTER [ \033[0;31mKO\033[0m ]')
+names = ['is_server_up',
+'get',
+'pos_text',
+'delete',
+'stress1',
+'stress2',
+'chunk',
+'large_payload']
 
-def get():
-	print('\033[0;34m\n------------------------------------------')
-	print('          GET_TESTER starting...')
-	print('------------------------------------------\033[0m')
-	time.sleep(0.5)
-	get_tester()
-	print('\nGET_TESTER...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('GET_TESTER [ \033[0;32mOK\033[0m ]')
-	else:
-		print('GET_TESTER [ \033[0;31mKO\033[0m ]')
+tester = dict()
+tester[names[0]] = is_server_up
+tester[names[1]] = get_tester
+tester[names[2]] = post_text_tester
+tester[names[3]] = delete_tester
+tester[names[4]] = stress1_tester
+tester[names[5]] = stress2_tester
+tester[names[6]] = chunk_tester
+tester[names[7]] = large_payload_tester
 
-def post():
-	print('\033[0;34m\n------------------------------------------')
-	print('          POST_TESTER starting...')
-	print('------------------------------------------\033[0m')
+def exec_tester(name):
+	print('\033[1;34m\n--------------------------------')
+	print('    ' + name.upper() + ' starting...')
+	print('--------------------------------\033[0m')
 	time.sleep(0.5)
-	post_tester()
-	print('\nPOST_TESTER...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('POST_TESTER [ \033[0;32mOK\033[0m ]')
-	else:
-		print('POST_TESTER [ \033[0;31mKO\033[0m ]')
-
-def delete():
-	print('\033[0;34m\n------------------------------------------')
-	print('          DELETE_TESTER starting...')
-	print('------------------------------------------\033[0m')
-	time.sleep(0.5)
-	delete_tester()
-	print('\nDELETE_TESTER...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('DELETE_TESTER [ \033[0;32mOK\033[0m ]')
-	else:
-		print('DELETE_TESTER [ \033[0;31mKO\033[0m ]')
-
-def stress1():
-	print('\033[0;34m\n------------------------------------------')
-	print('          STRESS_TESTER_1 starting...')
-	print('------------------------------------------\033[0m')
-	time.sleep(0.5)
-	stress_tester_1()
-	print()
-	print('\nSTRESS_TESTER_1...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('STRESS_TESTER_1 [ \033[0;32mOK\033[0m ]')
-	else:
-		print('STRESS_TESTER_1 [ \033[0;31mKO\033[0m ]')
-
-def stress2():
-	print('\033[0;34m\n------------------------------------------')
-	print('          STRESS_TESTER _2 starting...')
-	print('------------------------------------------\033[0m')
-	time.sleep(0.5)
-	stress_tester_2()
-	print('\nSTRESS_TESTER_2...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('STRESS_TESTER_2 [ \033[0;32mOK\033[0m ]')
-	else:
-		print('STRESS_TESTER_2 [ \033[0;31mKO\033[0m ]')
-
-def chunk():
-	print('\033[0;34m\n------------------------------------------')
-	print('          CHUNK_TESTER starting...')
-	print('------------------------------------------\033[0m')
-	time.sleep(0.5)
-	chunk_tester()
-	print('\nCHUNK_TESTER...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('CHUNK_TESTER [ \033[0;32mOK\033[0m ]')
-	else:
-		print('CHUNK_TESTER [ \033[0;31mKO\033[0m ]')
-
-def large_payload():
-	print('\033[0;34m\n------------------------------------------')
-	print('     LARGE_PAYLOAD_TESTER starting...')
-	print('------------------------------------------\033[0m')
-	time.sleep(0.5)
-	large_payload_tester()
-	print('\nLARGE_PAYLOAD_TESTER...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('MEMORY_TESTER [ \033[0;32mOK\033[0m ]')
-	else:
-		print('MEMORY_TESTER [ \033[0;31mKO\033[0m ]')
-
-def leak():
-	print('\033[0;34m\n------------------------------------------')
-	print('          LEAK_TESTER starting...')
-	print('------------------------------------------\033[0m')
-	time.sleep(0.5)
-	leak_tester()
-	print('\nLEAK_TESTER...', end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print('LEAK_TESTER [ \033[0;32mOK\033[0m ]')
-	else:
-		print('LEAK_TESTER [ \033[0;31mKO\033[0m ]')
+	try:
+		tester[name]()
+		print('\n' + name.upper(), end='\r')
+		ret = is_server_up(hostname, port)
+		time.sleep(0.5)
+		if ret:
+			print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
+		else:
+			print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
+	except:
+		print('[ \033[1;31m error: ' + name + '\033[0m ]')
 
 ########################################
 #                  RUN                 #
 ########################################
 
-print('[ hostname: ' + '\033[0;32m' + hostname + '\033[0m ]')
-print('[ port: ' + '\033[0;32m' + str(port) + '\033[0m ]')
-test_ = '[ test: ' + '\033[0;32m' + test + '\033[0m ]'
-print(test_)
-single_test = dict()
-single_test['up'] = up
-single_test['get'] = get
-single_test['post'] = post
-single_test['delete'] = delete
-single_test['stress1'] = stress1
-single_test['stress2'] = stress2
-single_test['chunk'] = chunk
-single_test['large_payload'] = large_payload
-single_test['leak'] = leak
+if __name__ == '__main__':
+	print('[ hostname: ' + '\033[1;32m' + hostname + '\033[0m ]')
+	print('[ port: ' + '\033[1;32m' + str(port) + '\033[0m ]')
+	test_ = '[ test: ' + '\033[1;32m' + test + '\033[0m ]'
+	print(test_)
 
-time.sleep(1)
+	time.sleep(1)
 
-if (test != ''):
-	try:
-		single_test[test]()
-	except:
-		print('error: usage: ./webserv port [up, get, post, delete, stress1, stress2, chunk, large_payload, leak]')
-else:
-	for key in single_test:
-		single_test[key]()
+	if (test != 'all'):
+		exec_tester(test)
+	else:
+		for name in names:
+			exec_tester(name)

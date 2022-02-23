@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 16:12:48 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 16:58:55 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,11 @@ Response::Response(int code)
 		sendPage(400);
 	else
 		sendPage(500);
+	writeAnswer();
 }
 
-Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()), _code(0) {
+Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()) {
+	
 	_methods["GET"] = &Response::getMethod;
 	_methods["POST"] = &Response::postMethod;
 	_methods["DELETE"] = &Response::deleteMethod;
@@ -118,6 +120,7 @@ int		Response::initRequest(Request &req)
     _request = req;
     _path = req.getFullPath();
 	_generalRoot = req.getGeneralRoot();
+	_type = _path.substr(_path.rfind(".") + 1, _path.size() - _path.rfind("."));
     if (_request.getPath().empty() || _request.getMethod().empty()
 		|| _request.getProtocolVersion() != "HTTP/1.1"
 		|| (_request.getHost().empty() && _request.getMethod() != "DELETE"))
@@ -198,6 +201,7 @@ void     Response::readContent(std::string &path)
 		fd.close();
 		_body = buffer.str();
 		_header.setHeader("200 OK", _request.getContentType(), _body.length());
+		_header.searchContentType(_path);
 	}
 	else
 	{
@@ -216,7 +220,7 @@ void		Response::getMethod()
 	{
 		readContent(_path);
 	}
-	if (_request.getRedirCode() == 308)
+	if (_request.getRedirCode() == 308 && _type != "css")
 		_header.setStatus("308 Permanent Redirect");
 }
 
@@ -277,8 +281,7 @@ void		Response::makeResponseCgi(std::string &answer)
 	_header.setCgiHeader(answer.substr(0, answer.find("\r\n\r\n")));
     _body = answer.substr(answer.find("\r\n\r\n") + 4);
 	_header.setBodyLength(_body.size());
-	_header.writeHeader();
-	_response = _header.getHeader() + _body;
+	writeAnswer();
 }
 
 std::string&		Response::getData() 			{ return _response; }

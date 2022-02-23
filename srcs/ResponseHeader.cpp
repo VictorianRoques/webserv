@@ -98,14 +98,12 @@ void            ResponseHeader::setCgiStatus(std::string body)
     setCgiHeader(body.substr(0, body.find("\r\n\r\n")));
 }
 
-void			ResponseHeader::setContentType(std::string type, std::string path)
+void			ResponseHeader::searchContentType(std::string path)
 {
-	if (type != "")
-	{
-		_contentType = type;
+	if (_contentType != "")
 		return ;
-	}
-	type = path.substr(path.rfind(".") + 1, path.size() - path.rfind("."));
+    
+	std::string type = path.substr(path.rfind(".") + 1, path.size() - path.rfind("."));
 	if (type == "html")
 		_contentType = "text/html";
 	else if (type == "css")
