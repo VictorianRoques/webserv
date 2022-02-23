@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 18:28:10 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 18:33:48 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -329,8 +329,6 @@ void				Response::isUpload(std::string &answer)
 	_header.setStatus("201 Created");
 	return ;
 }
-
-/* Home Made Upload */
 
 int			Response::upload()
 {

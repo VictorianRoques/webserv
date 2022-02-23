@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 17:17:37 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 22:56:43 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/23 18:35:08 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,11 +77,11 @@ int             cgiHandler::startCgi(int fd)
     char        **argv;
     pid_t       pid;
     int         status;
-
+    
     envp = envToString();
     argv = keyMapConvert(_env["PATH_TRANSLATED"]);
-    /* write in getDataFd() with body ! */
     pid = fork();
+
     if (pid == -1)
     {
         std::cerr << RED << "Fork crashed." << std::endl;
