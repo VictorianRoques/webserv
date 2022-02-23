@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 12:02:19 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/23 16:13:52 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,25 +46,25 @@ public:
     void            answer();
     void            setLocationConf();
     void            makeResponseCgi(std::string &body);
+    
     /* HTTP Methods */
     void            getMethod();
     void            postMethod();
     void            deleteMethod();
-    
+
     /* Helper Functions */
     bool            isAllow(std::string method);
     std::string		autoIndexBuilder(std::string path);
     int             needCgi();
     void            isUpload(std::string &answer);
-    /* Set Fd */
-    void            setFdContent();
-    void            setFdError(int code);
+    
+    /* Send Page */
     void            readContent(std::string &path);
     int             readErrorPage(std::string &path);
     void            sendPage(int code);
+    void            writeAnswer();
 
     /* Getters */
-
     Request&        getRequest();
     std::string&    getPath();
     std::string&    getBody();
