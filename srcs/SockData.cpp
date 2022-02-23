@@ -19,10 +19,6 @@ SockData::SockData(void)
 	initActiveSet();
 	initReadSet();
 	initWriteSet();
-	red = "\033[0;31m";
-	green = "\033[0;32m";
-	blue = "\033[0;34m";
-	white = "\033[0m";
 }
 
 SockData::SockData(const SockData &sockData)
@@ -95,51 +91,6 @@ void	SockData::addActiveSet(int fd)
 
 void	SockData::setReadToActive(void)
 	{ readSet_ = activeSet_; }
-
-void	SockData::setDataFd(int fd, Request &request, Server &server)
-{
-	Response	response(server);
-	dataFds_[fd] = response.searchFd(request);
-	clients_[fd].setRequest(request);
-	clients_[fd].setResponse(response);
-	clients_[fd].setServer(server);
-	clients_[fd].getTmpRequest().clear();
-	clients_[fd].getFinalRequest().clear();
-	clients_[fd].setChunk(false);
-}
-
-void	SockData::setResponse(int fd)
-{
-	try {
-		Request	request = requestParser(clients_[fd].getFinalRequest(), servers_);
-		std::vector<Server>::iterator	it = servers_.begin(), ite = servers_.end();
-		for (; it != ite; ++it) {
-			if (vector_contains_str(it->getServerName(), request.getHost())) {
-				setDataFd(fd, request, *it);
-				return ;
-			}
-		}
-		setDataFd(fd, request, *servers_.begin());
-	}
-	catch (std::exception &e) {
-		setInternalError(fd);
-		exceptionError(fd, e);
-	}
-}
-
-void	SockData::setInternalError(int fd)
-{
-	int	fd_error_500;
-	if ((fd_error_500 = open("error_pages/500.html", O_RDONLY)) == ERROR) {
-		clearClient(fd);
-		systemFailure("opening [error_pages/500.html]", fd);
-		return ;
-	}
-	dataFds_[fd] = fd_error_500;
-	clients_[fd].setRequest(Request());
-	clients_[fd].setResponse(Response(500));
-	clients_[fd].setServer(Server());
-}
 
 /*******************************/
 /*           CHECKERS          */
@@ -220,6 +171,182 @@ void	SockData::addClient(int fd)
 	}
 }
 
+void	SockData::recvClient(int fd)
+{
+	char		buffer[BUF_SIZE] = { 0 };
+	int			ret = recv(fd, buffer, BUF_SIZE - 1, 0);
+	if (ret == ERROR || ret == 0) {
+		recvClientClose(fd, ret);
+		return ;
+	}
+	clients_[fd].getTmpRequest() += std::string(buffer, ret);
+	if (isReadingOver(ret)) {
+		try {
+			if (!clients_[fd].isChunk()) {
+				if (clients_[fd].isTmpRequestChunk()) {
+					startChunkRequest(fd);
+				}
+				else {
+					normalRequest(fd);
+					return ;
+				}
+			}
+			if (clients_[fd].isChunkEof()) {
+				endChunkRequest(fd);
+				return ;
+			}
+			concatChunks(fd);
+		}
+		catch (std::exception &e) {
+			exceptionError(fd, e);
+			setInternalError(fd); // or clear client
+		}
+	}
+}
+
+void	SockData::sendClient(int fd)
+{
+	if (send(fd, clients_[fd].getData().c_str(),
+	clients_[fd].getData().size(), 0) == ERROR) {
+		systemFailure("send", fd);
+		clearClient(fd);
+	}
+	FD_CLR(fd, &writeSet_);
+	resetClient(fd);
+}
+
+/*******************************/
+/*           REQUESTS          */
+/*******************************/
+
+void	SockData::cgiInputFile(int fd, std::string strFd)
+{
+	std::string	pathFile = "./cgi_binary/.cgi_input_" + strFd;
+	std::ofstream	ofs;
+	ofs.open(pathFile.c_str(), std::ofstream::out);
+	if (!ofs.is_open()) {
+		throw cgiException();
+	}
+	ofs << clients_[fd].getRequest().getBody();
+	ofs.close();
+}
+
+void	SockData::cgiOutputFile(int fd, std::string strFd)
+{
+	std::string pathFile = "./cgi_binary/.cgi_output_" + strFd;
+	std::ifstream	ifs;
+	ifs.open(pathFile.c_str(), std::ifstream::in);
+	if (!ifs.is_open()) {
+		throw cgiException();
+	}
+	std::string	output, line;
+	while (std::getline(ifs, line)) {
+		output += line + "\n";
+	}
+	ifs.close();
+	clients_[fd].getResponse().makeResponseCgi(output); // change prototype
+}
+
+void	SockData::setRequestType(int fd, Request &request, Server &server)
+{
+	Response	response(server);
+	clients_[fd].getRequestType() = response.requestType(request);
+	clients_[fd].setRequest(request);
+	clients_[fd].setResponse(response);
+	clients_[fd].setServer(server);
+}
+
+void	SockData::setResponse(int fd)
+{
+	try {
+		Request	request = requestParser(clients_[fd].getFinalRequest(), servers_);
+		std::vector<Server>::iterator	it = servers_.begin(), ite = servers_.end();
+		for (; it != ite; ++it) {
+			if (vector_contains_str(it->getServerName(), request.getHost())) {
+				setRequestType(fd, request, *it);
+				return ;
+			}
+		}
+		setRequestType(fd, request, *servers_.begin());
+	}
+	catch (std::exception &e) {
+		exceptionError(fd, e);
+		setInternalError(fd); // or clear client
+	}
+}
+
+void	SockData::requestReceived(int fd)
+{
+	msgRecv(fd);
+	setResponse(fd);
+	FD_SET(fd, &writeSet_);
+	if (clients_[fd].getRequestType() == CGI) {
+		std::stringstream	ss;
+		ss << fd;
+		cgiInputFile(fd, ss.str());
+		cgiHandler	cgi(clients_[fd].getRequest(), clients_[fd].getServer());
+		cgi.startCgi(fd);
+		cgiOutputFile(fd, ss.str());
+	}
+	clients_[fd].getData() = clients_[fd].getResponse().getData();
+}
+
+void	SockData::setInternalError(int fd)
+{
+	fd = (int)fd;
+	// create internal error on the filestream model with response instance
+}
+
+/*******************************/
+/*             UTILS           */
+/*******************************/
+void	SockData::recvClientClose(int fd, int ret)
+{
+	if (ret == ERROR) {
+		systemFailure("read", fd);
+	}
+	else {
+		cnxCloseRecv(fd);
+	}
+	clearClient(fd);
+}
+
+void	SockData::clearCgiFiles(int fd)
+{
+	std::stringstream	ss;
+	ss << fd;
+	std::string	pathFileIn = "./cgi_binary/.cgi_input_" + ss.str();
+	std::string	pathFileOut = "./cgi_binary/.cgi_output_" + ss.str();;
+	unlink(pathFileIn.c_str());
+	unlink(pathFileOut.c_str());
+}
+
+void	SockData::clearClient(int fd)
+{
+	clearCgiFiles(fd);
+	FD_CLR(fd, &activeSet_);
+	FD_CLR(fd, &writeSet_);
+	close(fd);
+	clients_.erase(fd);
+}
+
+void	SockData::resetClient(int fd)
+{
+	clearCgiFiles(fd);
+	clients_[fd].setChunk(false);
+	clients_[fd].getTmpRequest().clear();
+	clients_[fd].getFinalRequest().clear();
+	clients_[fd].getTotalLength() = 0;
+	clients_[fd].getData().clear();
+}
+
+void	SockData::closeListen(size_t endInd)
+{
+	for (size_t i = 0; i < endInd; ++i) {
+		close(sockListen_[i].first);
+	}
+}
+
 void	SockData::modifyChunkRequest(int fd) {
 	std::stringstream	ss;
 	ss << clients_[fd].getTotalLength();
@@ -237,10 +364,26 @@ void	SockData::modifyChunkRequest(int fd) {
 	clients_[fd].getFinalRequest().erase(pos, transferEncoding.size());
 }
 
+SockData::unchunk_t	SockData::unchunk(std::string str) {
+	std::stringstream	ss;
+	unsigned int		lenHex;
+	size_t 				pos = str.find("\r\n");
+	if (str.empty() || str.substr(str.length() - 2) != "\r\n") {
+		throw SockData::badChunkRequestException();
+	}
+	str.erase(str.length() - 2, 2);
+	ss.clear();
+	ss << std::hex << str.substr(0, pos);
+	ss >> lenHex;
+	std::pair<unsigned int, std::string>	retPair;
+	retPair.first = std::min(lenHex, static_cast<unsigned int>(str.length() - (pos + 2)));
+	retPair.second = str.substr(pos + 2);
+	return retPair;
+}
+
 void	SockData::normalRequest(int fd)
 {
 	clients_[fd].getFinalRequest() = clients_[fd].getTmpRequest();
-
 	requestReceived(fd);
 }
 
@@ -283,249 +426,6 @@ void	SockData::concatChunks(int fd)
 		exceptionError(fd, e);
 		requestReceived(fd);
 	}
-}
-
-void	SockData::recvClient(int fd)
-{
-	char		buffer[BUF_SIZE];
-	int			ret = recv(fd, buffer, BUF_SIZE - 1, 0);
-	if (ret == ERROR || ret == 0) {
-		recvClientClose(fd, ret);
-		return ;
-	}
-	buffer[ret] = '\0';
-	clients_[fd].getTmpRequest() += std::string(buffer, ret);
-	if (isReadingOver(ret)) {
-		if (!clients_[fd].isChunk()) {
-			if (clients_[fd].isTmpRequestChunk()) {
-				startChunkRequest(fd);
-			}
-			else {
-				normalRequest(fd);
-				return ;
-			}
-		}
-		if (clients_[fd].isChunkEof()) {
-			endChunkRequest(fd);
-			return ;
-		}
-		concatChunks(fd);
-	}
-}
-
-void	SockData::sendClient(int fd)
-{
-	if (clients_[fd].isDataReady()) {
-		sendDataClient(fd);
-		return ;
-	}
-	if (dataFds_[fd] == CGI) {
-		cgiRequest(fd);
-	}
-	else if (dataFds_[fd] == STR_DATA) {
-		strDataRequest(fd);
-	}
-	else if (dataFds_[fd] > 2) {
-		fileRequest(fd);
-	}
-}
-
-/*******************************/
-/*           REQUESTS          */
-/*******************************/
-void	SockData::cgiRequest(int fd)
-{
-	std::stringstream	ss;
-	ss << fd;
-	if (FD_ISSET(clients_[fd].getInputFd(), &writeSet_)) {
-		std::string	pathFile = "./cgi_binary/.cgi_input_" + ss.str();
-		FD_CLR(clients_[fd].getInputFd(), &writeSet_);
-		if (write(clients_[fd].getInputFd(),
-		clients_[fd].getRequest().getBody().c_str(),
-		clients_[fd].getRequest().getBody().size()) == ERROR) {
-			clearClient(fd);
-			systemFailure("write", fd);
-			return ;
-		}
-		FD_SET(clients_[fd].getInputFd(), &activeSet_);
-	}
-	else if (FD_ISSET(clients_[fd].getInputFd(), &readSet_)) {
-		close(clients_[fd].getInputFd());
-		FD_CLR(clients_[fd].getInputFd(), &activeSet_);
-		cgiHandler cgi(clients_[fd].getRequest(), clients_[fd].getServer());
-		if (cgi.startCgi(fd) == ERROR) {
-			clearClient(fd);
-			systemFailure("cgi", fd);
-			return ;
-		}
-		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
-		if ((clients_[fd].getOutputFd() =
-		open(pathFile.c_str(), O_RDONLY)) == ERROR) {
-			clearClient(fd);
-			systemFailure("open", fd);
-			return ;
-		}
-		dataFds_[fd] = clients_[fd].getOutputFd();
-		FD_SET(dataFds_[fd], &activeSet_);
-	}
-}
-
-void	SockData::strDataRequest(int fd)
-{
-	clients_[fd].getData() = clients_[fd].getResponse().getData();
-	clients_[fd].setDataReady(true);
-}
-
-void	SockData::fileRequest(int fd)
-{
-	char	buffer[BUF_SIZE];
-	int		ret;
-	if ((ret = read(dataFds_[fd], buffer, BUF_SIZE - 1)) == ERROR) {
-		clearClient(fd);
-		systemFailure("read", fd);
-		return ;
-	}
-	buffer[ret] = '\0';
-	clients_[fd].getResponseBody() += std::string(buffer, ret);
-	if (isReadingOver(ret)) {
-		close(dataFds_[fd]);
-		clients_[fd].getResponse().makeResponse(
-			clients_[fd].getResponseBody(),
-			clients_[fd].isDataCgi());
-		clients_[fd].getData() = clients_[fd].getResponse().getData();
-		std::stringstream	ss;
-		ss << fd;
-		std::string	pathFile = "./cgi_binary/.cgi_output_" + ss.str();
-		clearDataFd(fd);
-		clients_[fd].setDataReady(true);
-	}
-}
-
-void	SockData::sendDataClient(int fd)
-{
-	if (send(fd, clients_[fd].getData().c_str(),
-	clients_[fd].getData().size(), 0) == ERROR) {
-		clearClient(fd);
-		systemFailure("send", fd);
-		return ;
-	}
-	msgSent(fd);
-	FD_CLR(fd, &writeSet_);
-	if (clients_[fd].getRequest().getConnection() == "keep-alive") {
-		resetClient(fd);
-	}
-	else {
-		cnxCloseRecv(fd);
-		clearClient(fd);
-	}
-}
-
-void	SockData::requestReceived(int fd)
-{
-	msgRecv(fd);
-	setResponse(fd);
-	FD_SET(fd, &writeSet_);
-	if (dataFds_[fd] == CGI) {
-		clients_[fd].setDataCgi(true);
-		std::stringstream	ss;
-		ss << fd;
-		std::string	pathFile = "./cgi_binary/.cgi_input_" + ss.str();
-		if ((clients_[fd].getInputFd() =
-		open(pathFile.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666)) == ERROR) {
-			clearClient(fd);
-			systemFailure("open", fd);
-			return ;
-		}
-		FD_SET(clients_[fd].getInputFd(), &writeSet_);
-	}
-	else if (dataFds_[fd] > 2) {
-		FD_SET(dataFds_[fd], &activeSet_);
-	}
-}
-
-/*******************************/
-/*             UTILS           */
-/*******************************/
-void	SockData::recvClientClose(int fd, int ret)
-{
-	if (ret == ERROR) {
-		systemFailure("read", fd);
-	}
-	else {
-		cnxCloseRecv(fd);
-	}
-	clearClient(fd);
-}
-
-void	SockData::clearDataFd(int fd)
-{
-	if (0 <= dataFds_[fd] && dataFds_[fd] < FD_SETSIZE) {
-		FD_CLR(dataFds_[fd], &activeSet_);
-		FD_CLR(dataFds_[fd], &writeSet_);
-	}
-	if (2 < dataFds_[fd] && dataFds_[fd] < FD_SETSIZE) {
-		close(dataFds_[fd]);
-	}
-	dataFds_.erase(fd);
-}
-
-void	SockData::clearClient(int fd)
-{
-	std::stringstream	ss;
-	ss << fd;
-	std::string	pathFileIn = "./cgi_binary/.cgi_input_" + ss.str();
-	std::string	pathFileOut = "./cgi_binary/.cgi_output_" + ss.str();;
-	unlink(pathFileIn.c_str());
-	unlink(pathFileOut.c_str());
-	clearDataFd(fd);
-	if (0 <= fd && fd < FD_SETSIZE) {
-		FD_CLR(fd, &activeSet_);
-		FD_CLR(fd, &writeSet_);
-	}
-	close(fd);
-	clients_.erase(fd);
-}
-
-void	SockData::closeListen(size_t endInd)
-{
-	for (size_t i = 0; i < endInd; ++i) {
-		close(sockListen_[i].first);
-	}
-}
-
-void	SockData::resetClient(int fd)
-{
-	std::stringstream	ss;
-	ss << fd;
-	std::string	pathFileIn = "./cgi_binary/.cgi_input_" + ss.str();
-	std::string	pathFileOut = "./cgi_binary/.cgi_output_" + ss.str();;
-	unlink(pathFileIn.c_str());
-	unlink(pathFileOut.c_str());
-	clients_[fd].setChunk(false);
-	clients_[fd].setDataReady(false);
-	clients_[fd].setDataCgi(false);
-	clients_[fd].getTmpRequest().clear();
-	clients_[fd].getFinalRequest().clear();
-	clients_[fd].getTotalLength() = 0;
-	clients_[fd].getResponseBody().clear();
-	clients_[fd].getData().clear();
-}
-
-SockData::unchunk_t	SockData::unchunk(std::string str) {
-	std::stringstream	s;
-	unsigned int		lenHex;
-	size_t 				pos = str.find("\r\n");
-	if (str.empty() || str.substr(str.length() - 2) != "\r\n") {
-		throw SockData::badChunkRequestException();
-	}
-	str.erase(str.length() - 2, 2);
-	s.clear();
-	s << std::hex << str.substr(0, pos);
-	s >> lenHex;
-	std::pair<unsigned int, std::string>	retPair;
-	retPair.first = std::min(lenHex, static_cast<unsigned int>(str.length() - (pos + 2)));
-	retPair.second = str.substr(pos + 2);
-	return retPair;
 }
 
 /*******************************/

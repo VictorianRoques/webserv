@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 15:57:25 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/23 03:46:53 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,17 +29,13 @@ class SockClient {
 		char			*ip_;
 		size_t			port_;
 		bool			chunk_;
-		bool			dataReady_;
-		bool			dataCgi_;
+		int				requestType_;
 		std::string		tmpRequest_;
 		std::string		finalRequest_;
 		unsigned int	totalLength_;
 		Request			request_;
 		Response		response_;
 		Server			server_;
-		int				inputFd_;
-		int				outputFd_;
-		std::string		responseBody_;
 		std::string		data_;
 
 	public:
@@ -52,8 +48,6 @@ class SockClient {
 		void			setIp(char *ip);
 		void			setPort(size_t port);
 		void			setChunk(bool chunk);
-		void			setDataReady(bool dataReady);
-		void			setDataCgi(bool dataCgi);
 		void			setRequest(const Request &request);
 		void			setResponse(const Response &response);
 		void			setServer(const Server &server);
@@ -62,25 +56,19 @@ class SockClient {
 
 		/* checkers */
 		bool			isChunk(void) const;
-		bool			isDataReady(void) const;
-		bool			isDataCgi(void) const;
 		bool			isTmpRequestChunk(void) const;
 		bool			isChunkEof(void) const;
-		bool			isDeleteRequest(void) const;
-		bool			isBadRequest(void) const;
 		/* getters */
 		char			*getIp(void) const;
 		size_t			getPort(void) const;
+		int				&getRequestType(void);
 		std::string		&getTmpRequest(void);
 		std::string		&getFinalRequest(void);
 		unsigned int	&getTotalLength(void);
 		Request			&getRequest(void);
 		Response		&getResponse(void);
 		Server			&getServer(void);
-		std::string		&getResponseBody(void);
 		std::string		&getData(void);
-		int				&getInputFd(void);
-		int				&getOutputFd(void);
 
 };
 
