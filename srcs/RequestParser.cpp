@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/23 17:36:13 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 17:41:58 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,19 +139,6 @@ Location findRightLocation(std::vector<Location> loc, Request req) {
 		}
 	}
 	// no exact match found: looking for the longest match	
-/**	size_t pos = req.getPath().length();
-
-	while (pos != 0) {
-		pos = req.getPath().rfind("/", pos - 1);
-		for (; it != loc.end(); it++) {
-			std::cout << "FIND RIGHT LOC : path = " << req.getPath().substr(0, pos) << " and LM = " << it->getLocationMatch().substr(0, pos) << std::endl;
-			if (!strncmp(req.getPath().c_str(), it->getLocationMatch().c_str(), pos))
-				return *it ;
-			if (it->getLocationMatch() == "/")
-				return *it;
-		}
-	}
-**/
 	//sorting the Locations from longest Location Match to shortest and then find the longest match.
 	std::sort(loc.begin(), loc.end(), hasLongerLocationMatch);
 	it = loc.begin();
@@ -188,6 +175,21 @@ void	Request::isChunked() {
 }
 
 /**
+ * needIndex(): checks if need to add index at the end
+**/
+bool	needIndex(std::string path, std::string root) {
+	path = cleanSlash(path + "/");
+	root = cleanSlash(root + "/");
+	path.erase(path.length() - 1);
+	root.erase(root.length() - 1);
+	path = path.substr(path.find_last_of("/"));
+	root = root.substr(root.find_last_of("/"));
+	if (path == root)
+		return true;
+	return false;
+}
+
+/**
  * buildFullPath(): append correct root to path without query string (symbol: '?')
  **/
 void	Request::buildFullPath(Location loc) {
@@ -203,11 +205,11 @@ void	Request::buildFullPath(Location loc) {
 	}
 	// general cases
 	std::string lm = loc.getLocationMatch();
-	size_t pos;
-	if (lm != "/" && (pos = _fullPath.find(lm)) != std::string::npos) {
+	size_t pos = _fullPath.find(lm);
+	if (lm != "/" && pos != std::string::npos) {
 		_fullPath.replace(pos, lm.length(), loc.getRoot() + "/");
 	}
-	if (loc.getAutoIndex() == false && pathIsDirectory(_fullPath)) {
+	if (loc.getAutoIndex() == false && pathIsDirectory(_fullPath) && needIndex(_fullPath, loc.getRoot())) {
 		_fullPath += "/" + loc.getIndex();
 	}
 	if (_fullPath[0] != '/') {
@@ -357,8 +359,6 @@ Request requestParser(std::string rq, std::vector<Server> servers_g) {
 		}
 		std::string lm = loc.getLocationMatch();
 		pos = request.getPath().find(lm);
-//if (lm != "/" && (pos = _fullPath.find(lm)) != std::string::npos) {
-//	_fullPath.replace(pos, lm.length(), loc.getRoot() + "/");
 		
 		std::string newPath  = loc.getRedirection().second;
 		std::string	path = request.getPath();
@@ -369,8 +369,6 @@ Request requestParser(std::string rq, std::vector<Server> servers_g) {
 		request.setPath(path);
 		request.setRedirCode(loc.getRedirection().first);
 		loc = findRightLocation(serv.getLocation(), request);
-//		if (request.getPath()[0] == '/') // if absolute path, no further redirection possible
-//			break ;
 	}
 	
 	// handle the rest

@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/23 17:33:52 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 17:41:42 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,11 +209,6 @@ std::string	findRightPath(std::string path, std::string root, bool autoIndex, st
 		return path;
 	}
 
-/**	path = cleanSlash(getPWD() + "/" + path);
-	if (pathIsFile(path) || pathIsDirectory(path)) {
-		return path;
-	}**/
-
 	return relative;
 }
 
@@ -285,9 +280,6 @@ long long maxBodyAtoi(std::string maxBodySize) {
 	
 	if (!ret)
 		throw WrongFormatMaxBodySizeException();
-
-//	std::cout << "MaxBodySize : pos = " << pos << std::endl;
-//	std::cout << "MaxBodySize.length() = " << maxBodySize.length() << std::endl;
 
 		return ret;
 }
