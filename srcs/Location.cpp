@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 18:09:23 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 17:11:32 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/23 16:58:49 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ char const *Location::NonValidRedirectionException::what() const throw() {
 }
 char const *Location::WrongPathException::what() const throw() { return "Invalid path for location in config_file. Probably missing a '/' in the beginning."; }
 char const *Location::MissingBracketException::what() const throw() { return "Missing a bracket after 'server' or 'location' directive."; }
-//char const *Location::WrongPathException::what() const throw() { return "Invalid path for root in config_file. Probably missing a '/' in the beginning."; }
 char const *Location::RootAndAbsolutePathException::what() const throw() { return "You can't have a root and redirection with ABSOLUTE path (starting with a /) in the same location context."; }
 char const *Location::AutoIndexWithoutIndexException::what() const throw() { return "Autoindex is off but an index file is missing in one location {}."; }
 char const *Location::WrongLocationMatchException::what() const throw() { return "One location doesn't have a location match.\nUsage: location <locationMatch> { ... }"; }

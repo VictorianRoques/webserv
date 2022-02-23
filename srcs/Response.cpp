@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 16:58:55 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 17:33:54 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,43 +78,6 @@ std::string&	Response::getUploadDest()		{ return _uploadDest; }
 ResponseHeader&	Response::getResponseHeader()	{ return _header; }
 std::string&	Response::getLocation()			{ return _location; }
 
-int		Response::requestType(Request &req)
-{
-	if (initRequest(req))
-	{
-		writeAnswer();
-		return (0);
-	}
-	if (needCgi())
-	{
-		return (1);
-	}
-	answer();
-	return (0);
-}
-
-void	Response::answer()
-{
-	if (_methods.find(_request.getMethod()) != _methods.end() 
-		&& isAllow(_request.getMethod()))
-	{
-		(this->*_methods[_request.getMethod()])();
-		writeAnswer();
-	}
-    else
-		sendPage(405);
-}
-
-int		Response::needCgi()
-{
-	if (_extensionCgi.empty() == false &&
-		_request.getFullPath().find(_extensionCgi) != std::string::npos)
-	{
-		return (1);
-	}
-	return (0);
-}
-
 int		Response::initRequest(Request &req)
 {
     _request = req;
@@ -143,6 +106,42 @@ int		Response::initRequest(Request &req)
     return (0);
 }
 
+int		Response::requestType(Request &req)
+{
+	if (initRequest(req))
+	{
+		writeAnswer();
+		return (0);
+	}
+	if (needCgi())
+	{
+		return (1);
+	}
+	answer();
+	return (0);
+}
+
+int		Response::needCgi()
+{
+	if (_extensionCgi.empty() == false &&
+		_request.getFullPath().find(_extensionCgi) != std::string::npos)
+	{
+		return (1);
+	}
+	return (0);
+}
+
+void	Response::answer()
+{
+	if (_methods.find(_request.getMethod()) != _methods.end() 
+		&& isAllow(_request.getMethod()))
+	{
+		(this->*_methods[_request.getMethod()])();
+		writeAnswer();
+	}
+    else
+		sendPage(405);
+}
 
 void	Response::sendPage(int code)
 {
@@ -244,8 +243,22 @@ void		Response::deleteMethod()
 
 void		Response::postMethod()
 {
-	_header.setStatus("204 No Content");
-	_body = "";
+	int ret;
+	if ((ret = upload()) != 1)
+    {
+		if (ret == 2)
+		{
+			sendPage(403);
+			return ;
+		}
+		_body = hrefLocation(_uploadDest);
+		_header.setHeader("201 Created", "text/html", _body.length());
+	}
+	else
+	{
+		_header.setStatus("204 No Content");
+		_body = "";
+	}
 }
 
 void        Response::setLocationConf()
@@ -319,36 +332,39 @@ void				Response::isUpload(std::string &answer)
 
 /* Home Made Upload */
 
-// int			Response::upload()
-// {
-// 	std::string contentType = _request.getContentType();
-// 	std::string body = _request.getBody();
-// 	size_t foundFileName = body.find("filename=");
-//     if (foundFileName == std::string::npos || 
-// 		contentType.find("multipart/form-data") == std::string::npos) 
-//         return (1);
+int			Response::upload()
+{
+	if (_uploadDest.empty() == true)
+		return (1);
+	std::string contentType = _request.getContentType();
+	std::string body = _request.getBody();
+	size_t foundFileName = body.find("filename=");
+    if (foundFileName == std::string::npos || 
+		contentType.find("multipart/form-data") == std::string::npos) 
+        return (1);
     
-//     std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
-//     fileName = fileName.substr(0, fileName.find("\n"));
-//     fileName = fileName.substr(10);
-//     fileName.erase(fileName.length() - 2);
-// 	if (fileName.empty())
-// 		return (1);
+    std::string fileName = body.substr(foundFileName, body.find("\n", foundFileName));
+    fileName = fileName.substr(0, fileName.find("\n"));
+    fileName = fileName.substr(10);
+    fileName.erase(fileName.length() - 2);
+	if (fileName.empty())
+		return (1);
 	
-//     _uploadDest = _uploadDest + "/" + fileName;
-//     std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
-//     body = body.substr(body.find("\r\n\r\n") + 4);
-//     body = body.substr(0, body.find(boundary));
-//     body = body.substr(0, body.length() - 2);
+    _uploadDest = _uploadDest + "/" + fileName;
+    std::string boundary = contentType.substr(contentType.find("boundary=") + 9);
+    body = body.substr(body.find("\r\n\r\n") + 4);
+    body = body.substr(0, body.find(boundary));
+    body = body.substr(0, body.length() - 2);
 	
-//     std::ofstream myfile;
-//     myfile.open(_uploadDest.c_str());
-//     if (myfile.is_open() == false)
-//         return (2);
-//     myfile << body.c_str();
-//     myfile.close();
-// 	_location = "http://" + _request.getHost() + "/" + _uploadDest;
-// 	_location = cleanSlash(_location);
-// 	_header.setDate();
-//     return (0);
-// }
+    std::ofstream myfile;
+    myfile.open(_uploadDest.c_str(), std::ios::binary);
+    if (myfile.is_open() == false)
+        return (2);
+    myfile << body;
+    myfile.close();
+	_location = "http://" + _request.getHost() + "/" + _uploadDest;
+	_location = cleanSlash(_location);
+	_header.setDate();
+	_header.setLocation(_location);
+    return (0);
+}

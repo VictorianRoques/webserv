@@ -7,7 +7,7 @@ server
 	location /
 	{
 		root www;
-        autoindex off;
+#        autoindex off;
 		index index.html;
         client_max_body_size 10m
 		methods GET POST DELETE;
@@ -16,7 +16,7 @@ server
 
     location /redirect/
     {
-        return 308 /;
+        return 308 /directory/;
     }
 
     location /loop1/
@@ -69,7 +69,11 @@ server
         cgi_handler .php cgi_binary/darwin_phpcgi;
         upload_dest www/upload_dir;
     }
-
+    location /nocgi/
+    {
+        methods GET POST;
+        upload_dest www/upload_dir;
+    }
 	location /directory/
 	{
 		root www/dir1;

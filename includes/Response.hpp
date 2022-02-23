@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 16:57:39 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 17:18:30 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ public:
     std::string		autoIndexBuilder(std::string path);
     int             needCgi();
     void            isUpload(std::string &answer);
+    int			    upload();
     
     /* Send Page */
     void            readContent(std::string &path);
