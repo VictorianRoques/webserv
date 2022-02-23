@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 19:04:05 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/22 14:26:13 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/23 12:41:40 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,11 @@ void	sockServ(std::vector<Server> servers, std::vector<size_t> ports)
 					if (sockData.isSockListen(fd)) {
 						sockData.addClient(fd);
 					}
-					else if (sockData.isSockClient(fd)) {
+					else {
 						sockData.recvClient(fd);
 					}
 				}
-				else if (sockData.isWriteSet(fd) && sockData.isSockClient(fd)) {
+				else if (sockData.isWriteSet(fd)) {
 					sockData.sendClient(fd);
 				}
 			}
