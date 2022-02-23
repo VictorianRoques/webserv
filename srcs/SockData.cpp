@@ -203,7 +203,7 @@ void	SockData::recvClient(int fd)
 		}
 		catch (std::exception &e) {
 			exceptionError(fd, e);
-			setInternalError(fd); // or clear client
+			setInternalError(fd);
 		}
 	}
 }
@@ -216,7 +216,11 @@ void	SockData::sendClient(int fd)
 		clearClient(fd);
 	}
 	FD_CLR(fd, &writeSet_);
-	resetClient(fd);
+	if (clients_[fd].getRequest().getConnection() == "keep-alive") {
+		resetClient(fd);
+		return;
+	}
+	clearClient(fd);
 }
 
 /*******************************/
@@ -275,6 +279,7 @@ void	SockData::setResponse(int fd)
 	}
 	catch (std::exception &e) {
 		exceptionError(fd, e);
+		resetClient(fd);
 		setInternalError(fd); // or clear client
 	}
 }
@@ -285,20 +290,27 @@ void	SockData::requestReceived(int fd)
 	setResponse(fd);
 	FD_SET(fd, &writeSet_);
 	if (clients_[fd].getRequestType() == CGI) {
-		std::stringstream	ss;
-		ss << fd;
-		cgiInputFile(fd, ss.str());
-		cgiHandler	cgi(clients_[fd].getRequest(), clients_[fd].getServer());
-		cgi.startCgi(fd);
-		cgiOutputFile(fd, ss.str());
+		try {
+			std::stringstream	ss;
+			ss << fd;
+			cgiInputFile(fd, ss.str());
+			cgiHandler	cgi(clients_[fd].getRequest(), clients_[fd].getServer());
+			cgi.startCgi(fd);
+			cgiOutputFile(fd, ss.str());
+		}
+		catch (std::exception &e) {
+			exceptionError(fd, e);
+			resetClient(fd);
+			setInternalError(fd);
+		}
 	}
 	clients_[fd].getData() = clients_[fd].getResponse().getData();
 }
 
 void	SockData::setInternalError(int fd)
 {
-	fd = (int)fd;
-	// create internal error on the filestream model with response instance
+	Response	response(500);
+	clients_[fd].setResponse(response);
 }
 
 /*******************************/
@@ -340,6 +352,7 @@ void	SockData::resetClient(int fd)
 	clients_[fd].setChunk(false);
 	clients_[fd].getTmpRequest().clear();
 	clients_[fd].getFinalRequest().clear();
+	clients_[fd].getRequestType() = NO_CGI;
 	clients_[fd].getTotalLength() = 0;
 	clients_[fd].getData().clear();
 }
