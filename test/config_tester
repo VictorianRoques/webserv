@@ -129,14 +129,6 @@ time.sleep(0.5)
 print('----------------------------------')
 
 time.sleep(0.5)
-print(FILE_COLOR + '[config_wrong_server_name.conf]' + NC)
-subprocess.run(['../webserv', '../conf/error_config/config_wrong_server_name.conf'])
-print('[ \033[0;32mOK\033[0m ]')
-
-time.sleep(0.5)
-print('----------------------------------')
-
-time.sleep(0.5)
 print(FILE_COLOR + '[config_wrongMaxBodySize.conf]' + NC)
 subprocess.run(['../webserv', '../conf/error_config/config_wrongMaxBodySize.conf'])
 print('[ \033[0;32mOK\033[0m ]')

@@ -6,7 +6,7 @@
 /*   By: pnielly <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/09 09:59:27 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 17:12:57 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/23 22:59:53 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,10 @@ bool	Parser::locationChecker() {
 **/
 bool	Parser::errorPageChecker() {
 	map_str::iterator it = _errorPage.begin();
+	std::string	path;
 	for (; it != _errorPage.end(); it++) {
-		if (!pathIsFile(it->second))
+		path = cleanSlash(getPWD() + "/" + it->second);
+		if (!pathIsFile(path) && !pathIsFile(it->second))
 			return false;
 	}
 	return true;
