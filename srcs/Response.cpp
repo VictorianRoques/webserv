@@ -6,7 +6,7 @@
 /*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 12:39:21 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/23 14:36:57 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,7 @@ void	Response::sendPage(int code)
 int      Response::readErrorPage(std::string &path)
 {
 	std::ifstream       ifs;
+	std::stringstream   buffer;
 
 	if (pathIsFile(path))
 	{
@@ -164,9 +165,9 @@ int      Response::readErrorPage(std::string &path)
 			_header.setStatusError("500", _body.length());
 			return (1);
 		}
-		std::string content((std::istreambuf_iterator<char>(ifs) ),
-                       (std::istreambuf_iterator<char>()    ) );
-		_body.swap(content);
+		buffer << ifs.rdbuf();
+		ifs.close();
+		_body = buffer.str();
 		ifs.close();
 		return (0);
 	}
@@ -180,22 +181,21 @@ int      Response::readErrorPage(std::string &path)
 
 void     Response::readContent(std::string &path)
 {
-	std::ifstream       ifs;
+	std::ifstream       fd;
+	std::stringstream   buffer;
 
 	if (pathIsFile(path) || pathIsDirectory(path))
 	{
-		ifs.open(path.c_str(), std::ios::binary);
-		if (ifs.is_open() == false || pathIsDirectory(path))
+		fd.open(path.c_str(), std::ifstream::in);
+		if (fd.is_open() == false || pathIsDirectory(path))
 		{
 			sendPage(403);
-			return;
+			return ;
 		}
-		std::string content((std::istreambuf_iterator<char>(ifs) ),
-                       (std::istreambuf_iterator<char>()    ) );
-		_body.swap(content);
-		ifs.close();
+		buffer << fd.rdbuf();
+		fd.close();
+		_body = buffer.str();
 		_header.setHeader("200 OK", _request.getContentType(), _body.length());
-		_header.setContentType(_request.getContentType(), _path);
 	}
 	else
 	{
