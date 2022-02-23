@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 19:17:38 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/23 16:58:05 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/23 21:27:33 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,8 +333,7 @@ size_t	Parser::dirServer(vec_str::iterator it, vec_str::iterator vend) {
 			_port.push_back(8080);
 
 		// update list of all ports
-		if (find(_ports_g.begin(), _ports_g.end(), *_port.begin()) == _ports_g.end())
-			_ports_g.push_back(*_port.begin());
+		_ports_g.push_back(*_port.begin());
 
 		serverChecker();
 		buildErrorPageContent();
