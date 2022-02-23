@@ -6,7 +6,7 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:39:50 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 15:57:25 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/23 03:05:23 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,17 +29,13 @@ class SockClient {
 		char			*ip_;
 		size_t			port_;
 		bool			chunk_;
-		bool			dataReady_;
-		bool			dataCgi_;
+		int				requestType_;
 		std::string		tmpRequest_;
 		std::string		finalRequest_;
 		unsigned int	totalLength_;
 		Request			request_;
 		Response		response_;
 		Server			server_;
-		int				inputFd_;
-		int				outputFd_;
-		std::string		responseBody_;
 		std::string		data_;
 
 	public:
@@ -71,6 +67,7 @@ class SockClient {
 		/* getters */
 		char			*getIp(void) const;
 		size_t			getPort(void) const;
+		int				&getRequestType(void);
 		std::string		&getTmpRequest(void);
 		std::string		&getFinalRequest(void);
 		unsigned int	&getTotalLength(void);

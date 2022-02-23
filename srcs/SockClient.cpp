@@ -6,13 +6,13 @@
 /*   By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 16:58:14 by fhamel            #+#    #+#             */
-/*   Updated: 2022/02/21 17:21:57 by fhamel           ###   ########.fr       */
+/*   Updated: 2022/02/23 03:06:03 by fhamel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "SockClient.hpp"
 
-SockClient::SockClient(void) : chunk_(false), dataReady_(false), dataCgi_(false), totalLength_(0)
+SockClient::SockClient(void) : chunk_(false), totalLength_(0)
 	{ return ; }
 
 SockClient::SockClient(const SockClient &sockClient)
@@ -26,16 +26,11 @@ SockClient	&SockClient::operator=(const SockClient &sockClient)
 	ip_ = sockClient.ip_;
 	port_ = sockClient.port_;
 	chunk_ = sockClient.chunk_;
-	dataReady_ = sockClient.dataReady_;
-	dataCgi_ = sockClient.dataCgi_;
 	tmpRequest_ = sockClient.tmpRequest_;
 	finalRequest_ = sockClient.finalRequest_;
 	request_ = sockClient.request_;
 	response_ = sockClient.response_;
 	server_ = sockClient.server_;
-	responseBody_ = sockClient.responseBody_;
-	inputFd_ = sockClient.inputFd_;
-	outputFd_ = sockClient.outputFd_;
 	return *this;
 }
 
@@ -49,12 +44,6 @@ void	SockClient::setPort(size_t port)
 void	SockClient::setChunk(bool chunk)
 	{ chunk_ = chunk; }
 
-void	SockClient::setDataReady(bool dataReady)
-	{ dataReady_ = dataReady; }
-
-void	SockClient::setDataCgi(bool dataCgi)
-	{ dataCgi_ = dataCgi; }
-
 void	SockClient::setRequest(const Request &request)
 	{ request_ = request; }
 
@@ -64,18 +53,9 @@ void	SockClient::setResponse(const Response &response)
 void	SockClient::setServer(const Server &server)
 	{ server_ = server; }
 
-void	SockClient::setOutputFd(int outputFd)
-	{ outputFd_ = outputFd; }
-
 /* checkers */
 bool	SockClient::isChunk(void) const
 	{ return chunk_; }
-
-bool	SockClient::isDataReady(void) const
-	{ return dataReady_; }
-
-bool	SockClient::isDataCgi(void) const
-	{ return dataCgi_; }
 
 bool	SockClient::isTmpRequestChunk(void) const
 {
@@ -154,6 +134,9 @@ char 	*SockClient::getIp(void) const
 size_t	SockClient::getPort(void) const
 	{ return port_; }
 
+int	&SockClient::getRequestType(void)
+	{ return requestType_; }
+
 std::string	&SockClient::getTmpRequest(void)
 	{ return tmpRequest_; }
 
@@ -172,14 +155,5 @@ Response	&SockClient::getResponse(void)
 Server	&SockClient::getServer(void)
 	{ return server_; }
 
-std::string	&SockClient::getResponseBody(void)
-	{ return responseBody_; }
-
 std::string	&SockClient::getData(void)
 	{ return data_; }
-
-int	&SockClient::getInputFd(void)
-	{ return inputFd_; }
-
-int	&SockClient::getOutputFd(void)
-	{ return outputFd_; }
