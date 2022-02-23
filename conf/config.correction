@@ -69,7 +69,11 @@ server
         cgi_handler .php cgi_binary/darwin_phpcgi;
         upload_dest www/upload_dir;
     }
-
+    location /nocgi/
+    {
+        methods GET POST;
+        upload_dest www/upload_dir;
+    }
 	location /directory/
 	{
 		root www/dir1;

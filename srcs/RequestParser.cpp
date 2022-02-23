@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/23 16:22:13 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/23 17:36:13 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -305,7 +305,10 @@ void	Request::print_request() {
 	std::cout << COLOR_REQ << "Chunked: " << NC << (_chunked ? "Yes" : "No") << std::endl;
 	std::cout << COLOR_REQ << "Redir Code: " << NC << _redirCode << std::endl;
 	std::cout << std::endl;
-	std::cout << COLOR_REQ << "Body: " << NC << _body << std::endl;
+	if (_body.size()< 10000)
+		std::cout << COLOR_REQ << "Body: " << NC << _body << std::endl;
+	else
+		std::cout << COLOR_REQ << "Body: " << NC << "body size too long" << std::endl;
 }
 
 /**

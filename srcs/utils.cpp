@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/23 12:35:51 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/23 17:33:52 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ std::string		sizeToString(size_t size)
 
 std::string		hrefLocation(std::string location)
 {
-	std::string ret = "<html><body>Your file has been upload!";
+	std::string ret = "<html><body>Your file has been upload! (no Cgi)";
 	ret += "<a href=\"";
 	ret += location;
 	ret += "\"> Check Here </a>";

@@ -509,7 +509,10 @@ void	SockData::msgRecv(int fd)
 	std::cerr << "Message: " << std::endl;
 	std::cerr << NC;
 	std::cerr << "-----------------------------" << std::endl;
-	std::cerr << clients_[fd].getFinalRequest() << std::endl;
+	if (clients_[fd].getFinalRequest().size() < 10000)
+		std::cerr << clients_[fd].getFinalRequest() << std::endl;
+	else
+		std::cerr << "body too long" << std::endl;
 }
 
 void	SockData::msgSent(int fd)
