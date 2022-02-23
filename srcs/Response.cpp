@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 16:50:12 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 16:58:55 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,10 @@ Response::Response(int code)
 		sendPage(400);
 	else
 		sendPage(500);
+	writeAnswer();
 }
 
-Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()), _code(0) {
+Response::Response(Server &serv): _serv(serv), _errorPage(serv.getErrorPage()) {
 	
 	_methods["GET"] = &Response::getMethod;
 	_methods["POST"] = &Response::postMethod;

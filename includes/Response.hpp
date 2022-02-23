@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 16:34:19 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 16:57:39 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ private:
     std::string                 _uploadDest;
     ResponseHeader              _header;
     std::string                 _location;
-    int                         _code;
     Location                    _loc;
     std::string                 _type;
     
