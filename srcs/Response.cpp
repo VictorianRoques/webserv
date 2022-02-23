@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 17:33:54 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 18:15:44 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,7 +190,7 @@ void     Response::readContent(std::string &path)
 
 	if (pathIsFile(path) || pathIsDirectory(path))
 	{
-		fd.open(path.c_str(), std::ifstream::in);
+		fd.open(path.c_str(), std::ios::binary);
 		if (fd.is_open() == false || pathIsDirectory(path))
 		{
 			sendPage(403);
