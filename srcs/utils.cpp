@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/17 15:19:47 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 22:41:36 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/23 12:35:51 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,3 +315,4 @@ std::string	getFileContent(std::string path) {
 	file.close();
 	return ret;
 }
+
