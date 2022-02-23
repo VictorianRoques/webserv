@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseHeader.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 18:17:41 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 12:38:48 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/23 16:48:35 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ public:
     
     void            setCgiStatus(std::string body);
     void            writeHeader();
+    void            searchContentType(std::string path);
 
 private:
 
