@@ -159,8 +159,12 @@ void	SockData::addClient(int fd)
 			clearClient(newSock);
 		}
 		else {
-			fcntl(fd, F_SETFL, O_NONBLOCK);
-			if (setsockopt(newSock, SOL_SOCKET, SO_NOSIGPIPE,
+			if (setsockopt(newSock, SOL_SOCKET, SO_RCVTIMEO,
+			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
+				cnxFailed();
+				clearClient(newSock);
+			}
+			if (setsockopt(newSock, SOL_SOCKET, SO_SNDTIMEO,
 			reinterpret_cast<const char*>(&tv), sizeof(tv)) == ERROR) {
 				cnxFailed();
 				clearClient(newSock);
