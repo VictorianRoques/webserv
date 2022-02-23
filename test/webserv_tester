@@ -10,7 +10,7 @@ import sys
 ########################################
 
 if len(sys.argv) != 3:
-	sys.exit('error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload')
+	sys.exit('error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload, redirect')
 
 hostname = 'localhost'
 port = int(sys.argv[1])
@@ -149,6 +149,29 @@ Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egesta
 	ret = sock.recv(4096)
 	print(ret)
 
+def redirect_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'GET /redirect/ HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Connection: keep-alive\r\n\r\n')
+	ret = sock.recv(4096)
+	print('GET /redirect/ HTTP/1.1')
+	print()
+	print(ret)
+	print()
+	sock.send(b'GET /redirect/dir2 HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Connection: keep-alive\r\n\r\n')
+	ret = sock.recv(4096)
+	print('GET /redirect/dir2 HTTP/1.1')
+	print()
+	print(ret)
+	print()
+
 ########################################
 #               EXEC_FCTS              #
 ########################################
@@ -160,7 +183,8 @@ names = ['is_server_up',
 'stress1',
 'stress2',
 'chunk',
-'large_payload']
+'large_payload',
+'redirect']
 
 tester = dict()
 tester[names[0]] = is_server_up
@@ -171,6 +195,7 @@ tester[names[4]] = stress1_tester
 tester[names[5]] = stress2_tester
 tester[names[6]] = chunk_tester
 tester[names[7]] = large_payload_tester
+tester[names[8]] = redirect_tester
 
 def exec_tester(name):
 	print('\033[1;34m\n--------------------------------')
