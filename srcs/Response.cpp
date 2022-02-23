@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 18:15:44 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 18:28:10 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,7 @@ int      Response::readErrorPage(std::string &path)
 		ifs.open(path.c_str(), std::ios::binary);
 		if (ifs.is_open() == false)
 		{
-			_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
+			_body = "<!DOCTYPE html>\n<html><title>500</title><body><h1>Server Internal Error</h1></body></html>";
 			_header.setStatusError("500", _body.length());
 			return (1);
 		}
@@ -177,7 +177,7 @@ int      Response::readErrorPage(std::string &path)
 	}
 	else
 	{
-		_body = "<!DOCTYPE html>\n<html><title>500</title><body>Something went wrong when finding error pages</body></html>\n";
+		_body = "<!DOCTYPE html>\n<html><title>500</title><body><h1>Server Internal Error</h1></body></html>";
 		_header.setStatusError("500", _body.length());
 		return (1);
 	}
