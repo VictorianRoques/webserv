@@ -252,7 +252,7 @@ void	SockData::cgiOutputFile(int fd, std::string strFd)
 		output += line + "\n";
 	}
 	ifs.close();
-	clients_[fd].getResponse().makeResponseCgi(output); // change prototype
+	clients_[fd].getResponse().makeResponseCgi(output);
 }
 
 void	SockData::setRequestType(int fd, Request &request, Server &server)
