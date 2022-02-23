@@ -7,28 +7,29 @@ server
 	location /
 	{
 		root www;
+        autoindex off;
 		index index.html;
         client_max_body_size 10m
 		methods GET POST DELETE;
         cgi_handler .php cgi_binary/darwin_phpcgi;
 	}
 
-    location /redirect
+    location /redirect/
     {
         return 308 /;
     }
 
-    location /loop1
+    location /loop1/
     {
-        return 308 loop2;
+        return 308 /loop2/;
     }
 
-    location /loop2
+    location /loop2/
     {
-        return 308 loop1;
+        return 308 /loop1/;
     }
 
-    location /message
+    location /message/
     {
         root www;
         index post.html;
@@ -36,7 +37,7 @@ server
         methods GET;
     }
 
-    location /send
+    location /send/
     {
         root www/php;
         index post.php;
@@ -44,7 +45,7 @@ server
         methods POST GET;
         cgi_handler .php cgi_binary/darwin_phpcgi;
     }
-    location /get
+    location /get/
     {
         root www/php;
         index get.php;
@@ -52,7 +53,7 @@ server
         methods GET;
         cgi_handler .php cgi_binary/darwin_phpcgi;
     }
-    location /input
+    location /input/
     {
         root www;
         index upload.html;
@@ -60,11 +61,17 @@ server
         methods GET POST;
     }
 
-    location /upload
+    location /upload/
     {
         index www/php/upload.php;
         methods POST;
+		autoindex off;
         cgi_handler .php cgi_binary/darwin_phpcgi;
-        upload_dest www/upload;
+        upload_dest www/upload_dir;
     }
+
+	location /directory/
+	{
+		root www/dir1;
+	}
 }

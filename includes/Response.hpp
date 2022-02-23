@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/22 16:11:50 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 12:02:19 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,16 +37,15 @@ public:
     Response();
     Response(int code);
     Response(Server &serv);
-    Response(Server &serv, Request &req);
     Response(const Response &res);
     ~Response();
     Response    &operator=(const Response &res);
 
     int             initRequest(Request &req);
-    int             searchFd(Request &req);
+    int             requestType(Request &req);
     void            answer();
     void            setLocationConf();
-    void            makeResponse(std::string &body, bool cgi);
+    void            makeResponseCgi(std::string &body);
     /* HTTP Methods */
     void            getMethod();
     void            postMethod();
@@ -60,6 +59,9 @@ public:
     /* Set Fd */
     void            setFdContent();
     void            setFdError(int code);
+    void            readContent(std::string &path);
+    int             readErrorPage(std::string &path);
+    void            sendPage(int code);
 
     /* Getters */
 
@@ -100,7 +102,6 @@ private:
     ResponseHeader              _header;
     std::string                 _location;
     int                         _code;
-    int                         _fd;
     Location                    _loc;
     
     std::map<std::string, void (Response::*)()> _methods;  

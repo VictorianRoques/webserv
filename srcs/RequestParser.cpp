@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/22 17:11:17 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/23 15:44:39 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,12 +114,20 @@ void	Request::setRedirCode(size_t redirCode) { _redirCode = redirCode; }
 /**************************************/
 
 /**
+ * hasLongerLocationMatch(): compare function used in findRightLocationMatch() (see below)
+**/
+bool hasLongerLocationMatch(Location a, Location b) {
+	return a.getLocationMatch().size() > b.getLocationMatch().size();
+}
+
+/**
  * findRightLocation(): find the relevant Location {}
  **/
 Location findRightLocation(std::vector<Location> loc, Request req) {
 	if (req.getPath()[0] != '/')
 		req.setPath("/" + req.getPath());
 	std::vector<Location>::iterator it = loc.begin();
+	
 	// if queryString attached to path, remove it
 	if (req.getPath().find("?") != std::string::npos) {
 		req.setPath(req.getPath().substr(0, req.getPath().find("?")));
@@ -131,17 +139,27 @@ Location findRightLocation(std::vector<Location> loc, Request req) {
 		}
 	}
 	// no exact match found: looking for the longest match	
-	it = loc.begin();
-	size_t pos = req.getPath().length();
+/**	size_t pos = req.getPath().length();
 
 	while (pos != 0) {
 		pos = req.getPath().rfind("/", pos - 1);
 		for (; it != loc.end(); it++) {
+			std::cout << "FIND RIGHT LOC : path = " << req.getPath().substr(0, pos) << " and LM = " << it->getLocationMatch().substr(0, pos) << std::endl;
 			if (!strncmp(req.getPath().c_str(), it->getLocationMatch().c_str(), pos))
 				return *it ;
 			if (it->getLocationMatch() == "/")
 				return *it;
 		}
+	}
+**/
+	//sorting the Locations from longest Location Match to shortest and then find the longest match.
+	std::sort(loc.begin(), loc.end(), hasLongerLocationMatch);
+	it = loc.begin();
+	std::string path = req.getPath();
+	size_t pos;
+	for (; it != loc.end(); it++) {
+		if ((pos = path.find(it->getLocationMatch())) != std::string::npos)
+			return *it;
 	}
 	return *it;
 }
@@ -174,24 +192,31 @@ void	Request::isChunked() {
  **/
 void	Request::buildFullPath(Location loc) {
 
-//	loc.print_loc();
-	if (getRedirCode() == 308) { // if redirection 
-		if (loc.getRedirection().second[0] == '/') { //absolute
-			_fullPath = loc.getRedirection().second;
-		}
-		else { //relative
-			_fullPath = loc.getRoot() + "/" + _path;
-		}
+	_fullPath = _path.substr(0, _path.find("?"));
+	
+	//special cases
+	if (_fullPath.find_first_not_of('/') == std::string::npos) {
+		_fullPath = loc.getRoot();
 	}
-	else {
-		if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) { // check upload
-				_fullPath = findRightPath(loc.getIndex(), loc.getRoot(), loc.getAutoIndex(), loc.getIndex());
-				_uploadDest = loc.getUploadDest();
-		}
-		else {
-			_fullPath = findRightPath(_path, loc.getRoot(), loc.getAutoIndex(), loc.getIndex());
-		}
+	if (_contentType.find("multipart/form-data; boundary=") != std::string::npos) {
+		_uploadDest = loc.getUploadDest();
 	}
+	// general cases
+	std::string lm = loc.getLocationMatch();
+	size_t pos;
+	if (lm != "/" && (pos = _fullPath.find(lm)) != std::string::npos) {
+		_fullPath.replace(pos, lm.length(), loc.getRoot() + "/");
+	}
+	if (loc.getAutoIndex() == false && pathIsDirectory(_fullPath)) {
+		_fullPath += "/" + loc.getIndex();
+	}
+	if (_fullPath[0] != '/') {
+		_fullPath = getPWD() + "/" + _fullPath;
+	}
+	if (!pathIsDirectory(_fullPath) && !pathIsFile(_fullPath)) {
+		_fullPath = loc.getRoot() + "/" + _fullPath;
+	}
+
 	_fullPath = cleanSlash(_fullPath);
 	return ;
 }
@@ -328,11 +353,10 @@ Request requestParser(std::string rq, std::vector<Server> servers_g) {
 			return request;
 		}
 		request.setPath(loc.getRedirection().second);
-		std::cout << "new redir Path = " << request.getPath() << std::endl;
 		request.setRedirCode(loc.getRedirection().first);
 		loc = findRightLocation(serv.getLocation(), request);
-		if (request.getPath()[0] == '/') // if absolute path, no further redirection possible
-			break ;
+//		if (request.getPath()[0] == '/') // if absolute path, no further redirection possible
+//			break ;
 	}
 	
 	// handle the rest
