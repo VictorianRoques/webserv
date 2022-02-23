@@ -21,12 +21,12 @@ server
 
     location /loop1/
     {
-        return 308 loop2;
+        return 308 /loop2/;
     }
 
     location /loop2/
     {
-        return 308 loop1;
+        return 308 /loop1/;
     }
 
     location /message/

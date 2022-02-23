@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/04 14:44:32 by pnielly           #+#    #+#             */
-/*   Updated: 2022/02/23 13:09:39 by pnielly          ###   ########.fr       */
+/*   Updated: 2022/02/23 15:44:39 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,8 +355,8 @@ Request requestParser(std::string rq, std::vector<Server> servers_g) {
 		request.setPath(loc.getRedirection().second);
 		request.setRedirCode(loc.getRedirection().first);
 		loc = findRightLocation(serv.getLocation(), request);
-		if (request.getPath()[0] == '/') // if absolute path, no further redirection possible
-			break ;
+//		if (request.getPath()[0] == '/') // if absolute path, no further redirection possible
+//			break ;
 	}
 	
 	// handle the rest
