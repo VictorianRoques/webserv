@@ -212,6 +212,7 @@ void	SockData::sendClient(int fd)
 		clearClient(fd);
 	}
 	FD_CLR(fd, &writeSet_);
+	resetClient(fd);
 }
 
 /*******************************/
