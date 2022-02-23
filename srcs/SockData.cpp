@@ -387,6 +387,7 @@ void	SockData::fileRequest(int fd)
 	}
 	buffer[ret] = '\0';
 	clients_[fd].getResponseBody() += std::string(buffer, ret);
+	std::cout <<  "SIZE" << clients_[fd].getResponseBody().size() << std::endl;
 	if (isReadingOver(ret)) {
 		close(dataFds_[fd]);
 		clients_[fd].getResponse().makeResponse(

@@ -22,11 +22,11 @@ std::string     ResponseHeader::getDate() const         { return _date; }
 std::string     ResponseHeader::getLocation() const     { return _location; }
 std::string     ResponseHeader::getHeader() const       { return _header; }
 
-void            ResponseHeader::setStatusError(std::string code) 
+void            ResponseHeader::setStatusError(std::string code, size_t len) 
 {
     if (code == "400")
         _status = "400 Bad Request";
-    else if (code == "413")
+    else if (code == "413") 
         _status = "413 Payload Too Large";
     else if (code == "403")
         _status = "403 Forbidden";
@@ -37,6 +37,7 @@ void            ResponseHeader::setStatusError(std::string code)
     else if (code == "500")
         _status = "500 Internal Error";
     _contentType = "text/html";
+    _bodyLength = len;
 }
 
 void            ResponseHeader::setStatus(std::string status)           {_status = status; }

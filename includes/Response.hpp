@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:08 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/22 16:11:50 by viroques         ###   ########.fr       */
+/*   Updated: 2022/02/23 10:51:56 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,10 @@ public:
     void            answer();
     void            setLocationConf();
     void            makeResponse(std::string &body, bool cgi);
+    void            readContent(std::string &path);
+    int             readErrorPage(std::string &path);
+    void            sendPage(int code);
+    
     /* HTTP Methods */
     void            getMethod();
     void            postMethod();
