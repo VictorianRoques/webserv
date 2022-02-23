@@ -6,7 +6,7 @@
 /*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 18:17:41 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 11:56:02 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/23 12:38:48 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ public:
 
     void            setStatus(std::string code);
     void            setContentType(std::string contentType);
+    void			setContentType(std::string type, std::string path);
     void            setBodyLength(size_t length);
     void            setDate();
     void            setLocation(std::string location);

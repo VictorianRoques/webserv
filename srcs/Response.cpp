@@ -6,7 +6,7 @@
 /*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 12:19:05 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/23 12:39:21 by victorianro      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,7 @@ void     Response::readContent(std::string &path)
 		_body.swap(content);
 		ifs.close();
 		_header.setHeader("200 OK", _request.getContentType(), _body.length());
+		_header.setContentType(_request.getContentType(), _path);
 	}
 	else
 	{

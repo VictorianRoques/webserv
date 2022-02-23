@@ -97,3 +97,27 @@ void            ResponseHeader::setCgiStatus(std::string body)
 {
     setCgiHeader(body.substr(0, body.find("\r\n\r\n")));
 }
+
+void			ResponseHeader::setContentType(std::string type, std::string path)
+{
+	if (type != "")
+	{
+		_contentType = type;
+		return ;
+	}
+	type = path.substr(path.rfind(".") + 1, path.size() - path.rfind("."));
+	if (type == "html")
+		_contentType = "text/html";
+	else if (type == "css")
+		_contentType = "text/css";
+	else if (type == "js")
+		_contentType = "text/javascript";
+	else if (type == "jpeg" || type == "jpg")
+		_contentType = "image/jpeg";
+	else if (type == "png")
+		_contentType = "image/png";
+	else if (type == "bmp")
+		_contentType = "image/bmp";
+	else
+		_contentType = "text/plain";
+}
