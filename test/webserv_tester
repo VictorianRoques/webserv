@@ -5,24 +5,18 @@ import time
 import threading
 import sys
 
-lock = threading.Lock()
-
 ########################################
 #               VARIABLES              #
 ########################################
 
+if len(sys.argv) != 3:
+	sys.exit('error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload')
+
 hostname = 'localhost'
-port = 8080
-test = ""
-if len(sys.argv) < 2:
-	print('error: usage: ./webserv port [get, post, delete, stress1, stress2, chunk, memory, leak')
-	exit(1)
-elif len(sys.argv) == 2:
-	port = int(sys.argv[1])
-elif len(sys.argv) == 3:
-	test = str(sys.argv[2])
-elif len(sys.argv) > 3:
-	print('error: too many arguments')
+port = int(sys.argv[1])
+test = str(sys.argv[2])
+
+lock = threading.Lock()
 
 ########################################
 #               FUNCTIONS              #
@@ -155,175 +149,60 @@ Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egesta
 	ret = sock.recv(4096)
 	print(ret)
 
-def leak_tester():
-	for i in range(10000):
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect((hostname, port))
-		sock.send(b'GET / HTTP/1.1\r\n\
-Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
-User-Agent: webserv_tester\r\n\
-Connection: keep-alive\r\n\r\n')
-		time.sleep(0.001)
-
 ########################################
 #               EXEC_FCTS              #
 ########################################
 
-tester = dict()
-tester['is_server_up'] = is_server_up
-tester['get_tester'] = get_tester
-tester['post_text_tester'] = post_text_tester
-tester['delete_tester'] = delete_tester
-tester['stress1_tester'] = stress1_tester
-tester['stress2_tester'] = stress2_tester
-tester['chunk_tester'] = chunk_tester
-tester['large_payload_tester'] = large_payload_tester
+names = ['is_server_up',
+'get',
+'pos_text',
+'delete',
+'stress1',
+'stress2',
+'chunk',
+'large_payload']
 
-def up():
-	name = 'is_server_up'
+tester = dict()
+tester[names[0]] = is_server_up
+tester[names[1]] = get_tester
+tester[names[2]] = post_text_tester
+tester[names[3]] = delete_tester
+tester[names[4]] = stress1_tester
+tester[names[5]] = stress2_tester
+tester[names[6]] = chunk_tester
+tester[names[7]] = large_payload_tester
+
+def exec_tester(name):
 	print('\033[1;34m\n--------------------------------')
 	print('    ' + name.upper() + ' starting...')
 	print('--------------------------------\033[0m')
 	time.sleep(0.5)
 	try:
 		tester[name]()
+		print('\n' + name.upper(), end='\r')
+		ret = is_server_up(hostname, port)
+		time.sleep(0.5)
+		if ret:
+			print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
+		else:
+			print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
 	except:
 		print('[ \033[1;31m error: ' + name + '\033[0m ]')
-	print('\n' + name.upper(), end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-	else:
-		print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
-
-def get():
-	name = 'get_tester'
-	print('\033[1;34m\n--------------------------------')
-	print('    ' + name.upper() + ' starting...')
-	print('--------------------------------\033[0m')
-	time.sleep(0.5)
-	tester[name]()
-	print('\n' + name.upper(), end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-	else:
-		print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
-
-def post_text():
-	name = 'post_text_tester'
-	print('\033[1;34m\n--------------------------------')
-	print('    ' + name.upper() + ' starting...')
-	print('--------------------------------\033[0m')
-	time.sleep(0.5)
-	tester[name]()
-	print('\n' + name.upper(), end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-	else:
-		print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
-
-def delete():
-	name = 'delete_tester'
-	print('\033[1;34m\n--------------------------------')
-	print('    ' + name.upper() + ' starting...')
-	print('--------------------------------\033[0m')
-	time.sleep(0.5)
-	tester[name]()
-	print('\n' + name.upper(), end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-	else:
-		print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
-
-def stress1():
-	name = 'stress1_tester'
-	print('\033[1;34m\n--------------------------------')
-	print('    ' + name.upper() + ' starting...')
-	print('--------------------------------\033[0m')
-	time.sleep(0.5)
-	tester[name]()
-	print('\n' + name.upper(), end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-	else:
-		print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
-
-def stress2():
-	name = 'stress2_tester'
-	print('\033[1;34m\n--------------------------------')
-	print('    ' + name.upper() + ' starting...')
-	print('--------------------------------\033[0m')
-	time.sleep(0.5)
-	tester[name]()
-	print('\n' + name.upper(), end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-	else:
-		print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
-
-def chunk():
-	name = 'post_text_tester'
-	print('\033[1;34m\n--------------------------------')
-	print('    ' + name.upper() + ' starting...')
-	print('--------------------------------\033[0m')
-	time.sleep(0.5)
-	tester[name]()
-	print('\n' + name.upper(), end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-	else:
-		print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
-
-def large_payload():
-	name = 'large_payload_tester'
-	print('\033[1;34m\n--------------------------------')
-	print('    ' + name.upper() + ' starting...')
-	print('--------------------------------\033[0m')
-	time.sleep(0.5)
-	tester[name]()
-	print('\n' + name.upper(), end='\r')
-	ret = is_server_up(hostname, port)
-	time.sleep(0.5)
-	if ret:
-		print(name.upper() + ' [ \033[1;32mOK\033[0m ]')
-	else:
-		print(name.upper() + ' [ \033[1;31mKO\033[0m ]')
 
 ########################################
 #                  RUN                 #
 ########################################
 
-print('[ hostname: ' + '\033[1;32m' + hostname + '\033[0m ]')
-print('[ port: ' + '\033[1;32m' + str(port) + '\033[0m ]')
-test_ = '[ test: ' + '\033[1;32m' + test + '\033[0m ]'
-print(test_)
-single_test = dict()
-single_test['up'] = up
-single_test['get'] = get
-single_test['post_text'] = post_text
-single_test['delete'] = delete
-single_test['stress1'] = stress1
-single_test['stress2'] = stress2
-single_test['chunk'] = chunk
-single_test['large_payload'] = large_payload
+if __name__ == '__main__':
+	print('[ hostname: ' + '\033[1;32m' + hostname + '\033[0m ]')
+	print('[ port: ' + '\033[1;32m' + str(port) + '\033[0m ]')
+	test_ = '[ test: ' + '\033[1;32m' + test + '\033[0m ]'
+	print(test_)
 
-time.sleep(1)
+	time.sleep(1)
 
-if (test != ''):
-	single_test[test]()
-else:
-	for key in single_test:
-		single_test[key]()
+	if (test != 'all'):
+		exec_tester(test)
+	else:
+		for name in names:
+			exec_tester(name)
