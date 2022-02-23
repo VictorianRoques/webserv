@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorianroques <victorianroques@studen    +#+  +:+       +#+        */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:33:19 by viroques          #+#    #+#             */
-/*   Updated: 2022/02/23 14:36:57 by victorianro      ###   ########.fr       */
+/*   Updated: 2022/02/23 16:12:48 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,10 @@ std::string&	Response::getLocation()			{ return _location; }
 int		Response::requestType(Request &req)
 {
 	if (initRequest(req))
+	{
+		writeAnswer();
 		return (0);
+	}
 	if (needCgi())
 	{
 		return (1);
@@ -94,8 +97,7 @@ void	Response::answer()
 		&& isAllow(_request.getMethod()))
 	{
 		(this->*_methods[_request.getMethod()])();
-		_header.writeHeader();
-		_response = _header.getHeader() + _body;
+		writeAnswer();
 	}
     else
 		sendPage(405);
@@ -280,6 +282,12 @@ void		Response::makeResponseCgi(std::string &answer)
 }
 
 std::string&		Response::getData() 			{ return _response; }
+
+void				Response::writeAnswer()
+{
+	_header.writeHeader();
+	_response = _header.getHeader() + _body;
+}
 
 void				Response::isUpload(std::string &answer)
 {
