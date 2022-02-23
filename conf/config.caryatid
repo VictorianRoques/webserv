@@ -1,0 +1,17 @@
+server 
+{
+	listen 127.0.0.1:8080;
+	server_name localhost;
+	client_max_body_size 10m;
+
+	location /
+	{
+		root caryatid;
+        autoindex off;
+		index index.html;
+        client_max_body_size 10m
+		methods GET POST DELETE;
+        cgi_handler .php cgi_binary/darwin_phpcgi;
+	}
+  
+}
