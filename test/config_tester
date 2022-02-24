@@ -38,13 +38,6 @@ print('[ \033[0;32mOK\033[0m ]')
 time.sleep(0.5)
 print('----------------------------------')
 
-print(FILE_COLOR + '[config_bad_client_max_body_size.conf]' + NC)
-subprocess.run(['../webserv', '../conf/error_config/config_bad_client_max_body_size.conf'])
-print('[ \033[0;32mOK\033[0m ]')
-
-time.sleep(0.5)
-print('----------------------------------')
-
 print(FILE_COLOR + '[config_embedded_servers.conf]' + NC)
 subprocess.run(['../webserv', '../conf/error_config/config_embedded_servers.conf'])
 print('[ \033[0;32mOK\033[0m ]')
