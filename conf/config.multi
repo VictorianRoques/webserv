@@ -3,7 +3,7 @@ server
 	listen 127.0.0.1:8080;
 	server_name localhost;
 	client_max_body_size 10m;
-    error_page 404 error_pages/403.html;
+    error_page 404 error_pages/404.html;
 
 	location /
 	{

@@ -9,7 +9,7 @@ server
 		root www;
 #        autoindex off;
 		index index.html;
-        client_max_body_size 10m
+        client_max_body_size 10m;
 		methods GET POST DELETE;
         cgi_handler .php cgi_binary/darwin_phpcgi;
 	}
