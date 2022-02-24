@@ -30,6 +30,7 @@ server
 		methods GET POST DELETE;
         cgi_handler .php cgi_binary/darwin_phpcgi;
 	}
+
     location /message
     {
         root www;
@@ -38,11 +39,29 @@ server
         methods GET;
     }
 
+    location /send/
+    {
+        root www/php;
+        index post.php;
+        autoindex off;
+        methods POST GET;
+        cgi_handler .php cgi_binary/darwin_phpcgi;
+    }
+
     location /input
     {
         root www;
         index upload.html;
         autoindex off;
         methods GET POST;
+    }
+
+    location /upload/
+    {
+        index www/php/upload.php;
+        methods POST;
+		autoindex off;
+        cgi_handler .php cgi_binary/darwin_phpcgi;
+        upload_dest www/upload_dir;
     }
 }
